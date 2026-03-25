@@ -117,7 +117,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="w-full bg-white/20 sticky top-0 z-50 p-6 rounded-xl px-6 py-3">
+    <nav className="w-full bg-[#EBEBEB] sticky top-0 z-50 p-6 rounded-xl px-6 py-3">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
 
         {/* Logo */}

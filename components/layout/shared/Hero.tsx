@@ -125,10 +125,9 @@ export default function HeroSection() {
 
         {/* Heading */}
         <h1 ref={headingRef} className="text-[40px] sm:text-[54px] font-extrabold leading-tight tracking-tight">
-          <span className="text-[#1a1a2e]">Gather Stories</span>
+          <span className="text-[#1a1a2e]">Create a Personal Gift</span>
           <br />
-          <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Create Memories</span>{" "}
-          <span className="text-[#1a1a2e]">Together</span>
+          <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Made Together</span>{" "}
         </h1>
 
         {/* Subtext */}

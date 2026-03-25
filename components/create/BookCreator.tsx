@@ -822,10 +822,10 @@ function Step4({ onBack }: { onBack: () => void }) {
         setFriends(prev => prev.map((f, i) => i === idx ? { ...f, [field]: value } : f));
     };
 
-    const removeFriend = (idx: number) => {
-        if (friends.length === 1) return;
-        setFriends(prev => prev.filter((_, i) => i !== idx));
-    };
+    // const removeFriend = (idx: number) => {
+    //     if (friends.length === 1) return;
+    //     setFriends(prev => prev.filter((_, i) => i !== idx));
+    // };
 
     const filledCount = friends.filter(f => f.name && f.email).length;
 
@@ -848,25 +848,6 @@ function Step4({ onBack }: { onBack: () => void }) {
                                     placeholder="Friend's name"
                                     className="w-full border border-[#e5e7eb] bg-white rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
                                 />
-                            </div>
-                            <div className="flex-1">
-                                <label className="text-[12px] font-semibold text-[#374151] block mb-1">Email</label>
-                                <div className="flex gap-2">
-                                    <input
-                                        value={friend.email}
-                                        onChange={e => updateFriend(idx, "email", e.target.value)}
-                                        placeholder="friend@email.com"
-                                        type="email"
-                                        className="flex-1 border border-[#e5e7eb] bg-white rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
-                                    />
-                                    {friends.length > 1 && (
-                                        <button onClick={() => removeFriend(idx)} className="text-[#9CA3AF] hover:text-red-500 transition-colors cursor-pointer px-1">
-                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                                            </svg>
-                                        </button>
-                                    )}
-                                </div>
                             </div>
                         </div>
                     ))}
