@@ -194,7 +194,7 @@ export default function HeroSection() {
           ))}
         </div>
         <div className="">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
             <Image src="/Maskgroup.png" alt="images" width={50} height={38} />
             <h2 className="text-2xl font-semibold">Free shipping in Germany, Austria and Switzerland</h2>
           </div>

@@ -383,7 +383,7 @@ export default function PricingDelivery() {
                     Start free, upgrade when you&apos;re ready to print.
                 </p>
                 <div className="mb-20">
-                    <div className="flex gap-2 justify-center">
+                    <div className="flex items-center gap-2 justify-center">
                         <Image src="/Maskgroup.png" alt="images" width={50} height={38} />
                         <h2 className="text-2xl font-semibold">Free shipping in Germany, Austria and Switzerland</h2>
                     </div>
