@@ -51,7 +51,7 @@ import ClientLayout from "@/components/layout/ClientLayout";
 
 const inter = Inter({
     variable: "--font-inter",
-    subsets: [],
+    subsets: ["latin"],
 });
 
 export const metadata: Metadata = {

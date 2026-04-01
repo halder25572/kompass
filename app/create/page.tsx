@@ -9,7 +9,7 @@ const createPage = () => {
                 backgroundSize: "cover",
                 backgroundPosition: "center",
             }}
-            className="w-full min-h-screen">
+            className="w-full min-h-screen px-4 py-4 sm:px-6 lg:px-8">
             <BookCreator />
         </div>
     );
