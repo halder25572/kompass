@@ -105,10 +105,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const pathname = usePathname();
+  const { isAuthenticated, user, logout } = useAuth();
 
   const navLinks = [
     { label: "Templates", href: "/Templates" },
@@ -152,15 +155,88 @@ export default function Navbar() {
 
         {/* Desktop CTA */}
         <div className="hidden md:flex items-center gap-4">
-          <a href="#" className="text-black text-sm font-medium hover:text-gray-300 transition-colors duration-200">
-            Log In
-          </a>
-          <a
-            href="#"
-            className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors duration-200"
-          >
-            Create Book
-          </a>
+          {!isAuthenticated ? (
+            <>
+              <Link href="/login" className="text-black text-sm font-medium hover:text-gray-300 transition-colors duration-200">
+                Log In
+              </Link>
+              <Link
+                href="/create"
+                className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors duration-200"
+              >
+                Create Book
+              </Link>
+            </>
+          ) : (
+            <div className="flex items-center gap-4">
+              <Link
+                href="/create"
+                className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-colors duration-200"
+              >
+                Create Book
+              </Link>
+              {/* Profile Icon with Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setProfileOpen(!profileOpen)}
+                  className="w-10 h-10 rounded-full bg-[#b91c1c] flex items-center justify-center text-white font-semibold hover:bg-[#991b1b] transition-colors duration-200"
+                  title={user?.name}
+                >
+                  {user?.name?.charAt(0).toUpperCase()}
+                </button>
+
+                {/* Dropdown Menu */}
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                    <div className="p-4 border-b border-gray-200">
+                      <p className="text-sm font-semibold text-black">{user?.name}</p>
+                      <p className="text-xs text-gray-600">{user?.email}</p>
+                    </div>
+                    <ul className="py-2">
+                      <li>
+                        <Link
+                          href="/profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          My Profile
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/my-books"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          My Books
+                        </Link>
+                      </li>
+                      <li>
+                        <Link
+                          href="/settings"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                          onClick={() => setProfileOpen(false)}
+                        >
+                          Settings
+                        </Link>
+                      </li>
+                      <li className="border-t border-gray-200">
+                        <button
+                          onClick={() => {
+                            logout();
+                            setProfileOpen(false);
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100 transition-colors"
+                        >
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Mobile Hamburger */}
@@ -200,16 +276,68 @@ export default function Navbar() {
               {item.label}
             </Link>
           ))}
-          <div className="flex items-center gap-4 mt-2">
-            <a href="#" className="text-black text-sm font-medium hover:text-gray-300 transition-colors duration-200">
-              Log In
-            </a>
-            <a
-              href="#"
-              className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-7 py-3 rounded-xl transition-colors duration-200"
-            >
-              Create Book
-            </a>
+          <div className="flex flex-col gap-4 mt-2 border-t border-white/10 pt-4">
+            {!isAuthenticated ? (
+              <>
+                <a href="/login" className="text-black text-sm font-medium hover:text-gray-300 transition-colors duration-200">
+                  Log In
+                </a>
+                <a
+                  href="/create"
+                  className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-7 py-3 rounded-xl transition-colors duration-200"
+                >
+                  Create Book
+                </a>
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-3 pb-3">
+                  <div className="w-10 h-10 rounded-full bg-[#b91c1c] flex items-center justify-center text-white font-semibold">
+                    {user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-black">{user?.name}</p>
+                    <p className="text-xs text-gray-600">{user?.email}</p>
+                  </div>
+                </div>
+                <Link
+                  href="/profile"
+                  className="text-[#a0a0a0] hover:text-[#7A1E3A] text-sm font-medium"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  My Profile
+                </Link>
+                <Link
+                  href="/my-books"
+                  className="text-[#a0a0a0] hover:text-[#7A1E3A] text-sm font-medium"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  My Books
+                </Link>
+                <Link
+                  href="/settings"
+                  className="text-[#a0a0a0] hover:text-[#7A1E3A] text-sm font-medium"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  Settings
+                </Link>
+                <a
+                  href="/create"
+                  className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-7 py-3 rounded-xl transition-colors duration-200"
+                >
+                  Create Book
+                </a>
+                <button
+                  onClick={() => {
+                    logout();
+                    setMenuOpen(false);
+                  }}
+                  className="text-red-600 text-sm font-medium hover:text-red-700 transition-colors text-left"
+                >
+                  Logout
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
