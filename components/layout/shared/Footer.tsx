@@ -1,45 +1,43 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 export default function Footer() {
     return (
-        <footer className="bg-[#EEE] border-t border-[#e0e0e0]">
-            <div className="max-w-7xl mx-auto px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <footer className="bg-[#EEE]">
+            <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row justify-between items-start gap-6">
 
-                {/* Logo */}
-                <Link href="/">
-                    <div className="flex items-center gap-2 shrink-0">
-                        <div className="w-7 h-7 bg-[#B91C1C] rounded-md flex items-center justify-center">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                            </svg>
+                {/* Left Section */}
+                <div className="max-w-sm">
+                    <Link href="/">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+                            <span className="text-sm font-semibold text-[#1A1A2E]">
+                                Mein HerzGeschenk
+                            </span>
                         </div>
-                        <span className="text-[13px] font-semibold text-[#1a1a2e]">MemoryBook</span>
-                    </div>
-                </Link>
+                    </Link>
 
-                {/* Nav links */}
-                <div className="flex items-center gap-5">
-                    {["Privacy", "Terms", "Support"].map((item) => (
-                        <Link
-                            key={item}
-                            href="#"
-                            className="text-[12px] text-[#6b7280] hover:text-[#1a1a2e] transition-colors"
-                        >
-                            {item}
-                        </Link>
-                    ))}
+                    <p className="text-xs text-gray-500 leading-relaxed">
+                        A thoughtful place to preserve memories, create beautiful books, and share the moments that matter most.
+                    </p>
                 </div>
 
-                {/* Made with love */}
-                <p className="text-[12px] text-[#6b7280] shrink-0">
-                    Made with{" "}
-                    <span className="text-[#B91C1C]">♥</span>
-                    {" "}by MemoryBook
-                </p>
+                {/* Right Section */}
+                <div className="flex flex-col items-end gap-4 w-full md:w-auto">
 
+                    {/* Top Links */}
+                    <div className="flex items-center gap-6 text-sm text-gray-500">
+                        <Link href="#" className="hover:text-gray-800">Privacy Policy</Link>
+                        <Link href="#" className="hover:text-gray-800">Terms & Conditions</Link>
+                        <Link href="#" className="hover:text-gray-800">Support</Link>
+                    </div>
+                    {/* Button */}
+                    <button className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] cursor-pointer text-white text-sm px-5 py-2 rounded-full shadow-sm hover:opacity-90">
+                        Imprint (Legal Notice)
+                    </button>
+                </div>
             </div>
         </footer>
     );
