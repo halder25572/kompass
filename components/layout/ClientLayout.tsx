@@ -37,6 +37,7 @@ const HIDDEN_LAYOUT_ROUTES = [
   "/reset-password",
   "/verify-otp",
   "/new-password",
+  "/dashboard",
   "/create-book",
   "/book-creator",
 ];

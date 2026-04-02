@@ -253,6 +253,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import Image from "next/image";
+import { LayoutGrid, Settings2, KeyRound, LogOut } from "lucide-react";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -284,11 +285,10 @@ export default function Navbar() {
             <Link
               key={item.label}
               href={item.href}
-              className={`text-[14px] font-medium transition ${
-                pathname === item.href
+              className={`text-[14px] font-medium transition ${pathname === item.href
                   ? "text-[#7A1E3A]"
                   : "text-[#6B7280] hover:text-[#7A1E3A]"
-              }`}
+                }`}
             >
               {item.label}
             </Link>
@@ -314,7 +314,7 @@ export default function Navbar() {
           ) : (
             <>
               {/* Language */}
-              <button className="flex items-center gap-1 bg-white border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-100">
+              <button className="flex items-center text-white gap-1 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] border border-gray-300 px-3 py-1.5 rounded-full text-sm font-medium hover:bg-gray-100">
                 DE
                 <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
                   <path d="M5 7l5 5 5-5H5z" />
@@ -338,7 +338,7 @@ export default function Navbar() {
                   {user?.name?.charAt(0).toUpperCase() || "P"}
                 </button>
 
-                {profileOpen && (
+                {/* {profileOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                     <div className="px-4 py-3 border-b">
                       <p className="text-sm font-semibold text-gray-900">{user?.name}</p>
@@ -364,6 +364,56 @@ export default function Navbar() {
                     >
                       Logout
                     </button>
+                  </div>
+                )} */}
+
+                {profileOpen && (
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden z-50">
+
+                    {/* Header */}
+                    <div className="px-4 py-3 border-b border-gray-100 flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-green-800 flex items-center justify-center text-white text-sm font-medium shrink-0">
+                        {user?.name?.charAt(0).toUpperCase() || "S"}
+                      </div>
+                      <span className="text-sm font-medium text-gray-900">{user?.name}</span>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="py-1.5">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+                      >
+                        <LayoutGrid size={16} className="text-rose-800" />
+                        Dashboard
+                      </Link>
+
+                      <Link
+                        href="/profile"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+                      >
+                        <Settings2 size={16} className="text-rose-800" />
+                        Profile Settings
+                      </Link>
+
+                      <Link
+                        href="/change-password"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+                      >
+                        <KeyRound size={16} className="text-rose-800" />
+                        Change Password
+                      </Link>
+
+                      <div className="border-t border-gray-100 mt-1">
+                        <button
+                          onClick={() => { logout(); setProfileOpen(false); }}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
+                        >
+                          <LogOut size={16} className="text-rose-800" />
+                          Logout
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 )}
               </div>

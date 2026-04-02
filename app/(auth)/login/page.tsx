@@ -2,8 +2,41 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+
+const DEMO_USER = {
+  id: "demo-user-1",
+  name: "Demo User",
+  email: "demo@memorybook.com",
+  password: "Demo@1234",
+};
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { login } = useAuth();
+  const [email, setEmail] = useState(DEMO_USER.email);
+  const [password, setPassword] = useState(DEMO_USER.password);
+  const [error, setError] = useState("");
+
+  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    if (email.trim().toLowerCase() !== DEMO_USER.email || password !== DEMO_USER.password) {
+      setError("Use the demo credentials to log in.");
+      return;
+    }
+
+    login({
+      id: DEMO_USER.id,
+      name: DEMO_USER.name,
+      email: DEMO_USER.email,
+    });
+
+    router.push("/");
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
 
@@ -55,8 +88,14 @@ export default function LoginPage() {
             Pick up where you left off
           </p>
 
+          <div className="mb-5 rounded-xl border border-[#e8d7dd] bg-[#fff7f9] px-4 py-3 text-sm text-[#5f1b31]">
+            <p className="font-semibold">Demo user</p>
+            <p>Email: {DEMO_USER.email}</p>
+            <p>Password: {DEMO_USER.password}</p>
+          </div>
+
           {/* Form */}
-          <form className="space-y-4">
+          <form className="space-y-4" onSubmit={handleLogin}>
 
             {/* Email */}
             <div>
@@ -64,6 +103,8 @@ export default function LoginPage() {
               <input
                 type="email"
                 placeholder="jane@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
               />
             </div>
@@ -74,6 +115,8 @@ export default function LoginPage() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
               />
 
@@ -90,6 +133,26 @@ export default function LoginPage() {
               className="w-full mt-2 cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
               Log In →
+            </button>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <button
+              type="button"
+              onClick={() => {
+                setEmail(DEMO_USER.email);
+                setPassword(DEMO_USER.password);
+                setError("");
+                login({
+                  id: DEMO_USER.id,
+                  name: DEMO_USER.name,
+                  email: DEMO_USER.email,
+                });
+                router.push("/");
+              }}
+              className="w-full cursor-pointer border border-[#7A1E3A] text-[#7A1E3A] py-2.5 rounded-full text-sm font-semibold hover:bg-[#fff7f9] transition-colors"
+            >
+              Use Demo Account
             </button>
 
             {/* Divider */}
