@@ -389,7 +389,7 @@ export default function Navbar() {
                       </Link>
 
                       <Link
-                        href="/profile"
+                        href="dashboard/profile"
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
                       >
                         <Settings2 size={16} className="text-rose-800" />
@@ -397,7 +397,7 @@ export default function Navbar() {
                       </Link>
 
                       <Link
-                        href="/change-password"
+                        href="dashboard/change-password"
                         className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-800 hover:bg-gray-50 transition-colors"
                       >
                         <KeyRound size={16} className="text-rose-800" />
