@@ -5,12 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 
 const participants = [
-    { name: "Sarah M.", initials: "SM", status: "Submitted" },
-    { name: "James K.", initials: "JK", status: "Submitted" },
-    { name: "Emily R.", initials: "ER", status: "Pending" },
-    { name: "Michael B.", initials: "MB", status: "Pending" },
-    { name: "Lisa T.", initials: "LT", status: "Invited" },
-    { name: "David W.", initials: "DW", status: "Invited" },
+    { id: "sarah-m", name: "Sarah M.", initials: "SM", status: "Submitted" },
+    { id: "james-k", name: "James K.", initials: "JK", status: "Submitted" },
+    { id: "emily-r", name: "Emily R.", initials: "ER", status: "Pending" },
+    { id: "michael-b", name: "Michael B.", initials: "MB", status: "Pending" },
+    { id: "lisa-t", name: "Lisa T.", initials: "LT", status: "Invited" },
+    { id: "david-w", name: "David W.", initials: "DW", status: "Invited" },
 ];
 
 const statusStyle = {
@@ -19,7 +19,7 @@ const statusStyle = {
     Invited: "bg-gray-200 text-gray-600",
 };
 
-export default function ProgressBar() {
+export default function ProgressBar({ bookId }: { bookId: string }) {
     return (
         <div className="min-h-screen max-w-7xl mx-auto p-4 md:p-8">
             {/* HEADER */}
@@ -63,7 +63,7 @@ export default function ProgressBar() {
                     </div>
 
                     {/* PARTICIPANTS */}
-                    <div className="bg-white rounded-xl p-5 shadow-sm">
+                    {/* <div className="bg-white rounded-xl p-5 shadow-sm">
                         <h2 className="text-sm font-medium mb-4">Participants</h2>
 
                         <div className="space-y-3">
@@ -91,6 +91,38 @@ export default function ProgressBar() {
                                 </div>
                             ))}
                         </div>
+                    </div> */}
+                    <div className="bg-white rounded-xl p-5 shadow-sm">
+                        <h2 className="text-sm font-medium mb-4">Participants</h2>
+
+                        <div className="space-y-3">
+                            {participants.map((p) => (
+                                <Link
+                                    key={p.id}
+                                    href={`/dashboard/${bookId}/participant/${p.id}`}
+                                    className="flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition cursor-pointer"
+                                >
+                                    {/* LEFT: Initials + Name */}
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">
+                                            {p.initials}
+                                        </div>
+                                        <span className="text-sm">{p.name}</span>
+                                    </div>
+
+                                    {/* RIGHT: Status + Chevron */}
+                                    <div className="flex items-center gap-3">
+                                        <span
+                                            className={`text-xs px-3 py-1 rounded-full ${statusStyle[p.status as keyof typeof statusStyle]
+                                                }`}
+                                        >
+                                            {p.status}
+                                        </span>
+                                        <ChevronRight size={16} className="text-gray-400" />
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
                     </div>
                 </div>
 
@@ -100,9 +132,12 @@ export default function ProgressBar() {
                     <div className="bg-white rounded-xl p-5 shadow-sm">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-sm font-medium">Book Settings</h2>
-                            <button className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] text-white">
+                            <Link
+                                href="/dashboard/editor-book"
+                                className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] text-white"
+                            >
                                 Edit
-                            </button>
+                            </Link>
                         </div>
 
                         <div className="space-y-3 text-sm">
