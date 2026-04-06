@@ -1,4 +1,7 @@
-import type { FC, ReactNode } from "react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+"use client";
+
+import { type FC, type ReactNode, useEffect, useRef } from "react";
 import {
   Home,
   Phone,
@@ -6,6 +9,7 @@ import {
   Users,
   ExternalLink,
 } from "lucide-react";
+import gsap from "gsap";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -13,6 +17,7 @@ interface CardProps {
   icon: ReactNode;
   title: string;
   children: ReactNode;
+  animRef?: React.RefObject<HTMLDivElement | null>;
 }
 
 // ─── Sub-components ──────────────────────────────────────────────────────────
@@ -25,8 +30,11 @@ const MetaLabel = ({ children }: { children: ReactNode }) => (
   </p>
 );
 
-const Card: FC<CardProps> = ({ icon, title, children }) => (
-  <div className="bg-white border border-[#7A1E3A] rounded-2xl p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200">
+const Card: FC<CardProps> = ({ icon, title, children, animRef }) => (
+  <div
+    ref={animRef}
+    className="bg-white border border-[#7A1E3A] rounded-2xl p-6 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+  >
     <div className="text-rose-800 mb-4 w-8 h-8">{icon}</div>
     <p className="text-[20px] font-bold text-gray-900 mb-3">{title}</p>
     {children}
@@ -36,14 +44,49 @@ const Card: FC<CardProps> = ({ icon, title, children }) => (
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const ImprintLegalNotice: FC = () => {
+  const headerRef  = useRef<HTMLDivElement>(null);
+  const card1Ref   = useRef<HTMLDivElement>(null);
+  const card2Ref   = useRef<HTMLDivElement>(null);
+  const card3Ref   = useRef<HTMLDivElement>(null);
+  const card4Ref   = useRef<HTMLDivElement>(null);
+  const euRef      = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+
+    const headerEls = Array.from(headerRef.current?.children ?? []);
+    const cards     = [card1Ref.current, card2Ref.current, card3Ref.current, card4Ref.current];
+
+    /* initial states */
+    gsap.set(headerEls,     { opacity: 0, y: 30 });
+    gsap.set(cards,         { opacity: 0, y: 40, scale: 0.97 });
+    gsap.set(euRef.current, { opacity: 0, y: 30 });
+
+    /* entrance */
+    tl.to(headerEls, { opacity: 1, y: 0, duration: 0.65, stagger: 0.12 })
+      .to(cards,      { opacity: 1, y: 0, scale: 1, duration: 0.55, stagger: 0.1 }, "-=0.3")
+      .to(euRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2");
+  }, []);
+
+  /* card hover */
+  const onCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    gsap.to(e.currentTarget, { y: -5, boxShadow: "0 12px 32px rgba(122,30,58,0.12)", duration: 0.22, ease: "power2.out" });
+  };
+  const onCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    gsap.to(e.currentTarget, { y: 0, boxShadow: "none", duration: 0.22, ease: "power2.inOut" });
+  };
+
   return (
-    <div className="min-h-screen font-sans"       style={{
+    <div
+      className="min-h-screen font-sans"
+      style={{
         backgroundImage: "url('/images/bg1.png')",
         backgroundSize: "cover",
         backgroundPosition: "center",
-      }}>
+      }}
+    >
       {/* Header */}
-      <div className="text-center pt-12 pb-2 px-4">
+      <div ref={headerRef} className="text-center pt-12 pb-2 px-4">
         <span className="text-[13px] uppercase tracking-[0.18em] text-[#7A1E3A] font-semibold block mb-3">
           Legal Information
         </span>
@@ -59,11 +102,16 @@ const ImprintLegalNotice: FC = () => {
       {/* Grid */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+
           {/* Company Details */}
-          <Card
-            icon={<Home size={20} strokeWidth={1.5} />}
-            title="Company Details"
+          <div
+            ref={card1Ref}
+            onMouseEnter={onCardEnter}
+            onMouseLeave={onCardLeave}
+            className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
+            <div className="text-rose-800 mb-4 w-8 h-8"><Home size={20} strokeWidth={1.5} /></div>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">Company Details</p>
             <p className="font-serif text-[16px] font-bold text-gray-900 mb-1">
               Mein HerzGeschenk
             </p>
@@ -75,18 +123,22 @@ const ImprintLegalNotice: FC = () => {
             <Divider />
             <MetaLabel>Represented by</MetaLabel>
             <p className="text-[15px] text-black">Jane Doe (Managing Director)</p>
-          </Card>
+          </div>
 
           {/* Contact Information */}
-          <Card
-            icon={<Phone size={20} strokeWidth={1.5} />}
-            title="Contact Information"
+          <div
+            ref={card2Ref}
+            onMouseEnter={onCardEnter}
+            onMouseLeave={onCardLeave}
+            className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
+            <div className="text-rose-800 mb-4 w-8 h-8"><Phone size={20} strokeWidth={1.5} /></div>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">Contact Information</p>
             <div className="space-y-2.5">
               {[
-                { label: "Phone:", value: "+49 (0) 30 1234 5678", href: "tel:+4930123456789" },
-                { label: "Email:", value: "hello@memora-moments.de", href: "mailto:hello@memora-moments.de" },
-                { label: "Website:", value: "www.memora-moments.de", href: "https://www.memora-moments.de" },
+                { label: "Phone:",   value: "+49 (0) 30 1234 5678",    href: "tel:+4930123456789" },
+                { label: "Email:",   value: "hello@memora-moments.de", href: "mailto:hello@memora-moments.de" },
+                { label: "Website:", value: "www.memora-moments.de",   href: "https://www.memora-moments.de" },
               ].map(({ label, value, href }) => (
                 <div key={label} className="flex items-start gap-3">
                   <span className="text-[16px] font-medium text-[#9CA3AF] min-w-11.5 pt-px">{label}</span>
@@ -101,13 +153,17 @@ const ImprintLegalNotice: FC = () => {
                 </div>
               ))}
             </div>
-          </Card>
+          </div>
 
           {/* Registration & Tax */}
-          <Card
-            icon={<FileText size={20} strokeWidth={1.5} />}
-            title="Registration &amp; Tax"
+          <div
+            ref={card3Ref}
+            onMouseEnter={onCardEnter}
+            onMouseLeave={onCardLeave}
+            className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
+            <div className="text-rose-800 mb-4 w-8 h-8"><FileText size={20} strokeWidth={1.5} /></div>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">Registration &amp; Tax</p>
             <MetaLabel>Commercial Register</MetaLabel>
             <p className="text-[15px] text-[#9CA3AF] mb-1">
               Amtsgericht Berlin (Charlottenburg)
@@ -121,13 +177,17 @@ const ImprintLegalNotice: FC = () => {
             <p className="text-[16px] font-medium text-gray-800 tracking-wide">
               DE 999 999 999
             </p>
-          </Card>
+          </div>
 
           {/* Editorial Responsibility */}
-          <Card
-            icon={<Users size={20} strokeWidth={1.5} />}
-            title="Editorial Responsibility"
+          <div
+            ref={card4Ref}
+            onMouseEnter={onCardEnter}
+            onMouseLeave={onCardLeave}
+            className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
+            <div className="text-rose-800 mb-4 w-8 h-8"><Users size={20} strokeWidth={1.5} /></div>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">Editorial Responsibility</p>
             <MetaLabel>Responsible according to § 18 MStV</MetaLabel>
             <p className="font-serif text-[16px] font-semibold text-gray-900 mb-1">
               Jane Doe
@@ -137,11 +197,16 @@ const ImprintLegalNotice: FC = () => {
               <p>Musterstraße 123</p>
               <p>10115 Berlin</p>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* EU Dispute Resolution */}
-        <div className="bg-white border mt-16 border-[#7A1E3A] rounded-2xl px-6 py-5 hover:shadow-md transition-all duration-200">
+        <div
+          ref={euRef}
+          onMouseEnter={onCardEnter}
+          onMouseLeave={onCardLeave}
+          className="bg-white border mt-16 border-[#7A1E3A] rounded-2xl px-6 py-5 transition-all duration-200"
+        >
           <div className="flex items-center gap-2 mb-2">
             <ExternalLink size={14} strokeWidth={1.5} className="text-rose-800" />
             <p className="text-[20px] font-bold text-gray-900">EU Dispute Resolution</p>

@@ -1,32 +1,3 @@
-// import Link from "next/link";
-
-
-// const ReadytoCreate = () => {
-//     return (
-//         <section className="py-18.25">
-//             <div className="max-w-7xl mx-auto text-center">
-//                 <h1 className="text-2xl lg:text-[36px] font-extrabold">Ready to Create Something <br /> <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Beautiful?</span></h1>
-//                 <p className="text-[#9CA3AF] text-[16px] mt-1.5">Start collecting memories today and surprise someone with a <br /> one-of-a-kind book they&apos;ll treasure forever.</p>
-//                 <Link
-//                     href="#"
-//                     className="flex justify-center"
-//                 >
-//                     <button className="flex items-center cursor-pointer mt-8 gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-sm font-semibold px-7 py-3.5 rounded-full transition-all duration-200 shadow-lg shadow-red-200">
-//                         Create Your First Book
-//                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-//                             <line x1="5" y1="12" x2="19" y2="12" />
-//                             <polyline points="12 5 19 12 12 19" />
-//                         </svg>
-//                     </button>
-//                 </Link>
-//             </div>
-//         </section>
-//     );
-// };
-
-// export default ReadytoCreate;
-
-
 "use client";
 
 import Link from "next/link";

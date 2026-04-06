@@ -27,16 +27,6 @@ const deliveryOptions = [
         title: "Express Shipping",
         description: "Express delivery in 3–5 business days available for printed orders.",
     },
-    {
-        icon: (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V22H4V12" /><path d="M22 7H2v5h20V7z" /><path d="M12 22V7" /><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" /><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" /></svg>),
-        title: "Gift Wrapping",
-        description: "Add premium gift wrapping with a personalised note card for a special unboxing experience.",
-    },
-    {
-        icon: (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><polyline points="9 12 11 14 15 10" /></svg>),
-        title: "Quality Guarantee",
-        description: "Not satisfied? We'll reprint and reship for free, or give you a full refund. No questions asked.",
-    },
 ];
 
 export default function PricingDelivery() {
@@ -150,7 +140,11 @@ export default function PricingDelivery() {
     };
 
     return (
-        <section ref={sectionRef} className="py-12 px-4 sm:px-6 lg:px-8">
+        <section ref={sectionRef} className="py-12 px-4 sm:px-6 lg:px-8" style={{
+            backgroundImage: "url('/images/bg1.png')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+        }}>
 
             {/* Header */}
             <div ref={headerRef} className="text-center mb-8">

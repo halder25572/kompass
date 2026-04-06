@@ -40,6 +40,8 @@ const HIDDEN_LAYOUT_ROUTES = [
   "/dashboard",
   "/create-book",
   "/book-creator",
+  "/checkout",
+  "/birthday-question",
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

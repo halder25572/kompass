@@ -9,7 +9,7 @@ const ProgressPageContent = () => {
 
     return (
         <div>
-            {bookId && <p className="text-xs text-gray-400 mb-4">Book ID: {bookId}</p>}
+            {bookId && <p className="text-xs text-gray-400 mb-4"> </p>}
             <ProgressBar bookId={bookId ?? ""} />
         </div>
     );

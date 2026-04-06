@@ -1,11 +1,12 @@
+import { Suspense } from "react";
 import StatusPageMain from "@/components/dashboard/status";
 
 
 const StatusPage = () => {
     return (
-        <div>
+        <Suspense fallback={null}>
             <StatusPageMain />
-        </div>
+        </Suspense>
     );
 };
 
