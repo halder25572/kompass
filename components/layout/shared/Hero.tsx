@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Link from "next/link";
@@ -150,6 +151,9 @@ function FlipModal({ book, onClose }: { book: typeof sampleBooks[0]; onClose: ()
 ═══════════════════════════════════════════════════ */
 export default function HomePage() {
   const [activeBook, setActiveBook] = useState<typeof sampleBooks[0] | null>(null);
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
 
   const heroRef = useRef<HTMLDivElement>(null);
   const whyRef = useRef<HTMLDivElement>(null);
@@ -189,6 +193,22 @@ export default function HomePage() {
     gsap.to(e.currentTarget, { y: 0, boxShadow: "0 2px 10px rgba(0,0,0,0.07)", duration: 0.25, ease: "power2.inOut" });
     const img = e.currentTarget.querySelector(".book-img");
     if (img) gsap.to(img, { scale: 1, duration: 0.3, ease: "power2.inOut" });
+  };
+
+  const handleContactSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const subject = encodeURIComponent(`Contact form from ${contactName.trim() || "website visitor"}`);
+    const body = encodeURIComponent(
+      [
+        `Name: ${contactName.trim() || "Not provided"}`,
+        `Email: ${contactEmail.trim() || "Not provided"}`,
+        "",
+        contactMessage.trim() || "No message provided.",
+      ].join("\n")
+    );
+
+    window.location.href = `mailto:hello@mein-herzgeschenk.de?subject=${subject}&body=${body}`;
   };
 
   return (
@@ -353,39 +373,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ══════════════════════════════════
-          3. HOW IT WORKS
-      ══════════════════════════════════ */}
-      {/* <section className="py-18 px-6">
-        <div ref={howRef} className="max-w-135 mx-auto text-center">
-          <h2 className="text-[22px] font-extrabold text-[#1A1A2E] mb-3">How It Works</h2>
-          <p className="text-[14px] text-gray-500 leading-relaxed mb-6">Creating a heartfelt gift has never been easier.</p>
-        </div>
-      </section> */}
-
-
-      {/* ══════════════════════════════════
-          4. SUPPORT
-      ══════════════════════════════════ */}
-      <section className="py-18 px-6">
-        <div ref={supportRef}
-          className="max-w-135 mx-auto text-center bg-white rounded-3xl px-9 py-12 shadow-[0_4px_24px_rgba(0,0,0,0.07)]">
-          <div className="w-13 h-13 bg-[#FFF0F3] rounded-2xl flex items-center justify-center mx-auto mb-5 text-[#BF003A]">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-            </svg>
-          </div>
-          <h2 className="text-[22px] font-extrabold text-[#1A1A2E] mb-3">We&apos;re here to help</h2>
-          <p className="text-[14px] text-gray-500 leading-relaxed mb-6">For all questions, please contact us at:</p>
-          <a href="mailto:hello@mein-herzgeschenk.de"
-            className="inline-block bg-linear-to-r from-[#BF003A] to-[#59001C] text-white text-[14px] font-bold px-6 py-2.5 rounded-full no-underline mb-4">
-            hello@mein-herzgeschenk.de
-          </a>
-          <p className="text-[13px] text-gray-400 m-0">We usually respond within 24 hours.</p>
-        </div>
-      </section>
-
       {activeBook && <FlipModal book={activeBook} onClose={() => setActiveBook(null)} />}
     </main>
   );

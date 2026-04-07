@@ -29,6 +29,7 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/shared/Navbar";
 import Footer from "@/components/layout/shared/Footer";
+import ContactSection from "@/components/sections/ContactSection";
 
 const HIDDEN_LAYOUT_ROUTES = [
   "/login",
@@ -55,6 +56,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
     <>
       {!hideLayout && <Navbar />}
       <main className="min-h-screen">{children}</main>
+      {!hideLayout && <ContactSection />}
       {!hideLayout && <Footer />}
     </>
   );

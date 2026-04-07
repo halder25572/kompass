@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -224,8 +225,7 @@ export default function TemplatesSection() {
 
         {/* Browse Button */}
         <div ref={btnRef} className="flex justify-center">
-          <a
-            href="#"
+          <Link href="/Templates"
             className="flex items-center gap-2 border border-[#7A1E3A] text-[#7A1E3A] hover:bg-[#7A1E3A] hover:text-white text-sm font-semibold px-7 py-3 rounded-full transition-all duration-200"
           >
             Browse All Templates
@@ -233,7 +233,7 @@ export default function TemplatesSection() {
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />
             </svg>
-          </a>
+          </Link>
         </div>
       </div>
     </section>
