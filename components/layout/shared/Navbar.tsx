@@ -218,7 +218,7 @@ export default function Navbar() {
 
   const navLinks = [
     { label: "Home",               href: "/" },
-    { label: "How it Works",       scrollTarget: "how-it-works" },
+    { label: "How it Works",       href: "/how-it-works" },
     { label: "Sample Covers",      href: "/cover" },
     { label: "Pricing & Delivery", href: "/pricing-delivery" },
   ];
@@ -246,7 +246,7 @@ export default function Navbar() {
         {/* ── Center nav links ── */}
         <div className="hidden md:flex items-center gap-8">
           {navLinks.map((item) => {
-            const href = item.href ?? (item.scrollTarget ? `/#${item.scrollTarget}` : "/");
+            const href = item.href;
             const active = pathname === item.href;
             return (
               <Link
@@ -478,7 +478,7 @@ export default function Navbar() {
           }}
         >
           {navLinks.map((item) => {
-            const href = item.href ?? (item.scrollTarget ? `/#${item.scrollTarget}` : "/");
+            const href = item.href;
             return (
               <Link
                 key={item.label}

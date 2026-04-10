@@ -21,7 +21,7 @@ export default function ContactSection() {
 
                 <div className="mb-8 text-center">
                     <h2 className="text-[28px] font-bold text-[#1a1a2e]">Contact Us</h2>
-                    <p className="text-[14px] text-[#9CA3AF] mt-1">Send us a message and we&apos;ll get back to you.</p>
+                    <p className="text-[14px] text-[#9CA3AF] mt-1">We usually respond within 24 hours.</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">

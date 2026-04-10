@@ -2,7 +2,9 @@
 
 // import Image from "next/image";
 // import Link from "next/link";
-// import { useState } from "react";
+// import { useState, useEffect, useRef } from "react";
+// import gsap from "gsap";
+// import { JSX } from "react/jsx-runtime";
 
 // // ── Data ─────────────────────────────────────────────────
 // const templates = [
@@ -186,52 +188,71 @@
 // };
 
 // // ── Step config ───────────────────────────────────────────
-// const stepConfig = [
+// type ProgressStep = {
+//     label: string;
+//     icon: JSX.Element;
+//     type?: "icon" | "dot";
+// };
+
+// const stepConfig: ProgressStep[] = [
 //     {
 //         label: "Book Details",
 //         icon: (
-//             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-//                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+//             <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+//                 <path d="M1.5 12C1.30109 12 1.11032 11.921 0.96967 11.7803C0.829018 11.6397 0.75 11.4489 0.75 11.25V1.5C0.75 1.30109 0.829018 1.11032 0.96967 0.96967C1.11032 0.829018 1.30109 0.75 1.5 0.75H5.25C6.04565 0.75 6.80871 1.06607 7.37132 1.62868C7.93393 2.19129 8.25 2.95435 8.25 3.75C8.25 2.95435 8.56607 2.19129 9.12868 1.62868C9.69129 1.06607 10.4544 0.75 11.25 0.75H15C15.1989 0.75 15.3897 0.829018 15.5303 0.96967C15.671 1.11032 15.75 1.30109 15.75 1.5V11.25C15.75 11.4489 15.671 11.6397 15.5303 11.7803C15.3897 11.921 15.1989 12 15 12H10.5C9.90326 12 9.33097 12.2371 8.90901 12.659C8.48705 13.081 8.25 13.6533 8.25 14.25C8.25 13.6533 8.01295 13.081 7.59099 12.659C7.16903 12.2371 6.59674 12 6 12H1.5Z" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 //             </svg>
 //         ),
 //     },
 //     {
-//         label: "Questionnaire",
+//         label: "Choose Theme",
 //         icon: (
-//             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-//                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-//             </svg>
-//         ),
-//     },
-//     {
-//         label: "Style",
-//         icon: (
-//             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-//                 <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" />
-//             </svg>
-//         ),
-//     },
-//     {
-//         label: "Choose Style",
-//         icon: (
-//             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-//                 <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
+//             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+//                 <path d="M1.99511 10.8951C2.09314 11.1424 2.11496 11.4133 2.05778 11.6731L1.34778 13.8664C1.3249 13.9777 1.33082 14.0929 1.36496 14.2012C1.39911 14.3095 1.46035 14.4073 1.54289 14.4853C1.62543 14.5633 1.72652 14.6189 1.83658 14.6469C1.94664 14.6749 2.06202 14.6742 2.17178 14.6451L4.44711 13.9798C4.69226 13.9312 4.94613 13.9524 5.17978 14.0411C6.60337 14.7059 8.21602 14.8466 9.73321 14.4383C11.2504 14.0299 12.5746 13.0989 13.4722 11.8094C14.3699 10.5198 14.7832 8.95472 14.6393 7.39015C14.4954 5.82557 13.8036 4.36209 12.6858 3.25791C11.5681 2.15373 10.0962 1.47981 8.53003 1.35504C6.96382 1.23028 5.40387 1.6627 4.12541 2.57601C2.84694 3.48931 1.93213 4.82481 1.54237 6.34687C1.15262 7.86894 1.31296 9.47975 1.99511 10.8951Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M6.06055 6.00038C6.21728 5.55482 6.52665 5.17912 6.93385 4.9398C7.34105 4.70049 7.81981 4.61301 8.28533 4.69285C8.75085 4.7727 9.17309 5.01473 9.47727 5.37606C9.78144 5.7374 9.94792 6.19473 9.94721 6.66705C9.94721 8.00038 7.94721 8.66705 7.94721 8.66705" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M8 11.334H8.00667" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 //             </svg>
 //         ),
 //     },
 //     {
 //         label: "Choose Cover",
 //         icon: (
-//             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-//                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+//             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+//                 <path d="M9.33398 14H10.0007" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M14 9.33398V10.0007" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M13.9993 12.666C13.9993 13.0196 13.8589 13.3588 13.6088 13.6088C13.3588 13.8589 13.0196 13.9993 12.666 13.9993" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M14 6V6.66667" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M2 9.33398V10.0007" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M2 3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H12.6667C13.0203 2 13.3594 2.14048 13.6095 2.39052C13.8595 2.64057 14 2.97971 14 3.33333" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M2 6V6.66667" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M3.33333 13.9993C2.97971 13.9993 2.64057 13.8589 2.39052 13.6088C2.14048 13.3588 2 13.0196 2 12.666" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M6 14H6.66667" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//             </svg>
+//         ),
+//     },
+//     {
+//         label: "Questionnaire",
+//         icon: (
+//             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+//                 <circle cx="7" cy="7" r="7" fill="#9CA3AF" />
 //             </svg>
 //         ),
 //     },
 //     {
 //         label: "Invite",
 //         icon: (
-//             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-//                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+//             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+//                 <circle cx="7" cy="7" r="7" fill="#9CA3AF" />
+//             </svg>
+//         ),
+//     },
+//     {
+//         label: "Preview & Order",
+//         icon: (
+//             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+//                 <path d="M1.33398 14.876C1.33393 13.7854 1.63007 12.7179 2.18688 11.8017C2.74369 10.8855 3.5375 10.1595 4.47305 9.71081C5.4086 9.26211 6.44614 9.10978 7.46116 9.27211C8.47617 9.43444 9.42554 9.90453 10.1953 10.626" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M6.66732 9.20833C8.50827 9.20833 10.0007 7.62267 10.0007 5.66667C10.0007 3.71066 8.50827 2.125 6.66732 2.125C4.82637 2.125 3.33398 3.71066 3.33398 5.66667C3.33398 7.62267 4.82637 9.20833 6.66732 9.20833Z" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M12.666 11.334V15.584" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+//                 <path d="M14.666 13.459H10.666" stroke="#9CA3AF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
 //             </svg>
 //         ),
 //     },
@@ -240,15 +261,8 @@
 // // ── Top Bar ───────────────────────────────────────────────
 // function TopBar({ step }: { step: number }) {
 //     const TOTAL = stepConfig.length;
-
-//     // circle size: active/completed = 36px (h-9), inactive = 32px (h-8)
-//     // label height ≈ 16px, gap = 8px (mb-2)
-//     // line should sit at: labelHeight + gap + circleHeight/2 = 16 + 8 + 18 = 42px from top
-//     // spacer = labelHeight + gap = 24px
-
 //     return (
 //         <div className="border-b border-[#f0edf1]">
-//             {/* Logo */}
 //             <div className="px-6 pt-4 pb-3 max-w-6xl mx-auto">
 //                 <Link href="/" className="inline-flex items-center gap-2">
 //                     <div className="w-7 h-7 rounded-md overflow-hidden shrink-0">
@@ -257,20 +271,16 @@
 //                     <span className="text-[14px] font-bold text-[#1a1a2e]">Mein HerzGeschenk</span>
 //                 </Link>
 //             </div>
-
-//             {/* Progress bar */}
 //             <div className="max-w-4xl mx-auto px-6 pb-5">
 //                 <div className="flex items-start">
 //                     {stepConfig.map((s, i) => {
 //                         const isCompleted = i + 1 < step;
 //                         const isActive = i + 1 === step;
 //                         const isLast = i === TOTAL - 1;
-
 //                         return (
 //                             <div key={i} className="flex items-start flex-1 last:flex-none">
-//                                 {/* Step node: label top, circle bottom */}
 //                                 <div className="flex flex-col items-center shrink-0">
-//                                     <span className={`text-[12px] whitespace-nowrap mb-2 leading-none
+//                                     {/* <span className={`text-[12px] whitespace-nowrap mb-2 leading-none
 //                                         ${isActive ? "font-bold text-[#1a1a2e]" : "font-medium text-[#9CA3AF]"}`}>
 //                                         {s.label}
 //                                     </span>
@@ -279,22 +289,35 @@
 //                                             ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white shadow-md"
 //                                             : isCompleted
 //                                                 ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white"
-//                                                 : "w-8 h-8 bg-[#eef0f3] text-[#9CA3AF]"}`}>
-//                                         {isCompleted ? (
-//                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-//                                                 <polyline points="20 6 9 17 4 12" />
-//                                             </svg>
-//                                         ) : s.icon}
-//                                     </div>
-//                                 </div>
+//                                                 : "w-9 h-9 bg-[#eef0f3] text-[#9CA3AF]"}`}>
+//                                         {s.icon}
+//                                     </div> */}
+//                                     <span className={`text-[12px] whitespace-nowrap mb-2 leading-none
+//     ${isActive ? "font-bold text-[#1a1a2e]" : "font-medium text-[#9CA3AF]"}`}>
+//                                         {s.label}
+//                                     </span>
 
-//                                 {/* Line — vertically centered to circle */}
+//                                     {s.type === "dot" && !isActive && !isCompleted ? (
+//                                         <div className="w-8 h-8 flex items-center justify-center">
+//                                             <div className="w-3 h-3 rounded-full bg-[#d1d5db]" />
+//                                         </div>
+//                                     ) : (
+//                                         <div className={`rounded-full flex items-center justify-center transition-all duration-300
+//                                         ${isActive
+//                                                 ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white shadow-md"
+//                                                 : isCompleted
+//                                                     ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white"
+//                                                     : "w-8 h-8 bg-[#eef0f3] text-[#9CA3AF]"}`}>
+//                                             {s.icon}
+//                                         </div>
+//                                     )}
+//                                 </div>
 //                                 {!isLast && (
-//                                     <div className="flex-1 flex flex-col min-w-0 px-1">
-//                                         {/* label height (10px font ~16px rendered) + mb-2 (8px) + half of circle (18px) = ~26px */}
-//                                         <div className="h-6.5 shrink-0" />
-//                                         <div className={`h-px w-full rounded-full transition-all duration-300
-//                                             ${isCompleted ? "bg-[#B91C1C]" : "bg-[#d1d5db]"}`} />
+//                                     <div className="flex-1 flex flex-col min-w-0">
+//                                         <div className="h-10 w-full shrink-0 flex items-center">
+//                                             <div className={`h-1.25 mt-7 w-full translate-y-1.5 transition-all duration-300
+//                                                 ${isCompleted ? "bg-[#B91C1C]" : "bg-[#d1d5db]"}`} />
+//                                         </div>
 //                                     </div>
 //                                 )}
 //                             </div>
@@ -322,25 +345,71 @@
 //     onNext,
 //     nextLabel = "Continue",
 //     showBack = true,
+//     nextDisabled = false,
 // }: {
 //     onBack?: () => void;
 //     onNext?: () => void;
 //     nextLabel?: string;
 //     showBack?: boolean;
+//     nextDisabled?: boolean;
 // }) {
+//     const navRef = useRef<HTMLDivElement>(null);
+//     const backRef = useRef<HTMLButtonElement>(null);
+//     const nextRef = useRef<HTMLButtonElement>(null);
+
+//     const onBackEnter = () => gsap.to(backRef.current, { scale: 1.04, duration: 0.18, ease: "power2.out" });
+//     const onBackLeave = () => gsap.to(backRef.current, { scale: 1, duration: 0.18, ease: "power2.inOut" });
+//     const onNextEnter = () => gsap.to(nextRef.current, { scale: 1.03, duration: 0.18, ease: "power2.out" });
+//     const onNextLeave = () => gsap.to(nextRef.current, { scale: 1, duration: 0.18, ease: "power2.inOut" });
+
 //     return (
-//         <div className="sticky bottom-0 backdrop-blur-sm border-t border-[#f0edf1] px-4 sm:px-6 py-4">
+//         <div ref={navRef} className="sticky bottom-0 backdrop-blur-sm border-t border-[#f0edf1] px-4 sm:px-6 py-4">
 //             <div className="max-w-4xl mx-auto flex gap-3">
 //                 {showBack && onBack && (
-//                     <button onClick={onBack} className="flex items-center justify-center gap-2 border border-[#e5e7eb] bg-white text-[#374151] font-semibold text-[14px] py-3 px-6 rounded-xl cursor-pointer hover:bg-[#f9fafb] transition-colors w-27.5">
+//                     <button
+//                         ref={backRef}
+//                         onClick={onBack}
+//                         onMouseEnter={onBackEnter}
+//                         onMouseLeave={onBackLeave}
+//                         className="flex items-center justify-center gap-2 border border-[#e5e7eb] bg-white text-[#374151] font-semibold text-[14px] py-3 px-6 rounded-xl cursor-pointer hover:bg-[#f9fafb] transition-colors w-27.5"
+//                     >
 //                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
 //                         Back
 //                     </button>
 //                 )}
 //                 {onNext && (
-//                     <button onClick={onNext} className="flex-1 flex items-center justify-center gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white font-semibold text-[14px] py-3 rounded-xl cursor-pointer hover:opacity-90 transition-opacity">
+//                     <button
+//                         ref={nextRef}
+//                         onClick={nextDisabled ? undefined : onNext}
+//                         onMouseEnter={onNextEnter}
+//                         onMouseLeave={onNextLeave}
+//                         className="flex-1 flex items-center font-bold justify-center gap-3 
+//                         bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] 
+//                         hover:bg-[linear-gradient(102deg,#D90042_0%,#7A0026_100%)]
+//                         text-white text-base py-4 rounded-2xl cursor-pointer 
+//                         transition-all duration-300 
+//                         shadow-lg shadow-[#BF003A]/50 
+//                         hover:shadow-2xl hover:shadow-[#BF003A]/70 
+//                         hover:scale-[1.03] active:scale-[0.98]
+//                         focus:outline-none focus:ring-4 focus:ring-[#BF003A]/30
+//                         disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+//                         disabled={nextDisabled}
+//                     >
 //                         {nextLabel}
-//                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+//                         <svg
+//                             width="18"
+//                             height="18"
+//                             viewBox="0 0 24 24"
+//                             fill="none"
+//                             stroke="currentColor"
+//                             strokeWidth="3"
+//                             strokeLinecap="round"
+//                             strokeLinejoin="round"
+//                             className="transition-transform group-hover:translate-x-1"
+//                         >
+//                             <line x1="5" y1="12" x2="19" y2="12" />
+//                             <polyline points="12 5 19 12 12 19" />
+//                         </svg>
 //                     </button>
 //                 )}
 //             </div>
@@ -353,49 +422,92 @@
 //     const [bookTitle, setBookTitle] = useState("");
 //     const [bookSubtitle, setBookSubtitle] = useState("");
 //     const [recipientName, setRecipientName] = useState("");
-//     const [selectedOccasion, setSelectedOccasion] = useState("Birthday");
-//     const [activeSubTab, setActiveSubTab] = useState("Birthday");
+//     const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+//     const [selectedSubTab, setSelectedSubTab] = useState("");
+//     const [isOccasionModalOpen, setIsOccasionModalOpen] = useState(false);
 
-//     const subTabs = subOccasionsByOccasion[selectedOccasion] ?? [];
+//     const containerRef = useRef<HTMLDivElement>(null);
+//     const headingRef = useRef<HTMLDivElement>(null);
+//     const fieldsRef = useRef<HTMLDivElement>(null);
+//     const occasionsRef = useRef<HTMLDivElement>(null);
+//     const modalOverlayRef = useRef<HTMLDivElement>(null);
+//     const modalCardRef = useRef<HTMLDivElement>(null);
+
+//     useEffect(() => {
+//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+//         gsap.set([headingRef.current, fieldsRef.current, occasionsRef.current], { opacity: 0, y: 24 });
+//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 })
+//             .to(fieldsRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3")
+//             .to(occasionsRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3");
+//     }, []);
+
+//     /* occasion grid re-animate on change */
+//     useEffect(() => {
+//         const btns = occasionsRef.current?.querySelectorAll<HTMLElement>(".occasion-btn");
+//         if (btns) {
+//             gsap.fromTo(btns,
+//                 { opacity: 0, scale: 0.92 },
+//                 { opacity: 1, scale: 1, duration: 0.35, stagger: 0.05, ease: "back.out(1.4)" }
+//             );
+//         }
+//     }, [selectedOccasion]);
+
+//     useEffect(() => {
+//         if (isOccasionModalOpen) {
+//             gsap.fromTo(modalOverlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+//             gsap.fromTo(modalCardRef.current,
+//                 { opacity: 0, y: 18, scale: 0.96 },
+//                 { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power3.out" }
+//             );
+//         }
+//     }, [isOccasionModalOpen]);
+
+//     const selectedOccasionLabel = occasions.find(occ => occ.id === selectedOccasion)?.label ?? "";
+//     const selectedItems = selectedOccasion ? (subOccasionsByOccasion[selectedOccasion] ?? []) : [];
 
 //     const handleOccasionChange = (occasionId: string) => {
 //         setSelectedOccasion(occasionId);
-//         const firstSub = subOccasionsByOccasion[occasionId]?.[0] ?? "";
-//         setActiveSubTab(firstSub);
+//         setSelectedSubTab("");
+//         setIsOccasionModalOpen(true);
+//     };
+
+//     const handleSubTabSelect = (subTab: string) => {
+//         setSelectedSubTab(subTab);
+//         setIsOccasionModalOpen(false);
 //     };
 
 //     return (
 //         <>
-//             <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full">
-//                 <div className="mb-6">
+//             <div ref={containerRef} className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full">
+//                 <div ref={headingRef} className="mb-6">
 //                     <h1 className="text-[24px] font-bold text-[#1a1a2e]">Book Details</h1>
 //                     <p className="text-[14px] text-[#9CA3AF] mt-0.5">Tell us about the person and occasion.</p>
 //                 </div>
 
-//                 <div className="mb-4">
-//                     <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Title</label>
-//                     <input value={bookTitle} onChange={e => setBookTitle(e.target.value)} placeholder="e.g., Mom's 60th Birthday Book"
-//                         className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+//                 <div ref={fieldsRef}>
+//                     <div className="mb-4">
+//                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Title</label>
+//                         <input value={bookTitle} onChange={e => setBookTitle(e.target.value)} placeholder="e.g., Mom's 60th Birthday Book"
+//                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+//                     </div>
+//                     <div className="mb-4">
+//                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Subtitle</label>
+//                         <input value={bookSubtitle} onChange={e => setBookSubtitle(e.target.value)} placeholder="e.g., Mom's 60th Birthday Book"
+//                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+//                     </div>
+//                     <div className="mb-5">
+//                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Recipient Name</label>
+//                         <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="e.g., Sarah Johnson"
+//                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+//                     </div>
 //                 </div>
 
-//                 <div className="mb-4">
-//                     <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Subtitle</label>
-//                     <input value={bookSubtitle} onChange={e => setBookSubtitle(e.target.value)} placeholder="e.g., Mom's 60th Birthday Book"
-//                         className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
-//                 </div>
-
-//                 <div className="mb-5">
-//                     <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Recipient Name</label>
-//                     <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="e.g., Sarah Johnson"
-//                         className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
-//                 </div>
-
-//                 <div className="mb-4">
+//                 <div ref={occasionsRef} className="mb-4">
 //                     <label className="text-[14px] font-semibold text-[#374151] block mb-2">Pick Your Occasion</label>
 //                     <div className="grid grid-cols-3 gap-2">
 //                         {occasions.map((occ) => (
 //                             <button key={occ.id} onClick={() => handleOccasionChange(occ.id)}
-//                                 className={`flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-xl border text-[14px] font-medium transition-all cursor-pointer
+//                                 className={`occasion-btn flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-xl border text-[14px] font-medium transition-all cursor-pointer
 //                                     ${selectedOccasion === occ.id ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50"}`}>
 //                                 <span className={selectedOccasion === occ.id ? "text-[#B91C1C]" : "text-[#9CA3AF]"}>{occ.icon}</span>
 //                                 {occ.label}
@@ -404,23 +516,87 @@
 //                     </div>
 //                 </div>
 
-//                 {subTabs.length > 0 && (
-//                     <div className="flex flex-wrap gap-2 mt-3">
-//                         {subTabs.map((tab) => (
-//                             <button key={tab} onClick={() => setActiveSubTab(tab)}
-//                                 className={`px-4 py-1.5 rounded-full text-[12px] font-medium border transition-all cursor-pointer whitespace-nowrap
-//                                     ${activeSubTab === tab ? "bg-white border-[#1a1a2e] text-[#1a1a2e] font-semibold" : "border-[#e5e7eb] text-[#9CA3AF] hover:text-[#374151] bg-white"}`}>
-//                                 {tab}
+//                 {selectedSubTab ? (
+//                     <div className="mt-4 rounded-2xl border border-[#f0edf1] bg-white px-4 py-3 shadow-sm">
+//                         <div className="flex items-start justify-between gap-3">
+//                             <div>
+//                                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Selected item</p>
+//                                 <h3 className="mt-1 text-[15px] font-bold text-[#1a1a2e]">{selectedSubTab}</h3>
+//                                 <p className="text-[12px] text-[#9CA3AF]">{selectedOccasionLabel}</p>
+//                             </div>
+//                             <button
+//                                 type="button"
+//                                 onClick={() => setIsOccasionModalOpen(true)}
+//                                 className="shrink-0 rounded-full border cursor-pointer border-[#e5e7eb] px-3 py-1.5 text-[12px] font-semibold text-[#374151] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]"
+//                             >
+//                                 Change
 //                             </button>
-//                         ))}
+//                         </div>
 //                     </div>
+//                 ) : (
+//                     <p className="mt-4 text-[12px] text-[#9CA3AF]">Pick an occasion, then choose one item from the modal to continue.</p>
 //                 )}
 //             </div>
+
+//             {isOccasionModalOpen && selectedOccasion && (
+//                 <div ref={modalOverlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+//                     <div ref={modalCardRef} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[#f0edf1] bg-white shadow-2xl">
+//                         <div className="flex items-start justify-between gap-4 border-b border-[#f5f2f3] px-5 py-4 sm:px-6">
+//                             <div>
+//                                 <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Sub Occasion</p>
+//                                 <h2 className="mt-1 text-[20px] font-bold text-[#1a1a2e]">{selectedOccasionLabel}</h2>
+//                             </div>
+//                             <button
+//                                 type="button"
+//                                 onClick={() => setIsOccasionModalOpen(false)}
+//                                 className="flex h-9 w-9 items-center justify-center cursor-pointer rounded-full border border-[#e5e7eb] text-[#9CA3AF] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]"
+//                                 aria-label="Close occasion picker"
+//                             >
+//                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+//                                     <line x1="18" y1="6" x2="6" y2="18" />
+//                                     <line x1="6" y1="6" x2="18" y2="18" />
+//                                 </svg>
+//                             </button>
+//                         </div>
+//                         <div className="p-5 sm:p-6">
+//                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+//                                 {selectedItems.map((tab) => {
+//                                     const isSelected = selectedSubTab === tab;
+//                                     return (
+//                                         <button
+//                                             key={tab}
+//                                             type="button"
+//                                             onClick={() => handleSubTabSelect(tab)}
+//                                             className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected
+//                                                 ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]"
+//                                                 : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"
+//                                                 }`}
+//                                         >
+//                                             <div className="flex items-center justify-between gap-3">
+//                                                 <span className="text-[14px] font-semibold">{tab}</span>
+//                                                 {isSelected && (
+//                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+//                                                         <polyline points="20 6 9 17 4 12" />
+//                                                     </svg>
+//                                                 )}
+//                                             </div>
+//                                             <p className={`mt-1 text-[12px] ${isSelected ? "text-[#B91C1C]/80" : "text-[#9CA3AF]"}`}>
+//                                                 Select this item to continue.
+//                                             </p>
+//                                         </button>
+//                                     );
+//                                 })}
+//                             </div>
+//                         </div>
+//                     </div>
+//                 </div>
+//             )}
 
 //             <BottomNav
 //                 showBack={true}
 //                 onBack={undefined}
-//                 onNext={() => onNext({ subTab: activeSubTab })}
+//                 onNext={() => selectedSubTab && onNext({ subTab: selectedSubTab })}
+//                 nextDisabled={!selectedSubTab}
 //                 nextLabel="Continue"
 //             />
 //         </>
@@ -431,6 +607,25 @@
 // function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => void; subTab: string }) {
 //     const [questions, setQuestions] = useState(questionnairesBySubOccasion);
 //     const [answers, setAnswers] = useState<Record<string, string>>({});
+
+//     const headingRef = useRef<HTMLDivElement>(null);
+//     const cardRef = useRef<HTMLDivElement>(null);
+
+//     useEffect(() => {
+//         gsap.set([headingRef.current, cardRef.current], { opacity: 0, y: 24 });
+//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 })
+//             .to(cardRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.25");
+
+//         const rows = cardRef.current?.querySelectorAll<HTMLElement>(".q-row");
+//         if (rows) {
+//             gsap.fromTo(rows,
+//                 { opacity: 0, x: -14 },
+//                 { opacity: 1, x: 0, duration: 0.35, stagger: 0.07, ease: "power2.out", delay: 0.3 }
+//             );
+//         }
+//     }, []);
+
 //     const currentQuestions = questions[subTab] ?? [];
 
 //     const handleAddQuestion = () => {
@@ -444,20 +639,21 @@
 //     return (
 //         <>
 //             <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full">
-//                 <div className="flex items-center gap-2 mb-1">
+//                 <div ref={headingRef} className="flex items-center gap-2 mb-1">
 //                     <div className="w-5 h-5 border-2 border-[#B91C1C] rounded flex items-center justify-center shrink-0">
 //                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
 //                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
 //                         </svg>
 //                     </div>
-//                     <h1 className="text-[18px] font-bold text-[#1a1a2e]">Questionnaire {subTab.toUpperCase()}</h1>
+//                     <h1 className="text-[18px] font-bold text-[#1a1a2e]">Questionnaire <span className="uppercase">Birthday</span></h1>
 //                 </div>
-//                 <p className="text-[12px] text-[#9CA3AF] mb-5">Fill in the same questionnaire that invited contributors see.</p>
+//                 <h3 className="font-semibold mt-2">Fill in the same questionnaire that invited contributors see.</h3>
+//                 <p className="text-[12px] text-[#9CA3AF] mb-5">Feel free to add, remove or rewrite any question — in any language you want.</p>
 
-//                 <div className="bg-white rounded-2xl border border-[#f0edf1] overflow-hidden mb-4">
+//                 <div ref={cardRef} className="bg-white rounded-2xl border border-[#f0edf1] overflow-hidden mb-4">
 //                     <div className="divide-y divide-[#f9fafb]">
 //                         {currentQuestions.map((q) => (
-//                             <div key={q.id} className="px-4 py-3">
+//                             <div key={q.id} className="q-row px-4 py-3">
 //                                 <div className="flex items-center justify-between mb-1.5">
 //                                     <span className="text-[12px] font-medium text-[#374151]">{q.question}</span>
 //                                     <div className="flex items-center gap-2">
@@ -502,7 +698,7 @@
 //                 </div>
 //             </div>
 
-//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Choose A Book Style" />
+//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Invite Friends" />
 //         </>
 //     );
 // }
@@ -510,17 +706,44 @@
 // // ── Step 3: Choose a Book Style ───────────────────────────
 // function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
 //     const [selected, setSelected] = useState(1);
+
+//     const headingRef = useRef<HTMLDivElement>(null);
+//     const gridRef = useRef<HTMLDivElement>(null);
+
+//     useEffect(() => {
+//         gsap.set([headingRef.current], { opacity: 0, y: 20 });
+//         const cards = gridRef.current?.querySelectorAll<HTMLElement>(".tpl-card");
+//         if (cards) gsap.set(cards, { opacity: 0, scale: 0.93, y: 20 });
+
+//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 });
+//         if (cards) {
+//             tl.to(cards, { opacity: 1, scale: 1, y: 0, duration: 0.45, stagger: 0.06, ease: "back.out(1.3)" }, "-=0.25");
+//         }
+//     }, []);
+
+//     const onCardEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+//         if (!e.currentTarget.classList.contains("ring-2")) {
+//             gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2, ease: "power2.out" });
+//         }
+//     };
+//     const onCardLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+//         gsap.to(e.currentTarget, { scale: 1, duration: 0.2, ease: "power2.inOut" });
+//     };
+
 //     return (
 //         <>
 //             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
-//                 <div className="mb-5">
+//                 <div ref={headingRef} className="mb-5">
 //                     <h1 className="text-[22px] font-bold text-[#1a1a2e]">Choose a Book Style</h1>
 //                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Pick a design template for your book.</p>
 //                 </div>
-//                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+//                 <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 //                     {templates.map((tpl) => (
 //                         <button key={tpl.id} onClick={() => setSelected(tpl.id)}
-//                             className={`relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
+//                             onMouseEnter={onCardEnter}
+//                             onMouseLeave={onCardLeave}
+//                             className={`tpl-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
 //                                 ${selected === tpl.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
 //                             <div className="relative w-full aspect-4/3 bg-[#d1cfc8]">
 //                                 <Image src={tpl.image} alt={tpl.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -541,17 +764,44 @@
 // // ── Step 4: Choose a Cover ────────────────────────────────
 // function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
 //     const [selected, setSelected] = useState(1);
+
+//     const headingRef = useRef<HTMLDivElement>(null);
+//     const gridRef = useRef<HTMLDivElement>(null);
+
+//     useEffect(() => {
+//         gsap.set(headingRef.current, { opacity: 0, y: 20 });
+//         const cards = gridRef.current?.querySelectorAll<HTMLElement>(".cover-card");
+//         if (cards) gsap.set(cards, { opacity: 0, scale: 0.93, y: 20 });
+
+//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 });
+//         if (cards) {
+//             tl.to(cards, { opacity: 1, scale: 1, y: 0, duration: 0.45, stagger: 0.07, ease: "back.out(1.3)" }, "-=0.25");
+//         }
+//     }, []);
+
+//     const onCardEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+//         if (!e.currentTarget.classList.contains("ring-2")) {
+//             gsap.to(e.currentTarget, { scale: 1.03, duration: 0.2, ease: "power2.out" });
+//         }
+//     };
+//     const onCardLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+//         gsap.to(e.currentTarget, { scale: 1, duration: 0.2, ease: "power2.inOut" });
+//     };
+
 //     return (
 //         <>
 //             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
-//                 <div className="mb-5">
+//                 <div ref={headingRef} className="mb-5">
 //                     <h1 className="text-[22px] font-bold text-[#1a1a2e]">Choose a Cover</h1>
 //                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Pick a design cover for your book.</p>
 //                 </div>
-//                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+//                 <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 //                     {covers.map((cover) => (
 //                         <button key={cover.id} onClick={() => setSelected(cover.id)}
-//                             className={`relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
+//                             onMouseEnter={onCardEnter}
+//                             onMouseLeave={onCardLeave}
+//                             className={`cover-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
 //                                 ${selected === cover.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
 //                             <div className="relative w-full aspect-3/4 bg-[#d1cfc8]">
 //                                 <Image src={cover.image} alt={cover.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -564,7 +814,7 @@
 //                     ))}
 //                 </div>
 //             </div>
-//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Invite Friends" />
+//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Design Questionnaire" />
 //         </>
 //     );
 // }
@@ -575,6 +825,18 @@
 //     const [copied, setCopied] = useState(false);
 //     const previewLink = "https://preview--keepsake-craft-h...";
 
+//     const headingRef = useRef<HTMLDivElement>(null);
+//     const linkCardRef = useRef<HTMLDivElement>(null);
+//     const emailRef = useRef<HTMLDivElement>(null);
+
+//     useEffect(() => {
+//         gsap.set([headingRef.current, linkCardRef.current, emailRef.current], { opacity: 0, y: 22 });
+//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 })
+//             .to(linkCardRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.25")
+//             .to(emailRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.25");
+//     }, []);
+
 //     const handleCopy = () => {
 //         navigator.clipboard.writeText(previewLink).catch(() => { });
 //         setCopied(true);
@@ -584,12 +846,12 @@
 //     return (
 //         <>
 //             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
-//                 <div className="mb-6">
+//                 <div ref={headingRef} className="mb-6">
 //                     <h1 className="text-[22px] font-bold text-[#1a1a2e]">Invite Friends</h1>
 //                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Invite your friends via link.</p>
 //                 </div>
 
-//                 <div className="mb-1.5">
+//                 <div ref={linkCardRef} className="mb-1.5">
 //                     <div className="flex items-center gap-2 border border-[#e5e7eb] rounded-xl px-4 py-2.5">
 //                         <span className="flex-1 text-[13px] text-[#374151] truncate">{previewLink}</span>
 //                         <button onClick={handleCopy}
@@ -608,7 +870,7 @@
 //                     <p className="text-[11px] text-[#9CA3AF] mt-1.5 px-1">Use this link to invite your friends, by copying it and sending it in WhatsApp</p>
 //                 </div>
 
-//                 <div className="mt-5">
+//                 <div ref={emailRef} className="mt-5">
 //                     <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Invite</label>
 //                     <div className="flex items-center gap-2 border border-[#e5e7eb] rounded-xl px-4 py-2.5">
 //                         <input value={email} onChange={e => setEmail(e.target.value)} placeholder="email@example.com"
@@ -622,17 +884,57 @@
 //                     <p className="text-[11px] text-[#9CA3AF] mt-1.5 px-1">Invite your friends by email.</p>
 //                 </div>
 //             </div>
+//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Preview & Order" />
+//         </>
+//     );
+// }
 
-//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Done" />
+// // ── Step 6: Preview & Order ──────────────────────────────
+// function Step6({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
+//     return (
+//         <>
+//             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
+//                 <div className="mb-6">
+//                     <h1 className="text-[22px] font-bold text-[#1a1a2e]">Preview & Order</h1>
+//                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Review your book setup and place the order.</p>
+//                 </div>
+
+//                 <div className="rounded-2xl border border-[#f0edf1] bg-white p-5">
+//                     <h2 className="text-[15px] font-semibold text-[#1a1a2e] mb-3">Ready to finalize</h2>
+//                     <ul className="space-y-2 text-[13px] text-[#4b5563]">
+//                         <li>Your book details are completed.</li>
+//                         <li>Theme and cover are selected.</li>
+//                         <li>Questionnaire and invite steps are finished.</li>
+//                     </ul>
+//                 </div>
+//             </div>
+
+//             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Create Project" />
 //         </>
 //     );
 // }
 
 // // ── Success Modal ─────────────────────────────────────────
 // function SuccessModal({ onClose }: { onClose: () => void }) {
+//     const overlayRef = useRef<HTMLDivElement>(null);
+//     const cardRef = useRef<HTMLDivElement>(null);
+
+//     useEffect(() => {
+//         gsap.fromTo(overlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.22 });
+//         gsap.fromTo(cardRef.current,
+//             { opacity: 0, scale: 0.88, y: 24 },
+//             { opacity: 1, scale: 1, y: 0, duration: 0.38, ease: "back.out(1.6)" }
+//         );
+//     }, []);
+
+//     const handleClose = () => {
+//         gsap.to(overlayRef.current, { opacity: 0, duration: 0.18 });
+//         gsap.to(cardRef.current, { opacity: 0, scale: 0.9, y: 16, duration: 0.18, onComplete: onClose });
+//     };
+
 //     return (
-//         <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-4">
-//             <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
+//         <div ref={overlayRef} className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+//             <div ref={cardRef} className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center">
 //                 <div className="flex justify-center mb-4">
 //                     <div className="w-12 h-12 rounded-full border-2 border-[#B91C1C] flex items-center justify-center">
 //                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -640,17 +942,19 @@
 //                         </svg>
 //                     </div>
 //                 </div>
-//                 <h2 className="text-[20px] font-bold text-[#1a1a2e] mb-2">Project Created !</h2>
+//                 <h2 className="text-[20px] font-bold text-[#1a1a2e] mb-2">Project Created!</h2>
 //                 <p className="text-[13px] text-[#6b7280] leading-relaxed mb-6">
 //                     Your memory book project has been created.
 //                 </p>
-//                 <button onClick={onClose}
-//                     className="w-full flex items-center justify-center gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white font-semibold text-[14px] py-3 rounded-xl cursor-pointer hover:opacity-90 transition-opacity">
-//                     Go To The Project
-//                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-//                         <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
-//                     </svg>
-//                 </button>
+//                 <Link href="/dashboard">
+//                     <button onClick={handleClose}
+//                         className="w-full flex items-center justify-center gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white font-semibold text-[14px] py-3 rounded-xl cursor-pointer hover:opacity-90 transition-opacity">
+//                         Go To The Project
+//                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+//                             <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
+//                         </svg>
+//                     </button>
+//                 </Link>
 //             </div>
 //         </div>
 //     );
@@ -668,10 +972,11 @@
 //             {step === 1 && (
 //                 <Step1 onNext={({ subTab }) => { setSelectedSubTab(subTab); setStep(2); }} />
 //             )}
-//             {step === 2 && <Step2 onNext={() => setStep(3)} onBack={() => setStep(1)} subTab={selectedSubTab} />}
-//             {step === 3 && <Step3 onNext={() => setStep(4)} onBack={() => setStep(2)} />}
-//             {step === 4 && <Step4 onNext={() => setStep(5)} onBack={() => setStep(3)} />}
-//             {step === 5 && <Step5 onNext={() => setShowSuccess(true)} onBack={() => setStep(4)} />}
+//             {step === 2 && <Step3 onNext={() => setStep(3)} onBack={() => setStep(1)} />}
+//             {step === 3 && <Step4 onNext={() => setStep(4)} onBack={() => setStep(2)} />}
+//             {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={selectedSubTab} />}
+//             {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} />}
+//             {step === 6 && <Step6 onNext={() => setShowSuccess(true)} onBack={() => setStep(5)} />}
 //             {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
 //         </div>
 //     );
@@ -684,6 +989,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
+import { JSX } from "react/jsx-runtime";
 
 // ── Data ─────────────────────────────────────────────────
 const templates = [
@@ -752,6 +1058,46 @@ const occasions = [
         )
     },
 ];
+
+// ── Dynamic placeholders per occasion ────────────────────
+const placeholdersByOccasion: Record<string, { title: string; subtitle: string; recipient: string }> = {
+    Birthday: {
+        title: "e.g., Mom's 60th Birthday Book",
+        subtitle: "e.g., 60 years of love and memories",
+        recipient: "e.g., Sarah Johnson",
+    },
+    School: {
+        title: "e.g., Class of 2025 Memory Book",
+        subtitle: "e.g., A year full of growth and friendship",
+        recipient: "e.g., Maria",
+    },
+    Farewell: {
+        title: "e.g., Farewell to an Amazing Colleague",
+        subtitle: "e.g., Thank you for everything",
+        recipient: "e.g., Thomas",
+    },
+    Love: {
+        title: "e.g., Our Wedding Memory Book",
+        subtitle: "e.g., A love story worth remembering",
+        recipient: "e.g., Anna & Michael",
+    },
+    Family: {
+        title: "e.g., Our Family Through the Years",
+        subtitle: "e.g., Stories and memories we treasure",
+        recipient: "e.g., The Johnson Family",
+    },
+    Seasonal: {
+        title: "e.g., Christmas Memories 2024",
+        subtitle: "e.g., A festive season to remember",
+        recipient: "e.g., Our Family",
+    },
+};
+
+const defaultPlaceholders = {
+    title: "e.g., My Memory Book",
+    subtitle: "e.g., A collection of beautiful memories",
+    recipient: "e.g., Your Name",
+};
 
 const subOccasionsByOccasion: Record<string, string[]> = {
     Birthday: ["Birthday", "Anniversary"],
@@ -867,52 +1213,71 @@ const questionnairesBySubOccasion: Record<
 };
 
 // ── Step config ───────────────────────────────────────────
-const stepConfig = [
+type ProgressStep = {
+    label: string;
+    icon: JSX.Element;
+    type?: "icon" | "dot";
+};
+
+const stepConfig: ProgressStep[] = [
     {
         label: "Book Details",
         icon: (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="15" viewBox="0 0 17 15" fill="none">
+                <path d="M1.5 12C1.30109 12 1.11032 11.921 0.96967 11.7803C0.829018 11.6397 0.75 11.4489 0.75 11.25V1.5C0.75 1.30109 0.829018 1.11032 0.96967 0.96967C1.11032 0.829018 1.30109 0.75 1.5 0.75H5.25C6.04565 0.75 6.80871 1.06607 7.37132 1.62868C7.93393 2.19129 8.25 2.95435 8.25 3.75C8.25 2.95435 8.56607 2.19129 9.12868 1.62868C9.69129 1.06607 10.4544 0.75 11.25 0.75H15C15.1989 0.75 15.3897 0.829018 15.5303 0.96967C15.671 1.11032 15.75 1.30109 15.75 1.5V11.25C15.75 11.4489 15.671 11.6397 15.5303 11.7803C15.3897 11.921 15.1989 12 15 12H10.5C9.90326 12 9.33097 12.2371 8.90901 12.659C8.48705 13.081 8.25 13.6533 8.25 14.25C8.25 13.6533 8.01295 13.081 7.59099 12.659C7.16903 12.2371 6.59674 12 6 12H1.5Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
         ),
     },
     {
-        label: "Questionnaire",
+        label: "Choose Theme",
         icon: (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-        ),
-    },
-    {
-        label: "Style",
-        icon: (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" /><path d="M3 9h18M9 21V9" />
-            </svg>
-        ),
-    },
-    {
-        label: "Choose Style",
-        icon: (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" /><path d="M12 8v4l3 3" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M1.99511 10.8951C2.09314 11.1424 2.11496 11.4133 2.05778 11.6731L1.34778 13.8664C1.3249 13.9777 1.33082 14.0929 1.36496 14.2012C1.39911 14.3095 1.46035 14.4073 1.54289 14.4853C1.62543 14.5633 1.72652 14.6189 1.83658 14.6469C1.94664 14.6749 2.06202 14.6742 2.17178 14.6451L4.44711 13.9798C4.69226 13.9312 4.94613 13.9524 5.17978 14.0411C6.60337 14.7059 8.21602 14.8466 9.73321 14.4383C11.2504 14.0299 12.5746 13.0989 13.4722 11.8094C14.3699 10.5198 14.7832 8.95472 14.6393 7.39015C14.4954 5.82557 13.8036 4.36209 12.6858 3.25791C11.5681 2.15373 10.0962 1.47981 8.53003 1.35504C6.96382 1.23028 5.40387 1.6627 4.12541 2.57601C2.84694 3.48931 1.93213 4.82481 1.54237 6.34687C1.15262 7.86894 1.31296 9.47975 1.99511 10.8951Z" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M6.06055 6.00038C6.21728 5.55482 6.52665 5.17912 6.93385 4.9398C7.34105 4.70049 7.81981 4.61301 8.28533 4.69285C8.75085 4.7727 9.17309 5.01473 9.47727 5.37606C9.78144 5.7374 9.94792 6.19473 9.94721 6.66705C9.94721 8.00038 7.94721 8.66705 7.94721 8.66705" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M8 11.334H8.00667" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
         ),
     },
     {
         label: "Choose Cover",
         icon: (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M9.33398 14H10.0007" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M14 9.33398V10.0007" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M13.9993 12.666C13.9993 13.0196 13.8589 13.3588 13.6088 13.6088C13.3588 13.8589 13.0196 13.9993 12.666 13.9993" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M14 6V6.66667" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 9.33398V10.0007" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 3.33333C2 2.97971 2.14048 2.64057 2.39052 2.39052C2.64057 2.14048 2.97971 2 3.33333 2H12.6667C13.0203 2 13.3594 2.14048 13.6095 2.39052C13.8595 2.64057 14 2.97971 14 3.33333" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M2 6V6.66667" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3.33333 13.9993C2.97971 13.9993 2.64057 13.8589 2.39052 13.6088C2.14048 13.3588 2 13.0196 2 12.666" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M6 14H6.66667" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        label: "Questionnaire",
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="7" fill="#9CA3AF" />
             </svg>
         ),
     },
     {
         label: "Invite",
         icon: (
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="7" fill="#9CA3AF" />
+            </svg>
+        ),
+    },
+    {
+        label: "Preview & Order",
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
+                <path d="M1.33398 14.876C1.33393 13.7854 1.63007 12.7179 2.18688 11.8017C2.74369 10.8855 3.5375 10.1595 4.47305 9.71081C5.4086 9.26211 6.44614 9.10978 7.46116 9.27211C8.47617 9.43444 9.42554 9.90453 10.1953 10.626" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M6.66732 9.20833C8.50827 9.20833 10.0007 7.62267 10.0007 5.66667C10.0007 3.71066 8.50827 2.125 6.66732 2.125C4.82637 2.125 3.33398 3.71066 3.33398 5.66667C3.33398 7.62267 4.82637 9.20833 6.66732 9.20833Z" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M12.666 11.334V15.584" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M14.666 13.459H10.666" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
         ),
     },
@@ -944,24 +1309,27 @@ function TopBar({ step }: { step: number }) {
                                         ${isActive ? "font-bold text-[#1a1a2e]" : "font-medium text-[#9CA3AF]"}`}>
                                         {s.label}
                                     </span>
-                                    <div className={`rounded-full flex items-center justify-center transition-all duration-300
-                                        ${isActive
-                                            ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white shadow-md"
-                                            : isCompleted
-                                                ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white"
-                                                : "w-8 h-8 bg-[#eef0f3] text-[#9CA3AF]"}`}>
-                                        {isCompleted ? (
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                                                <polyline points="20 6 9 17 4 12" />
-                                            </svg>
-                                        ) : s.icon}
-                                    </div>
+                                    {s.type === "dot" && !isActive && !isCompleted ? (
+                                        <div className="w-8 h-8 flex items-center justify-center">
+                                            <div className="w-3 h-3 rounded-full bg-[#d1d5db]" />
+                                        </div>
+                                    ) : (
+                                        <div className={`rounded-full flex items-center justify-center transition-all duration-300
+                                            ${isActive
+                                                ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white shadow-md"
+                                                : isCompleted
+                                                    ? "w-9 h-9 bg-[linear-gradient(135deg,#BF003A_0%,#59001C_100%)] text-white"
+                                                    : "w-8 h-8 bg-[#eef0f3] text-[#9CA3AF]"}`}>
+                                            {s.icon}
+                                        </div>
+                                    )}
                                 </div>
                                 {!isLast && (
-                                    <div className="flex-1 flex flex-col min-w-0 px-1">
-                                        <div className="h-6.5 shrink-0" />
-                                        <div className={`h-px w-full rounded-full transition-all duration-300
-                                            ${isCompleted ? "bg-[#B91C1C]" : "bg-[#d1d5db]"}`} />
+                                    <div className="flex-1 flex flex-col min-w-0">
+                                        <div className="h-10 w-full shrink-0 flex items-center">
+                                            <div className={`h-1.25 mt-7 w-full translate-y-1.5 transition-all duration-300
+                                                ${isCompleted ? "bg-[#B91C1C]" : "bg-[#d1d5db]"}`} />
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -989,13 +1357,14 @@ function BottomNav({
     onNext,
     nextLabel = "Continue",
     showBack = true,
+    nextDisabled = false,
 }: {
     onBack?: () => void;
     onNext?: () => void;
     nextLabel?: string;
     showBack?: boolean;
+    nextDisabled?: boolean;
 }) {
-    const navRef = useRef<HTMLDivElement>(null);
     const backRef = useRef<HTMLButtonElement>(null);
     const nextRef = useRef<HTMLButtonElement>(null);
 
@@ -1005,7 +1374,7 @@ function BottomNav({
     const onNextLeave = () => gsap.to(nextRef.current, { scale: 1, duration: 0.18, ease: "power2.inOut" });
 
     return (
-        <div ref={navRef} className="sticky bottom-0 backdrop-blur-sm border-t border-[#f0edf1] px-4 sm:px-6 py-4">
+        <div className="sticky bottom-0 backdrop-blur-sm border-t border-[#f0edf1] px-4 sm:px-6 py-4">
             <div className="max-w-4xl mx-auto flex gap-3">
                 {showBack && onBack && (
                     <button
@@ -1015,20 +1384,33 @@ function BottomNav({
                         onMouseLeave={onBackLeave}
                         className="flex items-center justify-center gap-2 border border-[#e5e7eb] bg-white text-[#374151] font-semibold text-[14px] py-3 px-6 rounded-xl cursor-pointer hover:bg-[#f9fafb] transition-colors w-27.5"
                     >
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" />
+                        </svg>
                         Back
                     </button>
                 )}
                 {onNext && (
                     <button
                         ref={nextRef}
-                        onClick={onNext}
+                        onClick={nextDisabled ? undefined : onNext}
                         onMouseEnter={onNextEnter}
                         onMouseLeave={onNextLeave}
-                        className="flex-1 flex items-center justify-center gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white font-semibold text-[14px] py-3 rounded-xl cursor-pointer hover:opacity-90 transition-opacity"
+                        className="flex-1 flex items-center font-bold justify-center gap-3 
+                        bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] 
+                        text-white text-base py-4 rounded-2xl cursor-pointer 
+                        transition-all duration-300 
+                        shadow-lg shadow-[#BF003A]/50 
+                        hover:shadow-2xl hover:shadow-[#BF003A]/70 
+                        hover:scale-[1.03] active:scale-[0.98]
+                        disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                        disabled={nextDisabled}
                     >
                         {nextLabel}
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                            <line x1="5" y1="12" x2="19" y2="12" />
+                            <polyline points="12 5 19 12 12 19" />
+                        </svg>
                     </button>
                 )}
             </div>
@@ -1037,18 +1419,24 @@ function BottomNav({
 }
 
 // ── Step 1: Book Details ──────────────────────────────────
-function Step1({ onNext }: { onNext: (data: { subTab: string }) => void }) {
+function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }) => void }) {
     const [bookTitle, setBookTitle] = useState("");
     const [bookSubtitle, setBookSubtitle] = useState("");
     const [recipientName, setRecipientName] = useState("");
-    const [selectedOccasion, setSelectedOccasion] = useState("Birthday");
-    const [activeSubTab, setActiveSubTab] = useState("Birthday");
+    const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+    const [selectedSubTab, setSelectedSubTab] = useState("");
+    const [isOccasionModalOpen, setIsOccasionModalOpen] = useState(false);
 
-    const containerRef = useRef<HTMLDivElement>(null);
     const headingRef = useRef<HTMLDivElement>(null);
     const fieldsRef = useRef<HTMLDivElement>(null);
     const occasionsRef = useRef<HTMLDivElement>(null);
-    const subTabsRef = useRef<HTMLDivElement>(null);
+    const modalOverlayRef = useRef<HTMLDivElement>(null);
+    const modalCardRef = useRef<HTMLDivElement>(null);
+
+    // ── Dynamic placeholders based on selected occasion ──
+    const ph = selectedOccasion
+        ? (placeholdersByOccasion[selectedOccasion] ?? defaultPlaceholders)
+        : defaultPlaceholders;
 
     useEffect(() => {
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -1058,7 +1446,6 @@ function Step1({ onNext }: { onNext: (data: { subTab: string }) => void }) {
             .to(occasionsRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.3");
     }, []);
 
-    /* occasion grid re-animate on change */
     useEffect(() => {
         const btns = occasionsRef.current?.querySelectorAll<HTMLElement>(".occasion-btn");
         if (btns) {
@@ -1069,28 +1456,33 @@ function Step1({ onNext }: { onNext: (data: { subTab: string }) => void }) {
         }
     }, [selectedOccasion]);
 
-    /* sub-tabs animate on change */
     useEffect(() => {
-        const tabs = subTabsRef.current?.querySelectorAll<HTMLElement>(".sub-tab-btn");
-        if (tabs) {
-            gsap.fromTo(tabs,
-                { opacity: 0, x: -10 },
-                { opacity: 1, x: 0, duration: 0.3, stagger: 0.05, ease: "power2.out" }
+        if (isOccasionModalOpen) {
+            gsap.fromTo(modalOverlayRef.current, { opacity: 0 }, { opacity: 1, duration: 0.2 });
+            gsap.fromTo(modalCardRef.current,
+                { opacity: 0, y: 18, scale: 0.96 },
+                { opacity: 1, y: 0, scale: 1, duration: 0.28, ease: "power3.out" }
             );
         }
-    }, [selectedOccasion]);
+    }, [isOccasionModalOpen]);
 
-    const subTabs = subOccasionsByOccasion[selectedOccasion] ?? [];
+    const selectedOccasionLabel = occasions.find(occ => occ.id === selectedOccasion)?.label ?? "";
+    const selectedItems = selectedOccasion ? (subOccasionsByOccasion[selectedOccasion] ?? []) : [];
 
     const handleOccasionChange = (occasionId: string) => {
         setSelectedOccasion(occasionId);
-        const firstSub = subOccasionsByOccasion[occasionId]?.[0] ?? "";
-        setActiveSubTab(firstSub);
+        setSelectedSubTab("");
+        setIsOccasionModalOpen(true);
+    };
+
+    const handleSubTabSelect = (subTab: string) => {
+        setSelectedSubTab(subTab);
+        setIsOccasionModalOpen(false);
     };
 
     return (
         <>
-            <div ref={containerRef} className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full">
+            <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full">
                 <div ref={headingRef} className="mb-6">
                     <h1 className="text-[24px] font-bold text-[#1a1a2e]">Book Details</h1>
                     <p className="text-[14px] text-[#9CA3AF] mt-0.5">Tell us about the person and occasion.</p>
@@ -1099,18 +1491,30 @@ function Step1({ onNext }: { onNext: (data: { subTab: string }) => void }) {
                 <div ref={fieldsRef}>
                     <div className="mb-4">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Title</label>
-                        <input value={bookTitle} onChange={e => setBookTitle(e.target.value)} placeholder="e.g., Mom's 60th Birthday Book"
-                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+                        <input
+                            value={bookTitle}
+                            onChange={e => setBookTitle(e.target.value)}
+                            placeholder={ph.title}
+                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                        />
                     </div>
                     <div className="mb-4">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Subtitle</label>
-                        <input value={bookSubtitle} onChange={e => setBookSubtitle(e.target.value)} placeholder="e.g., Mom's 60th Birthday Book"
-                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+                        <input
+                            value={bookSubtitle}
+                            onChange={e => setBookSubtitle(e.target.value)}
+                            placeholder={ph.subtitle}
+                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                        />
                     </div>
                     <div className="mb-5">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Recipient Name</label>
-                        <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="e.g., Sarah Johnson"
-                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+                        <input
+                            value={recipientName}
+                            onChange={e => setRecipientName(e.target.value)}
+                            placeholder={ph.recipient}
+                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                        />
                     </div>
                 </div>
 
@@ -1128,23 +1532,80 @@ function Step1({ onNext }: { onNext: (data: { subTab: string }) => void }) {
                     </div>
                 </div>
 
-                {subTabs.length > 0 && (
-                    <div ref={subTabsRef} className="flex flex-wrap gap-2 mt-3">
-                        {subTabs.map((tab) => (
-                            <button key={tab} onClick={() => setActiveSubTab(tab)}
-                                className={`sub-tab-btn px-4 py-1.5 rounded-full text-[12px] font-medium border transition-all cursor-pointer whitespace-nowrap
-                                    ${activeSubTab === tab ? "bg-white border-[#1a1a2e] text-[#1a1a2e] font-semibold" : "border-[#e5e7eb] text-[#9CA3AF] hover:text-[#374151] bg-white"}`}>
-                                {tab}
+                {selectedSubTab ? (
+                    <div className="mt-4 rounded-2xl border border-[#f0edf1] bg-white px-4 py-3 shadow-sm">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Selected item</p>
+                                <h3 className="mt-1 text-[15px] font-bold text-[#1a1a2e]">{selectedSubTab}</h3>
+                                <p className="text-[12px] text-[#9CA3AF]">{selectedOccasionLabel}</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsOccasionModalOpen(true)}
+                                className="shrink-0 rounded-full border cursor-pointer border-[#e5e7eb] px-3 py-1.5 text-[12px] font-semibold text-[#374151] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]"
+                            >
+                                Change
                             </button>
-                        ))}
+                        </div>
                     </div>
+                ) : (
+                    <p className="mt-4 text-[12px] text-[#9CA3AF]">Pick an occasion, then choose one item from the modal to continue.</p>
                 )}
             </div>
+
+            {isOccasionModalOpen && selectedOccasion && (
+                <div ref={modalOverlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div ref={modalCardRef} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[#f0edf1] bg-white shadow-2xl">
+                        <div className="flex items-start justify-between gap-4 border-b border-[#f5f2f3] px-5 py-4 sm:px-6">
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Sub Occasion</p>
+                                <h2 className="mt-1 text-[20px] font-bold text-[#1a1a2e]">{selectedOccasionLabel}</h2>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsOccasionModalOpen(false)}
+                                className="flex h-9 w-9 items-center justify-center cursor-pointer rounded-full border border-[#e5e7eb] text-[#9CA3AF] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]"
+                            >
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div className="p-5 sm:p-6">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {selectedItems.map((tab) => {
+                                    const isSelected = selectedSubTab === tab;
+                                    return (
+                                        <button key={tab} type="button" onClick={() => handleSubTabSelect(tab)}
+                                            className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected
+                                                ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]"
+                                                : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-[14px] font-semibold">{tab}</span>
+                                                {isSelected && (
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polyline points="20 6 9 17 4 12" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <p className={`mt-1 text-[12px] ${isSelected ? "text-[#B91C1C]/80" : "text-[#9CA3AF]"}`}>
+                                                Select this item to continue.
+                                            </p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <BottomNav
                 showBack={true}
                 onBack={undefined}
-                onNext={() => onNext({ subTab: activeSubTab })}
+                onNext={() => selectedSubTab && onNext({ subTab: selectedSubTab, occasion: selectedOccasion ?? "" })}
+                nextDisabled={!selectedSubTab}
                 nextLabel="Continue"
             />
         </>
@@ -1152,6 +1613,7 @@ function Step1({ onNext }: { onNext: (data: { subTab: string }) => void }) {
 }
 
 // ── Step 2: Questionnaire ─────────────────────────────────
+// FIX: nextLabel changed from "Choose A Book Style" → "Invite Friends"
 function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => void; subTab: string }) {
     const [questions, setQuestions] = useState(questionnairesBySubOccasion);
     const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -1193,9 +1655,10 @@ function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => v
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     </div>
-                    <h1 className="text-[18px] font-bold text-[#1a1a2e]">Questionnaire {subTab.toUpperCase()}</h1>
+                    <h1 className="text-[18px] font-bold text-[#1a1a2e]">Questionnaire <span className="uppercase">{subTab}</span></h1>
                 </div>
-                <p className="text-[12px] text-[#9CA3AF] mb-5">Fill in the same questionnaire that invited contributors see.</p>
+                <h3 className="font-semibold mt-2">Fill in the same questionnaire that invited contributors see.</h3>
+                <p className="text-[12px] text-[#9CA3AF] mb-5">Feel free to add, remove or rewrite any question — in any language you want.</p>
 
                 <div ref={cardRef} className="bg-white rounded-2xl border border-[#f0edf1] overflow-hidden mb-4">
                     <div className="divide-y divide-[#f9fafb]">
@@ -1245,7 +1708,8 @@ function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => v
                 </div>
             </div>
 
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Choose A Book Style" />
+            {/* FIX: "Choose A Book Style" → "Invite Friends" */}
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Invite Friends" />
         </>
     );
 }
@@ -1309,6 +1773,7 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
 }
 
 // ── Step 4: Choose a Cover ────────────────────────────────
+// FIX: nextLabel is "Design Questionnaire" (already correct per PDF)
 function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
     const [selected, setSelected] = useState(1);
 
@@ -1361,7 +1826,7 @@ function Step4({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                     ))}
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Invite Friends" />
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Design Questionnaire" />
         </>
     );
 }
@@ -1431,7 +1896,30 @@ function Step5({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                     <p className="text-[11px] text-[#9CA3AF] mt-1.5 px-1">Invite your friends by email.</p>
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Done" />
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Preview & Order" />
+        </>
+    );
+}
+
+// ── Step 6: Preview & Order ──────────────────────────────
+function Step6({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
+    return (
+        <>
+            <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
+                <div className="mb-6">
+                    <h1 className="text-[22px] font-bold text-[#1a1a2e]">Preview & Order</h1>
+                    <p className="text-[13px] text-[#9CA3AF] mt-0.5">Review your book setup and place the order.</p>
+                </div>
+                <div className="rounded-2xl border border-[#f0edf1] bg-white p-5">
+                    <h2 className="text-[15px] font-semibold text-[#1a1a2e] mb-3">Ready to finalize</h2>
+                    <ul className="space-y-2 text-[13px] text-[#4b5563]">
+                        <li>Your book details are completed.</li>
+                        <li>Theme and cover are selected.</li>
+                        <li>Questionnaire and invite steps are finished.</li>
+                    </ul>
+                </div>
+            </div>
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Create Project" />
         </>
     );
 }
@@ -1492,12 +1980,17 @@ export default function BookCreator() {
         <div className="flex flex-col min-h-screen">
             <TopBar step={step} />
             {step === 1 && (
-                <Step1 onNext={({ subTab }) => { setSelectedSubTab(subTab); setStep(2); }} />
+                <Step1 onNext={({ subTab, occasion }) => {
+                    setSelectedSubTab(subTab);
+                    setStep(2);
+                    void occasion;
+                }} />
             )}
-            {step === 2 && <Step2 onNext={() => setStep(3)} onBack={() => setStep(1)} subTab={selectedSubTab} />}
-            {step === 3 && <Step3 onNext={() => setStep(4)} onBack={() => setStep(2)} />}
-            {step === 4 && <Step4 onNext={() => setStep(5)} onBack={() => setStep(3)} />}
-            {step === 5 && <Step5 onNext={() => setShowSuccess(true)} onBack={() => setStep(4)} />}
+            {step === 2 && <Step3 onNext={() => setStep(3)} onBack={() => setStep(1)} />}
+            {step === 3 && <Step4 onNext={() => setStep(4)} onBack={() => setStep(2)} />}
+            {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={selectedSubTab} />}
+            {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} />}
+            {step === 6 && <Step6 onNext={() => setShowSuccess(true)} onBack={() => setStep(5)} />}
             {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
         </div>
     );

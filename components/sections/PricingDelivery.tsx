@@ -163,9 +163,9 @@ export default function PricingDelivery() {
                 <div className="mb-20">
                     <div className="flex items-center gap-2 justify-center">
                         <Image src="/Maskgroup.png" alt="images" width={50} height={38} />
-                        <h2 className="text-2xl font-semibold">Free shipping in Germany, Austria and Switzerland</h2>
+                        <h2 className="text-2xl font-semibold">Free shipping in Germany</h2>
                     </div>
-                    <p className="text-[16px] font-medium text-[#9CA3AF] pb-0">Fast delivery to AT & CH.</p>
+                    <p className="text-[16px] font-medium text-[#9CA3AF] pb-0">Fast delivery to Austria and Switzerland.</p>
                 </div>
             </div>
 

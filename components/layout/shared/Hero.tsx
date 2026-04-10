@@ -254,7 +254,7 @@ export default function HomePage() {
                 <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
               </svg>
             </Link>
-            <Link href="#how-it-works"
+            <Link href="/how-it-works"
               className="flex-1 inline-flex items-center justify-center text-[14px] font-semibold py-3.5 px-5 rounded-[10px] no-underline backdrop-blur-sm transition-all duration-200 active:scale-[0.98] border border-[#BF003A] bg-white text-[#BF003A] hover:bg-linear-to-r hover:from-[#BF003A] hover:to-[#59001C] hover:text-white hover:border-transparent">
               See How It Works
             </Link>
@@ -286,13 +286,13 @@ export default function HomePage() {
           </div>
 
           <div className="flex flex-col items-center gap-0.5 mt-2">
-            <div className="flex items-center gap-2 flex-wrap justify-center">
+            <div className="flex items-center text-center gap-2 flex-wrap justify-center">
               <Image src="/Maskgroup.png" alt="Free shipping" width={46} height={34} />
-              <span className="text-[14px] sm:text-[15px] font-bold text-[#1A1A2E] text-center">
-                Free shipping in Germany, Austria and Switzerland
+              <span className="text-[14px] sm:text-[15px] font-bold text-[#1A1A2E]">
+                Free shipping in Germany
               </span>
             </div>
-            <p className="text-[12px] text-gray-400 m-0">Fast delivery to AT &amp; CH.</p>
+            <p className="text-[12px] text-gray-400 m-0 text-center">Fast delivery to Austria and Switzerland.</p>
           </div>
         </div>
       </section>
