@@ -18,10 +18,15 @@ export interface PageElement {
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
-  textAlign?: string;
+  textAlign?: 'left' | 'center' | 'right';
   shapeType?: 'rect' | 'circle';
   radius?: number;
   zIndex: number;
+  listType?: 'none' | 'bullet' | 'number';
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
+  lineHeight?: number;
+  letterSpacing?: number;
+  opacity?: number;
 }
 
 export interface Page {

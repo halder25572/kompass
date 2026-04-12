@@ -5,6 +5,7 @@ import { Text, Transformer } from 'react-konva';
 import { Html } from 'react-konva-utils';
 import Konva from 'konva';
 import { InPlaceTextEditor } from './InPlaceTextEditor';
+import { FloatingTextToolbar } from './FloatingTextToolbar';
 import { PageElement } from '@/store/useBookStore';
 
 interface TextNodeProps {
@@ -20,6 +21,11 @@ interface TextNodeProps {
   fill?: string;
   width?: number;
   rotation?: number;
+  opacity?: number;
+  lineHeight?: number;
+  letterSpacing?: number;
+  listType?: string;
+  textTransform?: string;
   isSelected: boolean;
   isSelectMode: boolean;
   onSelect: () => void;
@@ -29,6 +35,7 @@ interface TextNodeProps {
 export default function TextNode({ 
   id, text, x, y, fontSize = 32, fontFamily = 'Arial', fontStyle, textDecoration,
   textAlign = 'center', fill = '#000000', width = 200, rotation = 0,
+  opacity = 1, lineHeight = 1.2, letterSpacing = 0, listType = 'none', textTransform = 'none',
   isSelected, isSelectMode, onSelect, onChange 
 }: TextNodeProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -50,7 +57,6 @@ export default function TextNode({
 
   const handleTextUpdate = (updates: Partial<PageElement>) => {
     onChange(updates);
-    setIsEditing(false);
   };
 
   const textItem: PageElement = {
@@ -68,6 +74,11 @@ export default function TextNode({
     width,
     rotation,
     zIndex: 0,
+    opacity,
+    lineHeight,
+    letterSpacing,
+    listType,
+    textTransform,
   };
 
   return (
@@ -80,10 +91,13 @@ export default function TextNode({
           y={y}
           fontSize={fontSize}
           fontFamily={fontFamily}
-          fontStyle={fontStyle}
-          textDecoration={textDecoration}
-          align={textAlign}
+          fontStyle={fontStyle || 'normal'}
+          textDecoration={textDecoration || ''}
+          align={textAlign as any}
           fill={fill}
+          opacity={textItem.opacity ?? 1}
+          lineHeight={textItem.lineHeight ?? 1.2}
+          letterSpacing={textItem.letterSpacing ?? 0}
           width={width}
           rotation={rotation}
           draggable={isSelectMode}
@@ -121,6 +135,25 @@ export default function TextNode({
           }}
           enabledAnchors={['middle-left', 'middle-right']}
         />
+      )}
+
+      {isSelected && isSelectMode && !isEditing && (
+        <Html
+          divProps={{
+            style: {
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              pointerEvents: 'auto',
+            }
+          }}
+        >
+          <FloatingTextToolbar
+            textItem={textItem}
+            onUpdate={handleTextUpdate}
+            position={{ x, y: y - 60 }}
+          />
+        </Html>
       )}
 
       {isEditing && (

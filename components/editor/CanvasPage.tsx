@@ -159,6 +159,11 @@ const CanvasPage = forwardRef<HTMLDivElement, CanvasPageProps>(
                     fill={element.fill}
                     width={element.width}
                     rotation={element.rotation}
+                    opacity={element.opacity}
+                    lineHeight={element.lineHeight}
+                    letterSpacing={element.letterSpacing}
+                    listType={element.listType}
+                    textTransform={element.textTransform}
                     isSelected={element.id === selectedElementId}
                     isSelectMode={isSelectMode}
                     onSelect={() => setSelectedElement(element.id)}
