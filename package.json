@@ -17,6 +17,8 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-konva": "^19.2.3",
+    "react-konva-utils": "^2.0.0",
+    "react-pageflip": "^2.0.3",
     "vercel": "^50.32.5",
     "zustand": "^5.0.12"
   },

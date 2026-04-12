@@ -152,7 +152,12 @@ const CanvasPage = forwardRef<HTMLDivElement, CanvasPageProps>(
                     x={element.x}
                     y={element.y}
                     fontSize={element.fontSize}
+                    fontFamily={element.fontFamily}
+                    fontStyle={element.fontStyle}
+                    textDecoration={element.textDecoration}
+                    textAlign={element.textAlign}
                     fill={element.fill}
+                    width={element.width}
                     rotation={element.rotation}
                     isSelected={element.id === selectedElementId}
                     isSelectMode={isSelectMode}

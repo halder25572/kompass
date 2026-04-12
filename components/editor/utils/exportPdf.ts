@@ -1,45 +1,128 @@
 import { jsPDF } from "jspdf";
 import Konva from "konva";
+import { Page, PageElement } from "@/store/useBookStore";
 
 export const exportBookToPDF = async (
-  stageRefs: React.MutableRefObject<(Konva.Stage | null)[]>,
-  bookWidth: number,
-  bookHeight: number
+  pages: Page[],
+  width: number,
+  height: number
 ) => {
-  const orientation = bookWidth > bookHeight ? "landscape" : "portrait";
   const pdf = new jsPDF({
-    orientation,
-    unit: "px",
-    format: [bookWidth, bookHeight],
+    orientation: 'portrait',
+    unit: 'mm',
+    format: 'a4',
   });
 
-  const stages = stageRefs.current.filter(Boolean);
+  const PRINT_SCALE_FACTOR = 3.125; // 300 DPI / 96 DPI
 
-  for (let i = 0; i < stages.length; i++) {
-    const stage = stages[i];
-    if (!stage) continue;
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  document.body.appendChild(container);
 
-    const oldTransformerNodes = stage.find('Transformer').map(tr => tr.nodes());
-    stage.find('Transformer').forEach(tr => tr.nodes([]));
+  for (let i = 0; i < pages.length; i++) {
+    const pageData = pages[i];
 
-    const dataUrl = stage.toDataURL({ 
-      pixelRatio: 2,
-      mimeType: "image/jpeg",
-      quality: 0.9 
+    const stage = new Konva.Stage({
+      container,
+      width,
+      height,
+    });
+
+    const layer = new Konva.Layer();
+    stage.add(layer);
+
+    // Render elements
+    await Promise.all(
+      pageData.elements.map(async (el: PageElement) => {
+        if (el.type === 'line') {
+          const line = new Konva.Line({
+            points: el.points || [],
+            stroke: el.stroke,
+            strokeWidth: el.strokeWidth,
+            tension: 0.5,
+            lineCap: 'round',
+            lineJoin: 'round',
+          });
+          layer.add(line);
+        } else if (el.type === 'image' && el.src) {
+          await new Promise<void>((resolve) => {
+            const img = new window.Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => {
+              const konvaImg = new Konva.Image({
+                image: img,
+                x: el.x,
+                y: el.y,
+                width: el.width,
+                height: el.height,
+                rotation: el.rotation || 0,
+              });
+              layer.add(konvaImg);
+              resolve();
+            };
+            img.onerror = () => resolve();
+            img.src = el.src!;
+          });
+        } else if (el.type === 'text') {
+          const text = new Konva.Text({
+            text: el.text || '',
+            x: el.x,
+            y: el.y,
+            fontSize: el.fontSize || 32,
+            fontFamily: el.fontFamily || 'Arial',
+            fontStyle: el.fontStyle,
+            textDecoration: el.textDecoration,
+            align: el.textAlign,
+            fill: el.fill || '#000000',
+            width: el.width,
+            rotation: el.rotation || 0,
+          });
+          layer.add(text);
+        } else if (el.type === 'shape') {
+          if (el.shapeType === 'rect') {
+            const rect = new Konva.Rect({
+              x: el.x,
+              y: el.y,
+              width: el.width,
+              height: el.height,
+              fill: el.fill,
+              stroke: el.stroke,
+              rotation: el.rotation || 0,
+            });
+            layer.add(rect);
+          } else if (el.shapeType === 'circle') {
+            const circle = new Konva.Circle({
+              x: el.x,
+              y: el.y,
+              radius: el.radius || 50,
+              fill: el.fill,
+              stroke: el.stroke,
+              rotation: el.rotation || 0,
+            });
+            layer.add(circle);
+          }
+        }
+      })
+    );
+
+    layer.batchDraw();
+
+    const dataUrl = stage.toDataURL({
+      pixelRatio: PRINT_SCALE_FACTOR,
+      mimeType: 'image/jpeg',
+      quality: 0.95,
     });
 
     if (i > 0) {
-      pdf.addPage([bookWidth, bookHeight], orientation);
+      pdf.addPage();
     }
-    
-    pdf.addImage(dataUrl, "JPEG", 0, 0, bookWidth, bookHeight);
 
-    stage.find('Transformer').forEach((tr, index) => {
-      if (oldTransformerNodes[index]) {
-         tr.nodes(oldTransformerNodes[index]);
-      }
-    });
+    pdf.addImage(dataUrl, 'JPEG', 0, 0, 210, 297);
+
+    stage.destroy();
   }
 
-  pdf.save("My-Artbook.pdf");
+  document.body.removeChild(container);
+  pdf.save('My_Book_HD.pdf');
 };

@@ -15,6 +15,10 @@ export interface PageElement {
   strokeWidth?: number;
   fill?: string;
   fontSize?: number;
+  fontFamily?: string;
+  fontStyle?: string;
+  textDecoration?: string;
+  textAlign?: string;
   shapeType?: 'rect' | 'circle';
   radius?: number;
   zIndex: number;
@@ -47,10 +51,11 @@ interface BookStore {
   updateElement: (pageId: number, elementId: string, updates: Partial<PageElement>) => void;
   deleteElement: (pageId: number, elementId: string) => void;
   deleteSelectedElement: () => void;
+  addPage: () => void;
 }
 
 export const useBookStore = create<BookStore>((set, get) => ({
-  pages: Array.from({ length: 40 }, (_, i) => ({ id: i + 1, elements: [] })),
+  pages: [{ id: 1, elements: [] }],
   activeTool: 'select',
   activeSubTool: 'select',
   zoom: 75,
@@ -107,5 +112,10 @@ export const useBookStore = create<BookStore>((set, get) => ({
         selectedElementId: null
       });
     }
-  }
+  },
+
+  addPage: () => set((state) => ({
+    pages: [...state.pages, { id: state.pages.length + 1, elements: [] }],
+    currentPage: state.pages.length + 1,
+  })),
 }));
