@@ -1,4 +1,5 @@
 import BookCreator from "@/components/create/BookCreator";
+import { Suspense } from "react";
 
 
 const createPage = () => {
@@ -10,7 +11,9 @@ const createPage = () => {
                 backgroundPosition: "center",
             }}
             className="w-full min-h-screen px-4 py-4 sm:px-6 lg:px-8">
-            <BookCreator />
+            <Suspense fallback={<div className="min-h-screen" />}>
+                <BookCreator />
+            </Suspense>
         </div>
     );
 };

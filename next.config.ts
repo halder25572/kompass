@@ -10,6 +10,14 @@ const nextConfig = {
         protocol: "https",
         hostname: "images.unsplash.com",
       },
+      {
+        protocol: "http",
+        hostname: "kompas5.thenightowl.team",
+      },
+      {
+        protocol: "https",
+        hostname: "kompas5.thenightowl.team",
+      },
     ],
   },
 };

@@ -17,15 +17,15 @@ interface TextNodeProps {
   fontFamily?: string;
   fontStyle?: string;
   textDecoration?: string;
-  textAlign?: string;
+  textAlign?: 'left' | 'center' | 'right';
   fill?: string;
   width?: number;
   rotation?: number;
   opacity?: number;
   lineHeight?: number;
   letterSpacing?: number;
-  listType?: string;
-  textTransform?: string;
+  listType?: 'none' | 'bullet' | 'number';
+  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize';
   isSelected: boolean;
   isSelectMode: boolean;
   onSelect: () => void;

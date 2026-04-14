@@ -1,10 +1,20 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
+import { toast } from "sonner";
+import {
+  useResendOtpMutation,
+  useVerifyOtpMutation,
+} from "@/features/auth/components/hooks/services";
 
 export default function VerifyOtpPage() {
+  const router = useRouter();
+  const { mutate, isPending } = useVerifyOtpMutation();
+  const { mutate: resendMutate, isPending: isResending } = useResendOtpMutation();
   const [otp, setOtp] = useState(["", "", "", ""]);
+  const [error, setError] = useState("");
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (value: string, index: number) => {
@@ -24,6 +34,69 @@ export default function VerifyOtpPage() {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputsRef.current[index - 1]?.focus();
     }
+  };
+
+  const handleVerify = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    const otpValue = otp.join("");
+    const email = localStorage.getItem("reset_email") || "";
+
+    if (!email) {
+      const message = "Please request OTP again from reset password.";
+      toast.error(message);
+      setError(message);
+      return;
+    }
+
+    if (otpValue.length !== 4) {
+      const message = "Please enter complete 4-digit OTP.";
+      toast.error(message);
+      setError(message);
+      return;
+    }
+
+    mutate(
+      { email, otp: otpValue },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          localStorage.setItem("reset_otp_verified", "true");
+          router.push("/new-password");
+        },
+        onError: (mutationError) => {
+          toast.error(mutationError.message);
+          setError(mutationError.message);
+        },
+      }
+    );
+  };
+
+  const handleResend = () => {
+    setError("");
+
+    const email = localStorage.getItem("reset_email") || "";
+
+    if (!email) {
+      const message = "Please request OTP again from reset password.";
+      toast.error(message);
+      setError(message);
+      return;
+    }
+
+    resendMutate(
+      { email },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+        },
+        onError: (mutationError) => {
+          toast.error(mutationError.message);
+          setError(mutationError.message);
+        },
+      }
+    );
   };
 
   return (
@@ -77,32 +150,45 @@ export default function VerifyOtpPage() {
             We’ve sent a 4-digit code to your email
           </p>
 
-          {/* OTP (4 boxes) */}
-          <div className="flex justify-center gap-3 mb-6">
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => {
-                  if (el) inputsRef.current[index] = el;
-                }}
-                type="text"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(e.target.value, index)}
-                onKeyDown={(e) => handleBackspace(e, index)}
-                className="w-14 h-14 text-center text-lg rounded-lg bg-gray-200 outline-none"
-              />
-            ))}
-          </div>
+          <form onSubmit={handleVerify}>
+            {/* OTP (4 boxes) */}
+            <div className="flex justify-center gap-3 mb-6">
+              {otp.map((digit, index) => (
+                <input
+                  key={index}
+                  ref={(el) => {
+                    if (el) inputsRef.current[index] = el;
+                  }}
+                  type="text"
+                  maxLength={1}
+                  value={digit}
+                  onChange={(e) => handleChange(e.target.value, index)}
+                  onKeyDown={(e) => handleBackspace(e, index)}
+                  className="w-14 h-14 text-center text-lg rounded-lg bg-gray-200 outline-none"
+                />
+              ))}
+            </div>
 
-          <button className="w-full cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold">
-            Verify OTP
-          </button>
+            {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}
+
+            <button
+              type="submit"
+              disabled={isPending}
+              className="w-full cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
+            >
+              {isPending ? "Verifying..." : "Verify OTP"}
+            </button>
+          </form>
 
           <p className="text-xs text-gray-500 mt-4">
             Didn’t receive the code?{" "}
-            <button className="text-[#7A1E3A] cursor-pointer font-medium">
-              Resend
+            <button
+              type="button"
+              onClick={handleResend}
+              disabled={isResending}
+              className="text-[#7A1E3A] cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isResending ? "Resending..." : "Resend"}
             </button>
           </p>
 

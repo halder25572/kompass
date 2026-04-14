@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "@/components/layout/ClientLayout";
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 
 const inter = Inter({
     variable: "--font-inter",
@@ -19,7 +20,9 @@ export default function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${inter.variable} antialiased font-sans`} suppressHydrationWarning>
-                <ClientLayout>{children}</ClientLayout>
+                <ReactQueryProvider>
+                    <ClientLayout>{children}</ClientLayout>
+                </ReactQueryProvider>
             </body>
         </html>
     );

@@ -2,10 +2,57 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useResetPasswordMutation } from "@/features/auth/components/hooks/services";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const { mutate, isPending } = useResetPasswordMutation();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    const email = localStorage.getItem("reset_email") || "";
+
+    if (!email) {
+      const message = "Please request OTP again from reset password.";
+      toast.error(message);
+      setError(message);
+      return;
+    }
+
+    if (password !== confirm) {
+      const message = "Password and confirm password do not match.";
+      toast.error(message);
+      setError(message);
+      return;
+    }
+
+    mutate(
+      {
+        email,
+        password,
+        password_confirmation: confirm,
+      },
+      {
+        onSuccess: (response) => {
+          toast.success(response.message);
+          localStorage.removeItem("reset_email");
+          localStorage.removeItem("reset_otp_verified");
+          router.push("/login");
+        },
+        onError: (mutationError) => {
+          toast.error(mutationError.message);
+          setError(mutationError.message);
+        },
+      }
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
@@ -61,7 +108,7 @@ export default function ResetPasswordPage() {
           </p>
 
           {/* FORM */}
-          <form className="space-y-5">
+          <form className="space-y-5" onSubmit={handleSubmit}>
 
             {/* New Password */}
             <div>
@@ -74,6 +121,7 @@ export default function ResetPasswordPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
+                required
               />
             </div>
 
@@ -88,15 +136,19 @@ export default function ResetPasswordPage() {
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 className="mt-1 w-full rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
+                required
               />
             </div>
+
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
             {/* BUTTON */}
             <button
               type="submit"
+              disabled={isPending}
               className="w-full cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] hover:opacity-90 transition text-white py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
             >
-              🔑 Update Password
+              {isPending ? "Updating..." : "🔑 Update Password"}
             </button>
           </form>
 

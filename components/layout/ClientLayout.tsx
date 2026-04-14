@@ -29,6 +29,8 @@
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/layout/shared/Navbar";
 import Footer from "@/components/layout/shared/Footer";
+import { Toaster } from "sonner";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const HIDDEN_LAYOUT_ROUTES = [
   "/login",
@@ -46,16 +48,19 @@ const HIDDEN_LAYOUT_ROUTES = [
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const googleClientId =
+    process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim() || "missing-google-client-id";
 
   const hideLayout = HIDDEN_LAYOUT_ROUTES.some((route) =>
     pathname?.startsWith(route)
   );
 
   return (
-    <>
+    <GoogleOAuthProvider clientId={googleClientId}>
       {!hideLayout && <Navbar />}
       <main className="min-h-screen">{children}</main>
       {!hideLayout && <Footer />}
-    </>
+      <Toaster position="top-right" richColors closeButton />
+    </GoogleOAuthProvider>
   );
 }

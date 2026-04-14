@@ -2,24 +2,23 @@
 
 // import Image from "next/image";
 // import { useEffect, useRef } from "react";
+// import { useRouter } from "next/navigation";
 // import gsap from "gsap";
 
 // const templates = [
-//     { id: 1, category: "COVER STYLE", title: "Classic Elegance", description: "Refined design with typography and warm tones.", image: "/images/t1.jpg", popular: true },
-//     { id: 2, category: "COVER STYLE", title: "Warm Memories", description: "Soft gradients and photo-friendly layout.", image: "/images/t2.jpg", popular: true },
-//     { id: 3, category: "COVER STYLE", title: "Modern Minimal", description: "Clean and simple design for any occasion.", image: "/images/t3.jpg", popular: false },
-//     { id: 4, category: "COVER STYLE", title: "Joyful Celebration", description: "Colorful and vibrant layout for all uses.", image: "/images/t4.jpg", popular: true },
-//     { id: 5, category: "COVER STYLE", title: "Garden Party", description: "Fresh and aesthetic layout with natural tones.", image: "/images/t5.jpg", popular: false },
+//     { id: 1, title: "Classic Elegance", description: "Refined design with typography and warm tones.", image: "/images/t1.jpg", popular: true },
+//     { id: 2, title: "Warm Memories", description: "Soft gradients and photo-friendly layout.", image: "/images/t2.jpg", popular: true },
+//     { id: 3, title: "Modern Minimal", description: "Clean and simple design for any occasion.", image: "/images/t3.jpg", popular: false },
+//     { id: 4, title: "Joyful Celebration", description: "Colorful and vibrant layout for all uses.", image: "/images/t4.jpg", popular: true },
+//     { id: 5, title: "Garden Party", description: "Fresh and aesthetic layout with natural tones.", image: "/images/t5.jpg", popular: false },
 // ];
 
-// function BookIcon() {
-//     return (
-//         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-//             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-//             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-//         </svg>
-//     );
-// }
+// // Seasonal templates — toggle on when Christmas / Ramadan / etc. is active
+// const seasonalTemplates: { id: number; title: string; description: string; image: string }[] = [
+//     // { id: 101, title: "Christmas Joy", description: "Festive red and green design for the holiday season.", image: "/images/seasonal-christmas.jpg" },
+//     // { id: 102, title: "Ramadan Kareem", description: "Elegant crescent and lantern motifs for Ramadan.", image: "/images/seasonal-ramadan.jpg" },
+// ];
+// const showSeasonalSection = seasonalTemplates.length > 0;
 
 // function StarIcon() {
 //     return (
@@ -30,6 +29,7 @@
 // }
 
 // export default function TemplatesNavbar() {
+//     const router = useRouter();
 //     const headerRef = useRef<HTMLDivElement>(null);
 //     const gridRef = useRef<HTMLDivElement>(null);
 //     const paginationRef = useRef<HTMLDivElement>(null);
@@ -135,14 +135,17 @@
 //             {/* Header */}
 //             <div ref={headerRef} className="text-center mb-8 px-4">
 //                 <h2 className="text-[32px] sm:text-[44px] md:text-[56px] font-extrabold text-[#1a1a2e]">
-//                     Book <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Covers</span>
+//                     Sample{" "}
+//                     <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
+//                         Covers
+//                     </span>
 //                 </h2>
 //                 <p className="text-[14px] sm:text-[16px] text-[#9CA3AF] mt-2">
 //                     Browse our example cover styles — suitable for any occasion.
 //                 </p>
 //             </div>
 
-//             {/* Grid */}
+//             {/* Main Grid */}
 //             <div ref={gridRef} className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
 //                 {templates.map((template) => (
 //                     <div
@@ -167,22 +170,16 @@
 //                         </div>
 
 //                         <div className="p-4">
-//                             <div className="flex items-center gap-1.5 mb-1">
-//                                 <span className="text-[#B91C1C]"><BookIcon /></span>
-//                                 <span className="text-[10px] font-bold text-[#B91C1C] uppercase">
-//                                     {template.category}
-//                                 </span>
-//                             </div>
-
 //                             <h3 className="text-[14px] font-bold text-[#1a1a2e] mb-1">
 //                                 {template.title}
 //                             </h3>
-
 //                             <p className="text-[11px] text-[#6b7280] mb-3 line-clamp-2">
 //                                 {template.description}
 //                             </p>
-
-//                             <button className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg">
+//                             <button
+//                                 onClick={() => router.push(`/create?cover=${template.id}`)}
+//                                 className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+//                             >
 //                                 Use This Cover
 //                             </button>
 //                         </div>
@@ -190,9 +187,54 @@
 //                 ))}
 //             </div>
 
-//             {/* Pagination */}
+//             {/* Seasonal Section — automatically shows when seasonalTemplates has items */}
+//             {showSeasonalSection && (
+//                 <div className="max-w-5xl mx-auto mt-14 px-4">
+//                     <div className="text-center mb-6">
+//                         <h3 className="text-[22px] font-extrabold text-[#1a1a2e]">
+//                             🎄 Seasonal <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Covers</span>
+//                         </h3>
+//                         <p className="text-[13px] text-[#9CA3AF] mt-1">Special designs for the season.</p>
+//                     </div>
+//                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+//                         {seasonalTemplates.map((template) => (
+//                             <div
+//                                 key={template.id}
+//                                 className="tmpl-card bg-white rounded-2xl overflow-hidden cursor-pointer"
+//                                 style={{ boxShadow: "0 1px 3px rgba(0,0,0,0.08)" }}
+//                                 onMouseEnter={handleCardEnter}
+//                                 onMouseLeave={handleCardLeave}
+//                             >
+//                                 <div className="relative w-full h-44 bg-[#d1cfc8] overflow-hidden">
+//                                     <Image
+//                                         src={template.image}
+//                                         alt={template.title}
+//                                         fill
+//                                         className="tmpl-img object-cover"
+//                                     />
+//                                 </div>
+//                                 <div className="p-4">
+//                                     <h3 className="text-[14px] font-bold text-[#1a1a2e] mb-1">{template.title}</h3>
+//                                     <p className="text-[11px] text-[#6b7280] mb-3 line-clamp-2">{template.description}</p>
+//                                     <button
+//                                         onClick={() => router.push(`/create?cover=${template.id}`)}
+//                                         className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
+//                                     >
+//                                         Use This Cover
+//                                     </button>
+//                                 </div>
+//                             </div>
+//                         ))}
+//                     </div>
+//                 </div>
+//             )}
+
+//             {/* Browse Button */}
 //             <div ref={paginationRef} className="flex justify-center mt-10">
-//                 <button className="px-4 py-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] cursor-pointer text-white rounded-lg text-sm">
+//                 <button
+//                     onClick={() => router.push("/sample-covers")}
+//                     className="px-6 py-2.5 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] cursor-pointer text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
+//                 >
 //                     Browse Sample Covers
 //                 </button>
 //             </div>
@@ -217,7 +259,7 @@ const templates = [
     { id: 5, title: "Garden Party", description: "Fresh and aesthetic layout with natural tones.", image: "/images/t5.jpg", popular: false },
 ];
 
-// Seasonal templates — toggle on when Christmas / Ramadan / etc. is active
+// ✅ Seasonal templates — uncomment the relevant one when the season is active
 const seasonalTemplates: { id: number; title: string; description: string; image: string }[] = [
     // { id: 101, title: "Christmas Joy", description: "Festive red and green design for the holiday season.", image: "/images/seasonal-christmas.jpg" },
     // { id: 102, title: "Ramadan Kareem", description: "Elegant crescent and lantern motifs for Ramadan.", image: "/images/seasonal-ramadan.jpg" },
@@ -232,7 +274,7 @@ function StarIcon() {
     );
 }
 
-export default function TemplatesNavbar() {
+export default function SampleThemesAndCovers() {
     const router = useRouter();
     const headerRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
@@ -333,19 +375,24 @@ export default function TemplatesNavbar() {
         if (img) gsap.to(img, { scale: 1, duration: 0.35 });
     };
 
+    // ✅ "Use This Cover" — passes cover ID via URL so /create page can pre-select it
+    const handleUseCover = (coverId: number) => {
+        router.push(`/create?cover=${coverId}&step=book-details`);
+    };
+
     return (
         <section className="bg-[#EEE8EA] py-12 font-medium">
 
             {/* Header */}
             <div ref={headerRef} className="text-center mb-8 px-4">
                 <h2 className="text-[32px] sm:text-[44px] md:text-[56px] font-extrabold text-[#1a1a2e]">
-                    Sample{" "}
+                    Sample Themes &{" "}
                     <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
                         Covers
                     </span>
                 </h2>
                 <p className="text-[14px] sm:text-[16px] text-[#9CA3AF] mt-2">
-                    Browse our example cover styles — suitable for any occasion.
+                    Browse our example themes and cover styles — suitable for any occasion.
                 </p>
             </div>
 
@@ -380,8 +427,9 @@ export default function TemplatesNavbar() {
                             <p className="text-[11px] text-[#6b7280] mb-3 line-clamp-2">
                                 {template.description}
                             </p>
+                            {/* ✅ Bug fix: now uses handleUseCover which passes cover ID + step */}
                             <button
-                                onClick={() => router.push(`/create?cover=${template.id}`)}
+                                onClick={() => handleUseCover(template.id)}
                                 className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
                             >
                                 Use This Cover
@@ -396,7 +444,10 @@ export default function TemplatesNavbar() {
                 <div className="max-w-5xl mx-auto mt-14 px-4">
                     <div className="text-center mb-6">
                         <h3 className="text-[22px] font-extrabold text-[#1a1a2e]">
-                            🎄 Seasonal <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Covers</span>
+                            🎄 Seasonal{" "}
+                            <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
+                                Covers
+                            </span>
                         </h3>
                         <p className="text-[13px] text-[#9CA3AF] mt-1">Special designs for the season.</p>
                     </div>
@@ -421,7 +472,7 @@ export default function TemplatesNavbar() {
                                     <h3 className="text-[14px] font-bold text-[#1a1a2e] mb-1">{template.title}</h3>
                                     <p className="text-[11px] text-[#6b7280] mb-3 line-clamp-2">{template.description}</p>
                                     <button
-                                        onClick={() => router.push(`/create?cover=${template.id}`)}
+                                        onClick={() => handleUseCover(template.id)}
                                         className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
                                     >
                                         Use This Cover
@@ -436,10 +487,10 @@ export default function TemplatesNavbar() {
             {/* Browse Button */}
             <div ref={paginationRef} className="flex justify-center mt-10">
                 <button
-                    onClick={() => router.push("/sample-covers")}
+                    onClick={() => router.push("/sample-themes-and-covers")}
                     className="px-6 py-2.5 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] cursor-pointer text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
                 >
-                    Browse Sample Covers
+                    Browse all themes and covers
                 </button>
             </div>
 

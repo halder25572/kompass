@@ -1,10 +1,51 @@
-"use client";
+﻿"use client";
 
 import { Key } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useChangePasswordMutation } from "@/features/auth/components/hooks/services";
 
 export default function ChangePassword() {
+    const { mutate, isPending } = useChangePasswordMutation();
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [error, setError] = useState("");
+
+    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setError("");
+
+        if (newPassword !== confirmPassword) {
+            const message = "New password and confirm password do not match.";
+            toast.error(message);
+            setError(message);
+            return;
+        }
+
+        mutate(
+            {
+                current_password: currentPassword,
+                password: newPassword,
+                password_confirmation: confirmPassword,
+            },
+            {
+                onSuccess: (response) => {
+                    toast.success(response.message);
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                },
+                onError: (mutationError) => {
+                    toast.error(mutationError.message);
+                    setError(mutationError.message);
+                },
+            }
+        );
+    };
+
     return (
         <section style={{
             backgroundImage: "url('/images/bg1.png')",
@@ -12,7 +53,6 @@ export default function ChangePassword() {
             backgroundPosition: "center",
         }}>
             <div className="max-w-7xl mx-auto min-h-screen flex flex-col">
-                {/* Header */}
                 <header className="px-6 py-4 flex items-center gap-2">
                     <Link href="/">
                         <div className="flex items-center gap-2">
@@ -22,17 +62,14 @@ export default function ChangePassword() {
                     </Link>
                 </header>
 
-                {/* Main */}
                 <main className="flex-1 flex items-center justify-center px-4">
                     <div className="w-full max-w-md text-center">
-                        {/* Icon */}
                         <div className="flex justify-center mb-3">
                             <div className="text-[#BF003A]">
                                 <Key size={18} />
                             </div>
                         </div>
 
-                        {/* Title */}
                         <h1 className="text-lg font-semibold text-gray-800">
                             Update Your Password
                         </h1>
@@ -41,21 +78,21 @@ export default function ChangePassword() {
                             Enter your current password & choose a new one
                         </p>
 
-                        {/* Form */}
-                        <form className="space-y-4">
-                            {/* Current Password */}
+                        <form className="space-y-4" onSubmit={handleSubmit}>
                             <div className="text-left">
                                 <label className="text-sm text-gray-600">
                                     Current Password
                                 </label>
                                 <input
                                     type="password"
-                                    placeholder="enter your full name"
+                                    placeholder="Current password"
+                                    value={currentPassword}
+                                    onChange={(event) => setCurrentPassword(event.target.value)}
                                     className="w-full mt-1 px-4 py-2 rounded-md bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
+                                    required
                                 />
                             </div>
 
-                            {/* New Password */}
                             <div className="text-left">
                                 <label className="text-sm text-gray-600">
                                     New Password
@@ -63,11 +100,13 @@ export default function ChangePassword() {
                                 <input
                                     type="password"
                                     placeholder="Enter new password"
+                                    value={newPassword}
+                                    onChange={(event) => setNewPassword(event.target.value)}
                                     className="w-full mt-1 px-4 py-2 rounded-md bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
+                                    required
                                 />
                             </div>
 
-                            {/* Confirm Password */}
                             <div className="text-left">
                                 <label className="text-sm text-gray-600">
                                     Confirm New Password
@@ -75,18 +114,22 @@ export default function ChangePassword() {
                                 <input
                                     type="password"
                                     placeholder="Confirm new password"
+                                    value={confirmPassword}
+                                    onChange={(event) => setConfirmPassword(event.target.value)}
                                     className="w-full mt-1 px-4 py-2 rounded-md bg-white border border-gray-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
+                                    required
                                 />
                             </div>
 
-                            {/* Button */}
+                            {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
                             <button
                                 type="submit"
-                                className="w-full mt-2 cursor-pointer py-2 rounded-md text-white font-medium flex items-center justify-center gap-2 
-              bg-linear-to-r from-[#BF003A] to-[#59001C] hover:opacity-95 transition"
+                                disabled={isPending}
+                                className="w-full mt-2 cursor-pointer py-2 rounded-md text-white font-medium flex items-center justify-center gap-2 bg-linear-to-r from-[#BF003A] to-[#59001C] hover:opacity-95 transition disabled:opacity-70 disabled:cursor-not-allowed"
                             >
                                 <Key size={16} />
-                                Save Changes
+                                {isPending ? "Saving..." : "Save Changes"}
                             </button>
                         </form>
                     </div>

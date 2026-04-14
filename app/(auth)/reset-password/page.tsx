@@ -2,8 +2,37 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { useForgotPasswordMutation } from "@/features/auth/components/hooks/services";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const { mutate, isPending } = useForgotPasswordMutation();
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    mutate(
+      { email },
+      {
+        onSuccess: (response) => {
+          localStorage.setItem("reset_email", email);
+          toast.success(response.message);
+          router.push("/verify-otp");
+        },
+        onError: (mutationError) => {
+          toast.error(mutationError.message);
+          setError(mutationError.message);
+        },
+      }
+    );
+  };
+
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
 
@@ -62,7 +91,7 @@ export default function ResetPasswordPage() {
           </p>
 
           {/* Form */}
-          <form className="space-y-4 text-left">
+          <form className="space-y-4 text-left" onSubmit={handleSubmit}>
 
             {/* Email */}
             <div>
@@ -70,16 +99,22 @@ export default function ResetPasswordPage() {
               <input
                 type="email"
                 placeholder="jane@example.com"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
+                required
               />
             </div>
+
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
             {/* Button */}
             <button
               type="submit"
+              disabled={isPending}
               className="w-full mt-2 cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
-              Send OTP
+              {isPending ? "Sending OTP..." : "Send OTP"}
             </button>
 
             {/* Back to login */}

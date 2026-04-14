@@ -24,7 +24,7 @@ export default function ImageNode({
 }: ImageNodeProps) {
   const imageRef = useRef<Konva.Image>(null);
   const trRef = useRef<Konva.Transformer>(null);
-  const imgElement = useRef<HTMLImageElement>();
+  const imgElement = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const img = new window.Image();
@@ -47,7 +47,7 @@ export default function ImageNode({
     <>
       <KonvaImage
         ref={imageRef}
-        image={imgElement.current}
+        image={imgElement.current ?? undefined}
         x={x}
         y={y}
         width={width}

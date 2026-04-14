@@ -5,36 +5,101 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  useGoogleLoginMutation,
+  useLoginMutation,
+} from "@/features/auth/components/hooks/services";
+import { toast } from "sonner";
+import { useGoogleLogin } from "@react-oauth/google";
 
-const DEMO_USER = {
-  id: "demo-user-1",
-  name: "Demo User",
-  email: "demo@memorybook.com",
-  password: "Demo@1234",
-};
+const DEMO_EMAIL = "demo.user.1776117353767@mailinator.com";
+const DEMO_PASSWORD = "Demo@12345";
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState(DEMO_USER.email);
-  const [password, setPassword] = useState(DEMO_USER.password);
+  const { mutate, isPending } = useLoginMutation();
+  const { mutate: googleMutate, isPending: isGooglePending } = useGoogleLoginMutation();
+  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
   const [error, setError] = useState("");
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const saveSessionAndRedirect = (apiUser: { id: number; name: string; email: string }, token: string) => {
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(apiUser));
+    login({
+      id: String(apiUser.id),
+      name: apiUser.name,
+      email: apiUser.email,
+    });
+    router.push("/");
+  };
 
-    if (email.trim().toLowerCase() !== DEMO_USER.email || password !== DEMO_USER.password) {
-      setError("Use the demo credentials to log in.");
+  const loginWithGoogle = useGoogleLogin({
+    flow: "implicit",
+    scope: "openid profile email",
+    onSuccess: (tokenResponse) => {
+      googleMutate(
+        { token: tokenResponse.access_token },
+        {
+          onSuccess: (response) => {
+            const apiUser = response.data.user;
+            const apiToken = response.data.access_token || response.data.token;
+
+            if (!apiToken) {
+              const message = "Google login succeeded but token is missing in response.";
+              toast.error(message);
+              setError(message);
+              return;
+            }
+
+            toast.success(response.message);
+            saveSessionAndRedirect(apiUser, apiToken);
+          },
+          onError: (mutationError) => {
+            toast.error(mutationError.message);
+            setError(mutationError.message);
+          },
+        }
+      );
+    },
+    onError: () => {
+      const message = "Google sign-in was cancelled or failed.";
+      toast.error(message);
+      setError(message);
+    },
+  });
+
+  const handleGoogleLogin = () => {
+    if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
+      const message = "Set NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env to enable Google login.";
+      toast.error(message);
+      setError(message);
       return;
     }
 
-    login({
-      id: DEMO_USER.id,
-      name: DEMO_USER.name,
-      email: DEMO_USER.email,
-    });
+    setError("");
+    loginWithGoogle();
+  };
 
-    router.push("/");
+  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError("");
+
+    mutate(
+      { email, password },
+      {
+        onSuccess: (response) => {
+          const apiUser = response.data.user;
+          toast.success(response.message);
+          saveSessionAndRedirect(apiUser, response.data.access_token);
+        },
+        onError: (mutationError) => {
+          toast.error(mutationError.message);
+          setError(mutationError.message);
+        },
+      }
+    );
   };
 
   return (
@@ -88,10 +153,10 @@ export default function LoginPage() {
             Pick up where you left off
           </p>
 
-          <div className="mb-5 rounded-xl border border-[#e8d7dd] bg-[#fff7f9] px-4 py-3 text-sm text-[#5f1b31]">
-            <p className="font-semibold">Demo user</p>
-            <p>Email: {DEMO_USER.email}</p>
-            <p>Password: {DEMO_USER.password}</p>
+          <div className="mb-4 rounded-lg border border-[#E8B9C8] bg-[#FFF4F7] px-3 py-2">
+            <p className="text-xs text-[#7A1E3A]">Demo login</p>
+            <p className="text-xs text-gray-700">Email: {DEMO_EMAIL}</p>
+            <p className="text-xs text-gray-700">Password: {DEMO_PASSWORD}</p>
           </div>
 
           {/* Form */}
@@ -106,6 +171,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
+                required
               />
             </div>
 
@@ -118,6 +184,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
+                required
               />
 
               <div className="text-right mt-1">
@@ -130,30 +197,13 @@ export default function LoginPage() {
             {/* Button */}
             <button
               type="submit"
+              disabled={isPending}
               className="w-full mt-2 cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
-              Log In →
+              {isPending ? "Logging in..." : "Log In →"}
             </button>
 
             {error && <p className="text-sm text-red-600">{error}</p>}
-
-            <button
-              type="button"
-              onClick={() => {
-                setEmail(DEMO_USER.email);
-                setPassword(DEMO_USER.password);
-                setError("");
-                login({
-                  id: DEMO_USER.id,
-                  name: DEMO_USER.name,
-                  email: DEMO_USER.email,
-                });
-                router.push("/");
-              }}
-              className="w-full cursor-pointer border border-[#7A1E3A] text-[#7A1E3A] py-2.5 rounded-full text-sm font-semibold hover:bg-[#fff7f9] transition-colors"
-            >
-              Use Demo Account
-            </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-4">
@@ -164,10 +214,15 @@ export default function LoginPage() {
 
             {/* Social */}
             <div className="flex gap-3">
-              <button className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
-                Google
+              <button
+                type="button"
+                onClick={handleGoogleLogin}
+                disabled={isGooglePending}
+                className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {isGooglePending ? "Signing in..." : "Google"}
               </button>
-              <button className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
+              <button type="button" className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
                 Apple
               </button>
             </div>

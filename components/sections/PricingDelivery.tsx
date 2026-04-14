@@ -238,7 +238,7 @@ export default function PricingDelivery() {
                         You will receive a <span className="font-bold text-[#7A1E3A]">35% discount</span> on each additional identical family book.
                     </p>
                     <p className="text-[12px] text-[#374151] leading-relaxed mt-3">
-                        If you would like to order more than 15 copies, please <a href="#" className="text-[#7A1E3A] underline">contact us</a> for a no-obligation quote.
+                        If you would like to order more than 15 copies, please <a href="#" className="text-[#7A1E3A] underline">We&apos;re here to help</a> for a no-obligation quote.
                     </p>
                 </div>
             </div>
