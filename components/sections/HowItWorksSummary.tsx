@@ -3,7 +3,7 @@ import Link from "next/link";
 const summarySteps = [
   {
     title: "Create Your Project",
-    description: "Choose occasion, add recipient details, and pick your theme.",
+    description: "Choose occasion, add recipient details, and pick your theme and cover.",
   },
   {
     title: "Invite Contributors",

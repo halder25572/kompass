@@ -2,13 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import Link from "next/link";
 
 const steps = [
     {
-        title: "Choose Occasion & Style",
+        title: "Create Your Book",
         points: [
-            { icon: "user", text: "Select Occasion" },
-            { icon: "grid", text: "Choose from premium templates" },
+            { icon: "user", text: "Select occasion, theme & cover style" },
+            { icon: "grid", text: "Set title, recipient name and deadline" },
         ],
         image: "/1.png",
         blobSide: "left",
@@ -16,22 +17,24 @@ const steps = [
     {
         title: "Invite Participants",
         points: [
-            { icon: "grid", text: "Gather information by inviting" },
-            { icon: "user", text: "Easy invite via link or mail" },
+            { icon: "grid", text: "Share link — no account or app needed" },
+            { icon: "user", text: "Everyone adds their personal page" },
         ],
         image: "/2.png",
         blobSide: "right",
     },
     {
-        title: "Print Your Book",
+        title: "Preview & Order",
         points: [
-            { icon: "grid", text: "Preview and approve your book" },
-            { icon: "user", text: "Confirm print order" },
+            { icon: "grid", text: "Flip through and approve your book" },
+            { icon: "user", text: "We print & deliver to your door" },
         ],
         image: "/3.png",
         blobSide: "left",
     },
 ];
+
+
 
 function UserIcon() {
     return (
@@ -87,7 +90,6 @@ export default function HowItWorksSection() {
 
         rows.forEach((row, idx) => {
             const blobLeft = steps[idx].blobSide === "left";
-            // blob-left rows slide from left, blob-right rows slide from right
             gsap.set(row, { opacity: 0, x: blobLeft ? -80 : 80, scale: 0.96 });
 
             const observer = new IntersectionObserver((entries) => {
@@ -99,7 +101,6 @@ export default function HowItWorksSection() {
                         ease: "power3.out",
                         clearProps: "transform",
                     });
-                    // Animate text content inside
                     const content = row.querySelector(".step-content");
                     const title = content?.querySelector("h3");
                     const points = content?.querySelectorAll(".step-point");
@@ -124,7 +125,15 @@ export default function HowItWorksSection() {
 
             {/* Header */}
             <div ref={headerRef} className="text-center mb-10">
-                <h1 className="text-[#7A1E3A] uppercase text-[12px] font-bold">How it Works</h1>
+                <div className="inline-flex items-center gap-2 bg-white border border-[#F3C5CE] rounded-full px-4 py-1.5 mb-5">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+                    </svg>
+                    <span className="text-[12px] font-semibold text-[#7A1E3A]">How it Works</span>
+                </div>
+
+
+
                 <h2 className="text-[32px] sm:text-[40px] font-extrabold leading-tight">
                     Three Simple Steps to a{" "}
                     <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
@@ -188,6 +197,17 @@ export default function HowItWorksSection() {
                     );
                 })}
             </div>
+
+            {/* CTA — View Full How It Works */}
+            <div className="text-center mt-10">
+                <Link
+                    href="/how-it-works"
+                    className="inline-block px-8 py-3 rounded-full border border-[#BF003A] text-[#BF003A] text-[14px] font-semibold hover:bg-[#BF003A] hover:text-white transition-colors duration-200"
+                >
+                    View Full How It Works
+                </Link>
+            </div>
+
         </section>
     );
 }

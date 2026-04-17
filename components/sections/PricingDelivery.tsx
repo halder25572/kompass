@@ -148,12 +148,14 @@ export default function PricingDelivery() {
 
             {/* Header */}
             <div ref={headerRef} className="text-center mb-8">
-                <div className="flex items-center justify-center gap-1.5 mb-3">
+                <div className="inline-flex items-center gap-2 bg-white border border-[#F3C5CE] rounded-full px-4 py-1.5 mb-5">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                     </svg>
-                    <span className="text-[13px] text-[#7A1E3A] font-medium">Simple & transparent</span>
+                    <span className="text-[12px] font-semibold text-[#7A1E3A]">Simple & transparent</span>
                 </div>
+
+
                 <h2 className="text-[28px] sm:text-[40px] md:text-[52px] font-extrabold text-[#1a1a2e] leading-tight">
                     Pricing & Delivery
                 </h2>

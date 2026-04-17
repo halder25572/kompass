@@ -18,7 +18,8 @@ export default function Navbar() {
   const navLinks = [
     { label: "Home",               href: "/" },
     { label: "How it Works",       href: "/how-it-works" },
-    { label: "Sample Covers",      href: "/cover" },
+    { label: "Sample Themes and Covers",      href: "/cover" },
+    { label: "Browse by Occasion",      href: "/sample-books" },
     { label: "Pricing & Delivery", href: "/pricing-delivery" },
   ];
 

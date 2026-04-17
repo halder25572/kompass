@@ -226,11 +226,18 @@ export default function HomePage() {
 
         <div ref={heroRef} className="relative z-10 w-full max-w-145 mx-auto flex flex-col items-center text-center gap-4 sm:gap-5">
 
-          <div className="inline-flex items-center gap-1.5 text-[12px] sm:text-[13px] font-medium text-[#7A1E3A]">
+          {/* <div className="inline-flex items-center gap-1.5 text-[12px] sm:text-[13px] font-medium text-[#7A1E3A]">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
             Create memories that last forever
+          </div> */}
+
+          <div className="inline-flex items-center gap-2 bg-white border border-[#F3C5CE] rounded-full px-4 py-1.5 mb-5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg>
+            <span className="text-[12px] font-semibold text-[#7A1E3A]">Create memories that last forever</span>
           </div>
 
           <h1 className="text-[clamp(32px,7vw,55px)] font-extrabold leading-[1.08] tracking-[-1.5px] m-0 px-2">
@@ -298,7 +305,7 @@ export default function HomePage() {
       </section>
 
 
-    {/* ══════════════════════════════════
+      {/* ══════════════════════════════════
       3. SAMPLE BOOKS
     ══════════════════════════════════ */}
       <section className="px-6 pb-20 mt-10">

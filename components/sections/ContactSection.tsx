@@ -1,9 +1,15 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ContactSection() {
     const [form, setForm] = useState({ name: "", email: "", message: "" });
+    const [isHydrated, setIsHydrated] = useState(false);
+
+    useEffect(() => {
+        setIsHydrated(true);
+    }, []);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -20,11 +26,13 @@ export default function ContactSection() {
             <div className="max-w-xl mx-auto">
 
                 <div className="mb-8 text-center">
+                    {/* <h2 className="text-[28px] font-bold text-[#1a1a2e]">We usually respond within 24 hours.</h2> */}
                     <h2 className="text-[28px] font-bold text-[#1a1a2e]">We&apos;re here to help</h2>
                     <p className="text-[14px] text-[#9CA3AF] mt-1">for all questions, please send us a message and we’ll get back to you</p>
                     <p className="text-[14px] text-[#9CA3AF] mt-1">We usually respond within 24 hours</p>
                 </div>
 
+                {isHydrated && (
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                     <div>
                         <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Name</label>
@@ -64,6 +72,7 @@ export default function ContactSection() {
                         </svg>
                     </button>
                 </form>
+                )}
             </div>
         </section>
     );
