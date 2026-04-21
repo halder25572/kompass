@@ -9,25 +9,36 @@ import gsap from "gsap";
 import { JSX } from "react/jsx-runtime";
 
 // ── Data ─────────────────────────────────────────────────
+// const templates = [
+//     { id: 1, name: "Classic", image: "/images/st1.jpg" },
+//     { id: 2, name: "Modern", image: "/images/st2.jpg" },
+//     { id: 3, name: "Warm & Cozy", image: "/images/st3.jpg" },
+//     { id: 4, name: "Vintage", image: "/images/st4.jpg" },
+//     { id: 5, name: "Garden", image: "/images/st5.jpg" },
+//     { id: 6, name: "Sunset", image: "/images/st6.jpg" },
+//     { id: 7, name: "Fresh", image: "/images/st7.jpg" },
+//     { id: 8, name: "Confetti", image: "/images/st8.jpg" },
+//     { id: 9, name: "Golden", image: "/images/st9.jpg" },
+// ];
 const templates = [
-    { id: 1, name: "Classic", image: "/images/st1.jpg" },
-    { id: 2, name: "Modern", image: "/images/st2.jpg" },
-    { id: 3, name: "Warm & Cozy", image: "/images/st3.jpg" },
-    { id: 4, name: "Vintage", image: "/images/st4.jpg" },
-    { id: 5, name: "Garden", image: "/images/st5.jpg" },
-    { id: 6, name: "Sunset", image: "/images/st6.jpg" },
-    { id: 7, name: "Fresh", image: "/images/st7.jpg" },
-    { id: 8, name: "Confetti", image: "/images/st8.jpg" },
-    { id: 9, name: "Golden", image: "/images/st9.jpg" },
+    { id: 1, name: "Classic", image: "/icon/1.jpg" },
+    { id: 2, name: "Modern", image: "/icon/2.jpg" },
+    { id: 3, name: "Warm & Cozy", image: "/icon/3.jpg" },
+    { id: 4, name: "Vintage", image: "/icon/4.jpg" },
+    { id: 5, name: "Garden", image: "/icon/5.jpg" },
+    { id: 6, name: "Sunset", image: "/icon/6.jpg" },
+    { id: 7, name: "Fresh", image: "/icon/1.jpg" },
+    { id: 8, name: "Confetti", image: "/icon/6.jpg" },
+    { id: 9, name: "Golden", image: "/icon/5.jpg" },
 ];
 
 const covers = [
-    { id: 1, name: "Classic", image: "/images/ste1.jpg" },
-    { id: 2, name: "Modern", image: "/images/ste2.jpg" },
-    { id: 3, name: "Warm & Cozy", image: "/images/ste3.jpg" },
-    { id: 4, name: "Classic", image: "/images/ste1.jpg" },
-    { id: 5, name: "Modern", image: "/images/ste2.jpg" },
-    { id: 6, name: "Warm & Cozy", image: "/images/ste3.jpg" },
+    { id: 1, name: "Classic", image: "/icon/11.jpg" },
+    { id: 2, name: "Modern", image: "/icon/12.jpg" },
+    { id: 3, name: "Warm & Cozy", image: "/icon/14.jpg" },
+    { id: 4, name: "Classic", image: "/icon/11.jpg" },
+    { id: 5, name: "Modern", image: "/icon/12.jpg" },
+    { id: 6, name: "Warm & Cozy", image: "/icon/11.jpg" },
 ];
 
 const occasions = [
@@ -286,7 +297,7 @@ function TopBar({ step }: { step: number }) {
             <div className="px-6 pt-4 pb-3 max-w-6xl mx-auto">
                 <Link href="/" className="inline-flex items-center gap-2">
                     <div className="w-7 h-7 rounded-md overflow-hidden shrink-0">
-                        <Image src="/images/logo.png" width={28} height={28} alt="Logo" className="object-cover" />
+                        <Image src="/images/logo.png" width={28} height={28} alt="Logo" className="" />
                     </div>
                     <span className="text-[14px] font-bold text-[#1a1a2e]">Mein HerzGeschenk</span>
                 </Link>
@@ -730,7 +741,7 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                             className={`tpl-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
                                 ${selected === tpl.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
                             <div className="relative w-full aspect-4/3 bg-[#d1cfc8]">
-                                <Image src={tpl.image} alt={tpl.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                                <Image src={tpl.image} alt={tpl.name} fill className="group-hover:scale-105 transition-transform duration-300" />
                                 {selected === tpl.id && <CheckIcon />}
                                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
                                     <span className="text-white text-[11px] sm:text-[12px] font-medium">{tpl.name}</span>
@@ -788,7 +799,7 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: () => void; onBack:
                             className={`cover-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
                                 ${selected === cover.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
                             <div className="relative w-full aspect-3/4 bg-[#d1cfc8]">
-                                <Image src={cover.image} alt={cover.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
+                                <Image src={cover.image} alt={cover.name} fill className="group-hover:scale-105 transition-transform duration-300" />
                                 {selected === cover.id && <CheckIcon />}
                                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
                                     <span className="text-white text-[11px] sm:text-[12px] font-medium">{cover.name}</span>
