@@ -19,7 +19,6 @@ email: string;
 
 export interface VerifyOtpPayload {
 email: string;
-
 otp: string;
 }
 
@@ -158,8 +157,7 @@ meta: Record<string, unknown>;
 code: number;
 }
 
-const BASE_URL =
-process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
 
 function getAuthToken() {
 if (typeof window === "undefined") {
@@ -169,6 +167,7 @@ return "";
 return localStorage.getItem("token") || "";
 }
 
+// for register api
 export async function registerUser(payload: RegisterPayload): Promise<RegisterResponse> {
 if (!BASE_URL) {
 throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -191,6 +190,7 @@ throw new Error(result?.message || "Registration failed");
 return result;
 }
 
+// for login api
 export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
 if (!BASE_URL) {
 throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -248,6 +248,7 @@ throw new Error(getResult?.message || postResult?.message || "Google login faile
 return getResult;
 }
 
+// for forgot password api
 export async function forgotPasswordUser(
 payload: ForgotPasswordPayload
 ): Promise<ForgotPasswordResponse> {
@@ -272,6 +273,7 @@ throw new Error(result?.message || "Failed to send OTP");
 return result;
 }
 
+// for verify otp api
 export async function verifyOtpUser(
 payload: VerifyOtpPayload
 ): Promise<VerifyOtpResponse> {
@@ -296,6 +298,7 @@ throw new Error(result?.message || "Invalid OTP");
 return result;
 }
 
+// for resend otp api
 export async function resendOtpUser(
 payload: ResendOtpPayload
 ): Promise<ResendOtpResponse> {
@@ -320,6 +323,7 @@ throw new Error(result?.message || "Failed to resend OTP");
 return result;
 }
 
+// for reset password api
 export async function resetPasswordUser(
 payload: ResetPasswordPayload
 ): Promise<ResetPasswordResponse> {
@@ -344,6 +348,7 @@ throw new Error(result?.message || "Failed to reset password");
 return result;
 }
 
+// for change password api
 export async function changePasswordUser(
 payload: ChangePasswordPayload
 ): Promise<ChangePasswordResponse> {
@@ -374,6 +379,7 @@ throw new Error(result?.message || "Failed to change password");
 return result;
 }
 
+// for show user profile api
 export async function showUser(): Promise<ShowUserResponse> {
 if (!BASE_URL) {
 throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -400,6 +406,7 @@ throw new Error(result?.message || "Failed to load user profile");
 return result;
 }
 
+// for update user profile api
 export async function updateProfileUser(
 payload: UpdateProfilePayload
 ): Promise<UpdateProfileResponse> {

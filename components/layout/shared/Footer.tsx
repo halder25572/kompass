@@ -29,9 +29,9 @@ export default function Footer() {
 
                     {/* Top Links */}
                     <div className="flex items-center gap-6 text-sm text-gray-500">
-                        <Link href="#" className="hover:text-gray-800">Privacy Policy</Link>
-                        <Link href="#" className="hover:text-gray-800">Terms & Conditions</Link>
-                        <Link href="#" className="hover:text-gray-800">Support</Link>
+                        <Link href="/privacy-policy" className="hover:text-gray-800">Privacy Policy</Link>
+                        <Link href="/terms-conditions" className="hover:text-gray-800">Terms & Conditions</Link>
+                        <Link href="/support" className="hover:text-gray-800">Support</Link>
                     </div>
                     {/* Button */}
                     <Link href="Imprint" className="w-full md:w-auto">
