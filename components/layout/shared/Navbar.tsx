@@ -19,7 +19,7 @@ export default function Navbar() {
     { label: "Home",               href: "/" },
     { label: "How it Works",       href: "/how-it-works" },
     { label: "Sample Themes and Covers",      href: "/cover" },
-    { label: "Browse by Occasion",      href: "/sample-books" },
+    { label: "Sample Books",            href: "/sample-books" },
     { label: "Pricing & Delivery", href: "/pricing-delivery" },
   ];
 

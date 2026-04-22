@@ -1,4 +1,4 @@
-import SampleBooksPage from "@/components/layout/shared/Samplebookspage ";
+import SampleBooksPage from "@/components/layout/shared/SampleBooksGallery";
 
 
 const SampleBookPage = () => {
