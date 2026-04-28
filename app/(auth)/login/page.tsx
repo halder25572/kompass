@@ -12,16 +12,15 @@ import {
 import { toast } from "sonner";
 import { useGoogleLogin } from "@react-oauth/google";
 
-const DEMO_EMAIL = "demo.user.1776117353767@mailinator.com";
-const DEMO_PASSWORD = "Demo@12345";
+
 
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
   const { mutate, isPending } = useLoginMutation();
   const { mutate: googleMutate, isPending: isGooglePending } = useGoogleLoginMutation();
-  const [email, setEmail] = useState(DEMO_EMAIL);
-  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
   const saveSessionAndRedirect = (apiUser: { id: number; name: string; email: string }, token: string) => {
@@ -153,11 +152,7 @@ export default function LoginPage() {
             Pick up where you left off
           </p>
 
-          <div className="mb-4 rounded-lg border border-[#E8B9C8] bg-[#FFF4F7] px-3 py-2">
-            <p className="text-xs text-[#7A1E3A]">Demo login</p>
-            <p className="text-xs text-gray-700">Email: {DEMO_EMAIL}</p>
-            <p className="text-xs text-gray-700">Password: {DEMO_PASSWORD}</p>
-          </div>
+
 
           {/* Form */}
           <form className="space-y-4" onSubmit={handleLogin}>

@@ -1,17 +1,4 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-
-
-// const BirthdayPage = () => {
-//     return (
-//         <div>
-            
-//         </div>
-//     );
-// };
-
-// export default BirthdayPage;
-
-
 "use client";
 
 import IntroStep from "@/components/questionnaire/IntroStep";
