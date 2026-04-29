@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
 import Image from "next/image";
@@ -7,6 +7,11 @@ import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { JSX } from "react/jsx-runtime";
+import { toast } from "sonner";
+import { useOccasionsQuery } from "@/features/occasions/hooks/services";
+import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/services";
+import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
+import { useCreateBookMutation } from "@/features/books/hooks/services";
 import {
     DndContext,
     KeyboardSensor,
@@ -28,72 +33,58 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 
 // ── Data ─────────────────────────────────────────────────
-const templates = [
-    { id: 1, name: "Classic", image: "/icon/1.jpg" },
-    { id: 2, name: "Modern", image: "/icon/2.jpg" },
-    { id: 3, name: "Warm & Cozy", image: "/icon/3.jpg" },
-    { id: 4, name: "Vintage", image: "/icon/4.jpg" },
-    { id: 5, name: "Garden", image: "/icon/5.jpg" },
-    { id: 6, name: "Sunset", image: "/icon/6.jpg" },
-    { id: 7, name: "Fresh", image: "/icon/1.jpg" },
-    { id: 8, name: "Confetti", image: "/icon/6.jpg" },
-    { id: 9, name: "Golden", image: "/icon/5.jpg" },
+const fallbackOccasions = [
+    { id: 1, name: "Birthday", image: "", status: 1, sub_occasions: [{ id: 1, occasion_id: 1, name: "Birthday", image: "", status: 1 }, { id: 3, occasion_id: 1, name: "Anniversary", image: "", status: 1 }] },
+    { id: 2, name: "School", image: "", status: 1, sub_occasions: [{ id: 2, occasion_id: 2, name: "Farewell Teacher", image: "", status: 1 }] },
 ];
 
-const covers = [
-    { id: 1, name: "Classic", image: "/icon/11.jpg" },
-    { id: 2, name: "Modern", image: "/icon/12.jpg" },
-    { id: 3, name: "Warm & Cozy", image: "/icon/14.jpg" },
-    { id: 4, name: "Classic", image: "/icon/11.jpg" },
-    { id: 5, name: "Modern", image: "/icon/12.jpg" },
-    { id: 6, name: "Warm & Cozy", image: "/icon/11.jpg" },
-];
-
-const occasions = [
-    {
-        id: "Birthday", label: "Birthday", icon: (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
-                <path d="M12 3v4" /><path d="M9 6l3-3 3 3" />
-            </svg>
-        )
-    },
-    {
-        id: "School", label: "School", icon: (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
-            </svg>
-        )
-    },
-    {
-        id: "Farewell", label: "Farewell", icon: (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" />
-            </svg>
-        )
-    },
-    {
-        id: "Love", label: "Love", icon: (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-            </svg>
-        )
-    },
-    {
-        id: "Family", label: "Family", icon: (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
-            </svg>
-        )
-    },
-    {
-        id: "Seasonal", label: "Seasonal", icon: (
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-            </svg>
-        )
-    },
-];
+function renderOccasionIcon(name: string) {
+    switch (name) {
+        case "Birthday":
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" />
+                    <path d="M12 3v4" /><path d="M9 6l3-3 3 3" />
+                </svg>
+            );
+        case "School":
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+            );
+        case "Farewell":
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" />
+                </svg>
+            );
+        case "Love":
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                </svg>
+            );
+        case "Family":
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+            );
+        case "Seasonal":
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="5" /><line x1="12" y1="1" x2="12" y2="3" /><line x1="12" y1="21" x2="12" y2="23" /><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" /><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" /><line x1="1" y1="12" x2="3" y2="12" /><line x1="21" y1="12" x2="23" y2="12" /><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" /><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                </svg>
+            );
+        default:
+            return (
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9" />
+                </svg>
+            );
+    }
+}
 
 const placeholdersByOccasion: Record<string, { title: string; subtitle: string; recipient: string }> = {
     Birthday: { title: "e.g., Mom's 60th Birthday Book", subtitle: "e.g., 60 years of love and memories", recipient: "e.g., Sarah Johnson" },
@@ -108,15 +99,6 @@ const defaultPlaceholders = {
     title: "e.g., My Memory Book",
     subtitle: "e.g., A collection of beautiful memories",
     recipient: "e.g., Your Name",
-};
-
-const subOccasionsByOccasion: Record<string, string[]> = {
-    Birthday: ["Birthday", "Anniversary"],
-    School: ["Class Book", "Kindergarten", "Farewell Teacher", "End-of-Year Book"],
-    Farewell: ["Retirement", "Team Memory Book"],
-    Love: ["Wedding", "Bachelorette Party (JGA)"],
-    Family: ["Family Book", "For Mom", "For Dad", "Baby Book", "For Grandma / Grandpa"],
-    Seasonal: ["Christmas", "New Year", "Easter", "Halloween"],
 };
 
 const questionnairesBySubOccasion: Record<
@@ -428,7 +410,15 @@ function BottomNav({
 }
 
 // ── Step 1: Book Details ──────────────────────────────────
-function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }) => void }) {
+type BookDraft = {
+    bookTitle: string;
+    bookSubtitle: string;
+    recipientName: string;
+    occasion: string;
+    subTab: string;
+};
+
+function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
     const [bookTitle, setBookTitle] = useState("");
     const [bookSubtitle, setBookSubtitle] = useState("");
     const [recipientName, setRecipientName] = useState("");
@@ -441,6 +431,9 @@ function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }
     const occasionsRef = useRef<HTMLDivElement>(null);
     const modalOverlayRef = useRef<HTMLDivElement>(null);
     const modalCardRef = useRef<HTMLDivElement>(null);
+    const { data: occasionsResponse } = useOccasionsQuery();
+
+    const occasions = occasionsResponse?.data?.length ? occasionsResponse.data : fallbackOccasions;
 
     const ph = selectedOccasion
         ? (placeholdersByOccasion[selectedOccasion] ?? defaultPlaceholders)
@@ -468,8 +461,8 @@ function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }
         }
     }, [isOccasionModalOpen]);
 
-    const selectedOccasionLabel = occasions.find(occ => occ.id === selectedOccasion)?.label ?? "";
-    const selectedItems = selectedOccasion ? (subOccasionsByOccasion[selectedOccasion] ?? []) : [];
+    const selectedOccasionLabel = occasions.find(occ => occ.name === selectedOccasion)?.name ?? "";
+    const selectedItems = selectedOccasion ? (occasions.find(occ => occ.name === selectedOccasion)?.sub_occasions ?? []) : [];
 
     const handleOccasionChange = (occasionId: string) => {
         setSelectedOccasion(occasionId);
@@ -510,11 +503,11 @@ function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }
                     <label className="text-[14px] font-semibold text-[#374151] block mb-2">Pick Your Occasion</label>
                     <div className="grid grid-cols-3 gap-2">
                         {occasions.map((occ) => (
-                            <button key={occ.id} onClick={() => handleOccasionChange(occ.id)}
+                            <button key={occ.id} onClick={() => handleOccasionChange(occ.name)}
                                 className={`occasion-btn flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-xl border text-[14px] font-medium transition-all cursor-pointer
-                                    ${selectedOccasion === occ.id ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50"}`}>
-                                <span className={selectedOccasion === occ.id ? "text-[#B91C1C]" : "text-[#9CA3AF]"}>{occ.icon}</span>
-                                {occ.label}
+                                    ${selectedOccasion === occ.name ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50"}`}>
+                                <span className={selectedOccasion === occ.name ? "text-[#B91C1C]" : "text-[#9CA3AF]"}>{renderOccasionIcon(occ.name)}</span>
+                                {occ.name}
                             </button>
                         ))}
                     </div>
@@ -556,14 +549,14 @@ function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }
                         <div className="p-5 sm:p-6">
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 {selectedItems.map((tab) => {
-                                    const isSelected = selectedSubTab === tab;
+                                    const isSelected = selectedSubTab === tab.name;
                                     return (
-                                        <button key={tab} type="button" onClick={() => handleSubTabSelect(tab)}
+                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
                                             className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected
                                                 ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]"
                                                 : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
                                             <div className="flex items-center justify-between gap-3">
-                                                <span className="text-[14px] font-semibold">{tab}</span>
+                                                <span className="text-[14px] font-semibold">{tab.name}</span>
                                                 {isSelected && (
                                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                                         <polyline points="20 6 9 17 4 12" />
@@ -585,7 +578,13 @@ function Step1({ onNext }: { onNext: (data: { subTab: string; occasion: string }
             <BottomNav
                 showBack={true}
                 onBack={undefined}
-                onNext={() => selectedSubTab && onNext({ subTab: selectedSubTab, occasion: selectedOccasion ?? "" })}
+                onNext={() => selectedSubTab && onNext({
+                    bookTitle,
+                    bookSubtitle,
+                    recipientName,
+                    occasion: selectedOccasion ?? "",
+                    subTab: selectedSubTab,
+                })}
                 nextDisabled={!selectedSubTab}
                 nextLabel="Continue"
             />
@@ -693,6 +692,20 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
     const [selected, setSelected] = useState(1);
     const headingRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
+    const { data: bookPageStylesResponse } = useBookPageStylesQuery();
+
+    const templates = bookPageStylesResponse?.data?.map((style) => ({
+        id: style.id,
+        name: style.name,
+        description: style.description,
+        image: style.image[0] || "/icon/1.jpg",
+    })) ?? [];
+
+    useEffect(() => {
+        if (templates.length > 0 && !templates.some((template) => template.id === selected)) {
+            setSelected(templates[0].id);
+        }
+    }, [selected, templates]);
 
     useEffect(() => {
         gsap.set([headingRef.current], { opacity: 0, y: 20 });
@@ -718,20 +731,31 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Pick a design theme for your book.</p>
                 </div>
                 <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {templates.map((tpl) => (
-                        <button key={tpl.id} onClick={() => setSelected(tpl.id)}
-                            onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
-                            className={`tpl-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
-                                ${selected === tpl.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
-                            <div className="relative w-full aspect-4/3 bg-[#d1cfc8]">
-                                <Image src={tpl.image} alt={tpl.name} fill className="group-hover:scale-105 transition-transform duration-300" />
-                                {selected === tpl.id && <CheckIcon />}
-                                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
-                                    <span className="text-white text-[11px] sm:text-[12px] font-medium">{tpl.name}</span>
+                    {templates.length > 0 ? (
+                        templates.map((tpl) => (
+                            <button key={tpl.id} onClick={() => setSelected(tpl.id)}
+                                onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
+                                className={`tpl-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
+                                    ${selected === tpl.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
+                                <div className="relative w-full aspect-4/3 bg-[#d1cfc8]">
+                                    <Image src={tpl.image} alt={tpl.name} fill className="group-hover:scale-105 transition-transform duration-300" />
+                                    {selected === tpl.id && <CheckIcon />}
+                                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
+                                        <span className="text-white text-[11px] sm:text-[12px] font-medium">{tpl.name}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                    ))}
+                                {tpl.description && (
+                                    <div className="px-2 py-2 text-left">
+                                        <p className="text-[11px] text-[#6b7280] line-clamp-2">{tpl.description}</p>
+                                    </div>
+                                )}
+                            </button>
+                        ))
+                    ) : (
+                        <div className="col-span-2 sm:col-span-3 rounded-2xl border border-dashed border-[#e5e7eb] bg-white px-4 py-8 text-center text-[13px] text-[#9CA3AF]">
+                            No theme styles available yet.
+                        </div>
+                    )}
                 </div>
             </div>
             <BottomNav onBack={onBack} onNext={onNext} nextLabel="Choose A Cover" />
@@ -744,6 +768,20 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
     const [selected, setSelected] = useState(initialCoverId ?? 1);
     const headingRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
+    const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
+
+    const covers = coverPageStylesResponse?.data?.map((style) => ({
+        id: style.id,
+        name: style.name,
+        description: style.description,
+        image: style.image[0] || "/icon/11.jpg",
+    })) ?? [];
+
+    useEffect(() => {
+        if (covers.length > 0 && !covers.some((cover) => cover.id === selected)) {
+            setSelected(covers[0].id);
+        }
+    }, [covers, selected]);
 
     useEffect(() => {
         gsap.set(headingRef.current, { opacity: 0, y: 20 });
@@ -769,20 +807,26 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Pick a design cover for your book.</p>
                 </div>
                 <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {covers.map((cover) => (
-                        <button key={cover.id} onClick={() => setSelected(cover.id)}
-                            onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
-                            className={`cover-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
-                                ${selected === cover.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
-                            <div className="relative w-full aspect-3/4 bg-[#d1cfc8]">
-                                <Image src={cover.image} alt={cover.name} fill className="group-hover:scale-105 transition-transform duration-300" />
-                                {selected === cover.id && <CheckIcon />}
-                                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
-                                    <span className="text-white text-[11px] sm:text-[12px] font-medium">{cover.name}</span>
+                    {covers.length > 0 ? (
+                        covers.map((cover) => (
+                            <button key={cover.id} onClick={() => setSelected(cover.id)}
+                                onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
+                                className={`cover-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200
+                                    ${selected === cover.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
+                                <div className="relative w-full aspect-3/4 bg-[#d1cfc8]">
+                                    <Image src={cover.image} alt={cover.name} fill className="group-hover:scale-105 transition-transform duration-300" />
+                                    {selected === cover.id && <CheckIcon />}
+                                    <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
+                                        <span className="text-white text-[11px] sm:text-[12px] font-medium">{cover.name}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </button>
-                    ))}
+                            </button>
+                        ))
+                    ) : (
+                        <div className="col-span-2 sm:col-span-3 rounded-2xl border border-dashed border-[#e5e7eb] bg-white px-4 py-8 text-center text-[13px] text-[#9CA3AF]">
+                            No cover page styles available yet.
+                        </div>
+                    )}
                 </div>
             </div>
             <BottomNav onBack={onBack} onNext={() => onNext(selected)} nextLabel="Design Questionnaire" />
@@ -791,9 +835,25 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
 }
 
 // ── Step 5: Preview & Create Book ─────────────────────────
-function Step5({ onNext, onBack, coverId, subTab }: { onNext: () => void; onBack: () => void; coverId: number; subTab: string }) {
+function Step5({
+    onNext,
+    onBack,
+    coverId,
+    bookDraft,
+}: {
+    onNext: () => void;
+    onBack: () => void;
+    coverId: number;
+    bookDraft: BookDraft | null;
+}) {
     const headingRef = useRef<HTMLDivElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
+    const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
+    const covers = coverPageStylesResponse?.data?.map((style) => ({
+        id: style.id,
+        name: style.name,
+        image: style.image[0] || "/icon/11.jpg",
+    })) ?? [];
     const selectedCover = covers.find((cover) => cover.id === coverId) ?? covers[0];
 
     useEffect(() => {
@@ -813,25 +873,74 @@ function Step5({ onNext, onBack, coverId, subTab }: { onNext: () => void; onBack
                 <div ref={previewRef} className="rounded-2xl border border-[#f0edf1] bg-white p-5">
                     <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-5 items-start">
                         <div className="relative w-full max-w-55 mx-auto sm:mx-0 aspect-3/4 rounded-xl overflow-hidden border border-[#e5e7eb] bg-[#f7f7f7]">
-                            <Image src={selectedCover.image} alt={selectedCover.name} fill className="" />
+                            {selectedCover ? (
+                                <Image src={selectedCover.image} alt={selectedCover.name} fill className="" />
+                            ) : (
+                                <div className="flex h-full w-full items-center justify-center text-[13px] text-[#9CA3AF]">
+                                    No cover selected
+                                </div>
+                            )}
                         </div>
                         <div>
                             <h2 className="text-[16px] font-semibold text-[#1a1a2e]">Book Preview</h2>
                             <p className="text-[13px] text-[#6b7280] mt-1">This is the current cover and setup that will be used for your new book.</p>
                             <ul className="mt-4 space-y-2 text-[13px] text-[#4b5563]">
+                                {selectedCover && (
+                                    <li className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
+                                        Cover: {selectedCover.name}
+                                    </li>
+                                )}
                                 <li className="flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
-                                    Cover: {selectedCover.name}
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
-                                    Questionnaire Type: {subTab}
+                                    Questionnaire Type: {bookDraft?.subTab ?? "Not selected"}
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />
                                     Status: Ready to create
                                 </li>
                             </ul>
+                        </div>
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-[#f0edf1] bg-[#fafafa] p-4">
+                        <div className="flex items-center justify-between gap-3">
+                            <div>
+                                <h3 className="text-[14px] font-semibold text-[#1a1a2e]">Current draft</h3>
+                                <p className="text-[12px] text-[#9CA3AF]">This draft will be submitted to POST /user/books.</p>
+                            </div>
+                            <span className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#BF003A] border border-[#f3d4db]">
+                                Ready
+                            </span>
+                        </div>
+
+                        <div className="mt-3 space-y-2">
+                            {bookDraft ? (
+                                <div className="rounded-xl border border-[#ece7ea] bg-white px-3 py-2.5">
+                                    <div className="flex items-start justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <p className="truncate text-[13px] font-semibold text-[#1a1a2e]">
+                                                {bookDraft.bookTitle || "Untitled book"}
+                                            </p>
+                                            <p className="mt-0.5 text-[12px] text-[#6b7280]">
+                                                {bookDraft.recipientName ? `Recipient: ${bookDraft.recipientName}` : "Recipient not set"}
+                                            </p>
+                                        </div>
+                                        <div className="shrink-0 text-right">
+                                            <p className="text-[11px] font-semibold text-[#BF003A]">
+                                                {bookDraft.occasion || "No occasion selected"}
+                                            </p>
+                                            <p className="text-[11px] text-[#9CA3AF]">
+                                                {bookDraft.bookSubtitle || "No subtitle provided"}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="rounded-xl border border-dashed border-[#e5e7eb] bg-white px-3 py-5 text-center text-[13px] text-[#9CA3AF]">
+                                    No draft found yet. Go back and fill in the book details.
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -1049,7 +1158,17 @@ function SortablePageRow({
 }
 
 // ── Step 6 Component ──────────────────────────────────────
-function Step6({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
+function Step6({
+    onBack,
+    onDone,
+    isSubmitting,
+    errorMessage,
+}: {
+    onBack: () => void;
+    onDone: () => Promise<void> | void;
+    isSubmitting?: boolean;
+    errorMessage?: string;
+}) {
     const [emailSubject, setEmailSubject] = useState("You're invited to contribute to a memory book! 📖");
     const [emailBody, setEmailBody] = useState(
         `Hi [Name],\n\nYou've been invited to contribute to a special memory book.\n\nClick the link below to add your message, photos, and memories:\n[Invite Link]\n\nThis won't take long and will mean the world to the recipient.\n\nThank you so much!\n`
@@ -1362,9 +1481,17 @@ function Step6({ onBack, onDone }: { onBack: () => void; onDone: () => void }) {
 
             <BottomNav
                 onBack={onBack}
-                onNext={onDone}
+                onNext={() => { void onDone(); }}
                 nextLabel="Send Invites"
+                nextDisabled={isSubmitting}
             />
+            {errorMessage && (
+                <div className="px-4 sm:px-6 pb-6 max-w-4xl mx-auto w-full">
+                    <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] text-red-700">
+                        {errorMessage}
+                    </div>
+                </div>
+            )}
         </>
     );
 }
@@ -1421,6 +1548,8 @@ export default function BookCreator() {
     const [showSuccess, setShowSuccess] = useState(false);
     const [selectedSubTab, setSelectedSubTab] = useState("Birthday");
     const [selectedCoverId, setSelectedCoverId] = useState(1);
+    const [bookDraft, setBookDraft] = useState<BookDraft | null>(null);
+    const createBookMutation = useCreateBookMutation();
 
     const urlCoverId = searchParams ? Number(searchParams.get("cover")) || undefined : undefined;
 
@@ -1436,10 +1565,10 @@ export default function BookCreator() {
             <TopBar step={step} />
 
             {step === 1 && (
-                <Step1 onNext={({ subTab, occasion }) => {
+                <Step1 onNext={({ subTab, ...draft }) => {
                     setSelectedSubTab(subTab);
+                    setBookDraft({ subTab, ...draft });
                     setStep(2);
-                    void occasion;
                 }} />
             )}
             {step === 2 && (
@@ -1460,13 +1589,41 @@ export default function BookCreator() {
                     onNext={() => setStep(6)}
                     onBack={() => setStep(4)}
                     coverId={selectedCoverId}
-                    subTab={selectedSubTab}
+                    bookDraft={bookDraft}
                 />
             )}
             {step === 6 && (
                 <Step6
                     onBack={() => setStep(5)}
-                    onDone={() => setShowSuccess(true)}
+                    onDone={async () => {
+                        if (!bookDraft) {
+                            toast.error("Book details are missing");
+                            return;
+                        }
+
+                        // Client-side validation: ensure required fields are present
+                        if (!bookDraft.bookTitle || !bookDraft.bookTitle.trim()) {
+                            toast.error("Book title is required.");
+                            return;
+                        }
+
+                        try {
+                            const result = await createBookMutation.mutateAsync({
+                                book_title: bookDraft.bookTitle,
+                                book_subtitle: bookDraft.bookSubtitle,
+                                recipient_name: bookDraft.recipientName,
+                                occasion: bookDraft.occasion || null,
+                                sub_occasion: bookDraft.subTab || null,
+                            });
+                            toast.success(result.message || "Book created successfully!");
+                            setShowSuccess(true);
+                        } catch (error) {
+                            const errorMessage = error instanceof Error ? error.message : "Failed to create book";
+                            toast.error(errorMessage);
+                        }
+                    }}
+                    isSubmitting={createBookMutation.isPending}
+                    errorMessage={createBookMutation.error?.message}
                 />
             )}
 

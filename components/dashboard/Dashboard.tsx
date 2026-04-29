@@ -157,35 +157,10 @@ import BookCard from "./Bookcard";
 import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { useBooksQuery } from "@/features/books/hooks/services";
+import type { BookItem } from "@/services/api";
 
 // ─── Mock data (replace with real API/DB calls) ───────────────────────────────
-
-const mockBooks: Book[] = [
-  {
-    id: "1",
-    title: "Team Farewell — Alex",
-    pages: 1245,
-    dueDate: "Mar 20, 2026",
-    status: "In Progress",
-    progress: 62,
-  },
-  {
-    id: "2",
-    title: "Mom's Birthday Book",
-    pages: 48,
-    dueDate: "Apr 10, 2026",
-    status: "Draft",
-    progress: 20,
-  },
-  {
-    id: "3",
-    title: "Our Anniversary",
-    pages: 320,
-    dueDate: "Feb 14, 2026",
-    status: "Completed",
-    progress: 100,
-  },
-];
 
 const mockActivities: Activity[] = [
   {
@@ -216,6 +191,9 @@ const DashboardPageMain: FC = () => {
   const titleRef       = useRef<HTMLDivElement>(null);
   const booksRef       = useRef<HTMLDivElement>(null);
   const activityRef    = useRef<HTMLDivElement>(null);
+  const { data: booksResponse, isLoading, isError } = useBooksQuery();
+
+  const books: Book[] = (booksResponse?.data ?? []).map((book, index) => mapBookItemToBook(book, index));
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -254,6 +232,56 @@ const DashboardPageMain: FC = () => {
   const onBtnLeave = (e: React.MouseEvent<HTMLAnchorElement>) => {
     gsap.to(e.currentTarget, { scale: 1, duration: 0.18, ease: "power2.inOut" });
   };
+
+  function mapBookItemToBook(book: BookItem, index: number): Book {
+    const rawStatus = typeof book.status === "string" ? book.status : "";
+    const title = typeof book.title === "string"
+      ? book.title
+      : typeof book.name === "string"
+        ? book.name
+        : `Book ${book.id}`;
+
+    const pages = typeof book.pages === "number"
+      ? book.pages
+      : typeof book.page_count === "number"
+        ? book.page_count
+        : 0;
+
+    const dueDate = typeof book.dueDate === "string"
+      ? book.dueDate
+      : typeof book.due_date === "string"
+        ? book.due_date
+        : typeof book.updated_at === "string"
+          ? new Date(book.updated_at).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
+          : "No due date";
+
+    const progress = typeof book.progress === "number"
+      ? book.progress
+      : rawStatus.toLowerCase() === "completed"
+        ? 100
+        : rawStatus.toLowerCase() === "draft"
+          ? 20
+          : 0;
+
+    const status: Book["status"] = rawStatus.toLowerCase() === "completed"
+      ? "Completed"
+      : rawStatus.toLowerCase() === "draft"
+        ? "Draft"
+        : "In Progress";
+
+    return {
+      id: String(book.id ?? index + 1),
+      title,
+      pages,
+      dueDate,
+      status,
+      progress,
+    };
+  }
 
   return (
     <div className="min-h-screen bg-[#faf9f7] pt-5">
@@ -298,7 +326,19 @@ const DashboardPageMain: FC = () => {
 
           {/* Books list */}
           <div ref={booksRef} className="flex-1 space-y-3">
-            {mockBooks.map((book) => (
+            {isLoading && (
+              <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-10 text-center">
+                <p className="text-sm text-gray-400 font-light">Loading books...</p>
+              </div>
+            )}
+
+            {isError && !isLoading && (
+              <div className="bg-white border border-dashed border-red-200 rounded-2xl p-10 text-center">
+                <p className="text-sm text-red-500 font-light">Failed to load books.</p>
+              </div>
+            )}
+
+            {!isLoading && !isError && books.map((book) => (
               <Link
                 key={book.id}
                 href={`/dashboard/progress?bookId=${book.id}`}
@@ -310,7 +350,7 @@ const DashboardPageMain: FC = () => {
               </Link>
             ))}
 
-            {mockBooks.length === 0 && (
+            {!isLoading && !isError && books.length === 0 && (
               <div className="bg-white border border-dashed border-gray-200 rounded-2xl p-10 text-center">
                 <p className="text-sm text-gray-400 font-light">No books yet.</p>
                 <Link
