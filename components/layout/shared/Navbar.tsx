@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserProfileQuery } from "@/features/auth/components/hooks/services";
 import Image from "next/image";
 import { LayoutGrid, Settings2, KeyRound, LogOut, X, Menu } from "lucide-react";
 
@@ -14,6 +15,11 @@ export default function Navbar() {
   const [lang, setLang]             = useState<"EN" | "DE">("EN");
   const pathname  = usePathname();
   const { isAuthenticated, user, logout } = useAuth();
+  const { data: profileData } = useUserProfileQuery();
+  const profileUser = profileData?.data.user;
+  const displayName = profileUser?.name || user?.name || "Profile";
+  const displayEmail = profileUser?.email || user?.email || "";
+  const displayAvatar = profileUser?.avatar || user?.avatar || "";
 
   const navLinks = [
     { label: "Home",               href: "/" },
@@ -168,15 +174,26 @@ export default function Navbar() {
                   style={{
                     width: 36, height: 36,
                     borderRadius: "50%",
-                    background: "#15803d",
+                    background: displayAvatar ? "#fff" : "#15803d",
                     border: "none",
                     cursor: "pointer",
                     display: "flex", alignItems: "center", justifyContent: "center",
                     color: "#fff",
                     fontSize: 14, fontWeight: 600,
+                    overflow: "hidden",
                   }}
                 >
-                  {user?.name?.charAt(0).toUpperCase() || "P"}
+                  {displayAvatar ? (
+                    <Image
+                      src={displayAvatar}
+                      alt={displayName}
+                      width={36}
+                      height={36}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    displayName.charAt(0).toUpperCase() || "P"
+                  )}
                 </button>
 
                 {profileOpen && (
@@ -198,15 +215,26 @@ export default function Navbar() {
                     }}>
                       <div style={{
                         width: 32, height: 32, borderRadius: "50%",
-                        background: "#15803d",
+                        background: displayAvatar ? "#fff" : "#15803d",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         color: "#fff", fontSize: 13, fontWeight: 600, flexShrink: 0,
+                        overflow: "hidden",
                       }}>
-                        {user?.name?.charAt(0).toUpperCase() || "P"}
+                        {displayAvatar ? (
+                          <Image
+                            src={displayAvatar}
+                            alt={displayName}
+                            width={32}
+                            height={32}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          displayName.charAt(0).toUpperCase() || "P"
+                        )}
                       </div>
                       <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0 }}>{user?.name}</p>
-                        <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>{user?.email}</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: "#111827", margin: 0 }}>{displayName}</p>
+                        <p style={{ fontSize: 11, color: "#9CA3AF", margin: 0 }}>{displayEmail}</p>
                       </div>
                     </div>
 

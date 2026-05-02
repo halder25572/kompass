@@ -694,6 +694,8 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
     const gridRef = useRef<HTMLDivElement>(null);
     const { data: bookPageStylesResponse } = useBookPageStylesQuery();
 
+    console.log("Theme API response:", bookPageStylesResponse);
+
     const templates = bookPageStylesResponse?.data?.map((style) => ({
         id: style.id,
         name: style.name,
@@ -745,8 +747,8 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                                     </div>
                                 </div>
                                 {tpl.description && (
-                                    <div className="px-2 py-2 text-left">
-                                        <p className="text-[11px] text-[#6b7280] line-clamp-2">{tpl.description}</p>
+                                    <div className="px-2 text-left">
+                                        {/* <p className="text-[11px] text-[#6b7280] line-clamp-2">{tpl.description}</p> */}
                                     </div>
                                 )}
                             </button>

@@ -1083,6 +1083,7 @@ export interface UpdateProfilePayload {
     name: string;
     email: string;
     phone?: string;
+    avatar?: File;
 }
 
 interface RegisterUser {
@@ -1723,13 +1724,24 @@ export async function updateProfileUser(
         throw new Error("Authentication token is missing.");
     }
 
+    const formData = new FormData();
+    formData.append("name", payload.name);
+    formData.append("email", payload.email);
+
+    if (payload.phone && payload.phone.trim().length > 0) {
+        formData.append("phone", payload.phone);
+    }
+
+    if (payload.avatar) {
+        formData.append("avatar", payload.avatar);
+    }
+
     const response = await fetch(`${BASE_URL}/user/update`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: formData,
     });
 
     const result = (await response.json()) as UpdateProfileResponse;
@@ -1762,36 +1774,65 @@ export async function fetchOccasions(): Promise<OccasionsResponse> {
     return result;
 }
 
+// export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
+//     const token = getAuthToken();
+
+//     if (!BASE_URL) {
+//         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+//     }
+
+//     const response = await fetch(`${BASE_URL}/user/book-page-styles`, {
+//         method: "GET",
+//         headers: {
+//             "Content-Type": "application/json",
+//             ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//         },
+//     });
+
+//     const result = (await response.json()) as BookPageStylesResponse;
+
+//     if (!response.ok || !result.success) {
+//         throw new Error(result?.message || "Failed to load book page styles");
+//     }
+
+//     return result;
+// }
+
 export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
     if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+        throw new Error("Base URL is missing.");
     }
+    const token = getAuthToken();
 
-    const response = await fetch(`${BASE_URL}/user/book-page-styles`, {
+    const response = await fetch(`/api/user/book-page-styles`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     });
 
     const result = (await response.json()) as BookPageStylesResponse;
 
     if (!response.ok || !result.success) {
-        throw new Error(result?.message || "Failed to load book page styles");
+        return { success: false, message: result?.message ?? "", data: [], meta: {}, code: response.status };
     }
 
     return result;
 }
 
 export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
+    const token = getAuthToken();
+
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
     }
 
-    const response = await fetch(`${BASE_URL}/user/cover-page`, {
+    const response = await fetch(`/api/user/cover-page`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     });
 

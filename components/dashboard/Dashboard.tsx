@@ -186,12 +186,15 @@ const mockActivities: Activity[] = [
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 const DashboardPageMain: FC = () => {
-  const headerLogoRef  = useRef<HTMLDivElement>(null);
-  const headerBtnRef   = useRef<HTMLAnchorElement>(null);
-  const titleRef       = useRef<HTMLDivElement>(null);
-  const booksRef       = useRef<HTMLDivElement>(null);
-  const activityRef    = useRef<HTMLDivElement>(null);
+  const headerLogoRef = useRef<HTMLDivElement>(null);
+  const headerBtnRef = useRef<HTMLAnchorElement>(null);
+  const titleRef = useRef<HTMLDivElement>(null);
+  const booksRef = useRef<HTMLDivElement>(null);
+  const activityRef = useRef<HTMLDivElement>(null);
   const { data: booksResponse, isLoading, isError } = useBooksQuery();
+
+  console.log("API Response:", booksResponse);
+  console.log("Books:", booksResponse?.data);
 
   const books: Book[] = (booksResponse?.data ?? []).map((book, index) => mapBookItemToBook(book, index));
 
@@ -208,13 +211,13 @@ const DashboardPageMain: FC = () => {
 
     // Entrance sequence
     tl.to(headerLogoRef.current, { opacity: 1, y: 0, duration: 0.5 })
-      .to(headerBtnRef.current,  { opacity: 1, y: 0, duration: 0.45 }, "-=0.3")
-      .to(titleRef.current,      { opacity: 1, y: 0, duration: 0.5  }, "-=0.25")
+      .to(headerBtnRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.3")
+      .to(titleRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.25")
       .to(booksRef.current?.children ?? [], {
-          opacity: 1, y: 0, scale: 1,
-          duration: 0.5, stagger: 0.1,
-        }, "-=0.2")
-      .to(activityRef.current,   { opacity: 1, x: 0, duration: 0.5  }, "-=0.35");
+        opacity: 1, y: 0, scale: 1,
+        duration: 0.5, stagger: 0.1,
+      }, "-=0.2")
+      .to(activityRef.current, { opacity: 1, x: 0, duration: 0.5 }, "-=0.35");
   }, []);
 
   // Book card hover
@@ -253,10 +256,10 @@ const DashboardPageMain: FC = () => {
         ? book.due_date
         : typeof book.updated_at === "string"
           ? new Date(book.updated_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+          })
           : "No due date";
 
     const progress = typeof book.progress === "number"

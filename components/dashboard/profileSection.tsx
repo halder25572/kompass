@@ -4,7 +4,7 @@
 import { Key, Save } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useUserProfileQuery } from "@/features/auth/components/hooks/services";
 import { useUpdateProfileMutation } from "@/features/auth/components/hooks/services";
@@ -16,15 +16,58 @@ export default function ProfileSection() {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [phone, setPhone] = useState("");
+    const [avatarFile, setAvatarFile] = useState<File | undefined>(undefined);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [formError, setFormError] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (user) {
             setName(user.name || "");
             setEmail(user.email || "");
             setPhone(user.phone || "");
+            setAvatarPreview(user.avatar || null);
         }
     }, [user]);
+
+    useEffect(() => {
+        return () => {
+            if (avatarPreview?.startsWith("blob:")) {
+                URL.revokeObjectURL(avatarPreview);
+            }
+        };
+    }, [avatarPreview]);
+
+    const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+
+        if (!file) {
+            return;
+        }
+
+        const isValidType = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+        const maxSizeInBytes = 5 * 1024 * 1024;
+
+        if (!isValidType) {
+            toast.error("Please upload JPG, PNG, or WEBP image.");
+            event.target.value = "";
+            return;
+        }
+
+        if (file.size > maxSizeInBytes) {
+            toast.error("Image must be 5MB or smaller.");
+            event.target.value = "";
+            return;
+        }
+
+        if (avatarPreview?.startsWith("blob:")) {
+            URL.revokeObjectURL(avatarPreview);
+        }
+
+        const previewUrl = URL.createObjectURL(file);
+        setAvatarFile(file);
+        setAvatarPreview(previewUrl);
+    };
 
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -35,10 +78,28 @@ export default function ProfileSection() {
                 name,
                 email,
                 phone: phone || undefined,
+                avatar: avatarFile,
             },
             {
                 onSuccess: (response) => {
                     toast.success(response.message);
+                    setAvatarFile(undefined);
+
+                    const storedUser = window.localStorage.getItem("user");
+                    const parsedStoredUser = storedUser ? JSON.parse(storedUser) : {};
+
+                    window.localStorage.setItem(
+                        "user",
+                        JSON.stringify({
+                            ...parsedStoredUser,
+                            id: response.data.user.id,
+                            name: response.data.user.name,
+                            email: response.data.user.email,
+                            avatar: response.data.user.avatar,
+                        })
+                    );
+
+                    setAvatarPreview(response.data.user.avatar || null);
                 },
                 onError: (mutationError) => {
                     toast.error(mutationError.message);
@@ -73,10 +134,10 @@ export default function ProfileSection() {
                             <div className="w-20 h-20 rounded-full border border-gray-300 overflow-hidden bg-white flex items-center justify-center text-gray-500">
                                 {isLoading ? (
                                     <span className="text-sm">...</span>
-                                ) : user?.avatar ? (
+                                ) : avatarPreview ? (
                                     <Image
-                                        src={user.avatar}
-                                        alt={user.name}
+                                        src={avatarPreview}
+                                        alt={name || user?.name || "Profile"}
                                         width={80}
                                         height={80}
                                         className="w-full h-full object-cover"
@@ -87,6 +148,23 @@ export default function ProfileSection() {
                                     </span>
                                 )}
                             </div>
+                        </div>
+
+                        <div className="mb-5">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/png,image/jpeg,image/webp"
+                                onChange={handleAvatarChange}
+                                className="hidden"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => fileInputRef.current?.click()}
+                                className="text-sm cursor-pointer font-medium text-[#BF003A] hover:text-[#8f002d] transition"
+                            >
+                                Upload profile photo
+                            </button>
                         </div>
 
                         {/* Title */}

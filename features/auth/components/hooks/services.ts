@@ -83,7 +83,7 @@ export function useUserProfileQuery() {
 	return useQuery<ShowUserResponse, Error>({
 		queryKey: ["user-profile"],
 		queryFn: showUser,
-		retry: false,
+		enabled: !!getAuthToken(),
 	});
 }
 
@@ -97,3 +97,15 @@ export function useUpdateProfileMutation() {
 		},
 	});
 }
+function getAuthToken() {
+	if (typeof window === "undefined") {
+		return null;
+	}
+
+	return (
+		window.localStorage.getItem("authToken") ||
+		window.localStorage.getItem("token") ||
+		window.localStorage.getItem("accessToken")
+	);
+}
+
