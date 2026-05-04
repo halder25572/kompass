@@ -1,159 +1,20 @@
-// import Link from "next/link";
-
-// const supportSections = [
-//   {
-//     title: "1. How We Can Help",
-//     points: [
-//       "Account assistance for login, password reset, and profile access.",
-//       "Guidance for creating books, inviting participants, and managing pages.",
-//       "Support for checkout, printing options, and delivery tracking.",
-//     ],
-//   },
-//   {
-//     title: "2. Contact Channels",
-//     points: [
-//       "Email support: support@meinherzgeschenk.de",
-//       "Response time: usually within 24-48 hours on business days.",
-//       "Please include your project name or order number for faster help.",
-//     ],
-//   },
-//   {
-//     title: "3. Common Issues",
-//     points: [
-//       "Invitation link not working or not received by participants.",
-//       "Image upload errors or formatting/layout questions.",
-//       "Payment, order confirmation, or shipping update concerns.",
-//     ],
-//   },
-//   {
-//     title: "4. Order and Delivery Support",
-//     points: [
-//       "We can help with print quality questions and delivery timelines.",
-//       "If your order arrives damaged or incorrect, contact us with photos.",
-//       "Our team will guide you through replacement or resolution steps.",
-//     ],
-//   },
-//   {
-//     title: "5. Account and Data Requests",
-//     points: [
-//       "Request updates to your account details when needed.",
-//       "Ask for help regarding privacy-related support requests.",
-//       "We handle all requests in line with applicable data protection rules.",
-//     ],
-//   },
-//   {
-//     title: "6. Tips Before Contacting Us",
-//     points: [
-//       "Share clear screenshots and a short description of the issue.",
-//       "Mention device, browser, and steps already tried.",
-//       "Include order ID or project link to speed up troubleshooting.",
-//     ],
-//   },
-// ];
-
-// export default function SupportSection() {
-//   return (
-//     <section className="min-h-screen bg-[#EEE] px-4 py-10 sm:px-6 sm:py-14">
-//       <div className="mx-auto w-full max-w-5xl">
-//         <div className="mb-10 text-center sm:mb-14">
-//           <h1 className="mt-5 text-4xl font-extrabold leading-tight text-[#1A1A2E] sm:text-6xl">
-//             Customer <span className="text-[#7A1E3A]">Support</span>
-//           </h1>
-
-//           <p className="mt-5 text-base text-[#94A3B8] sm:text-[18px] sm:leading-normal">
-//             We are here to help you create, order, and deliver your memory book without stress.
-//           </p>
-
-//           <div className="mt-6 flex items-start justify-center gap-2 sm:mt-8">
-//             <div className="text-left">
-//               <p className="text-3xl font-bold text-[#111827] sm:text-[44px] sm:leading-tight">
-//                 Fast help, <span className="text-[#7A1E3A]">human support</span>
-//               </p>
-//               <p className="text-xl font-semibold text-[#94A3B8] sm:text-[18px] text-center">
-//                 Every step backed by our team.
-//               </p>
-//             </div>
-//           </div>
-//         </div>
-
-//         <div className="rounded-3xl border border-[#E5E7EB] bg-white p-6 sm:p-10 md:p-12 shadow-[0_20px_60px_rgba(17,24,39,0.08)]">
-//           <p className="text-xs sm:text-sm font-semibold uppercase tracking-[0.18em] text-[#7A1E3A]">Help Center</p>
-//           <h2 className="mt-3 text-3xl sm:text-4xl font-extrabold leading-tight text-[#111827]">Support</h2>
-//           <p className="mt-4 text-sm sm:text-base leading-relaxed text-[#4B5563]">
-//             Find answers, contact options, and practical guidance for your projects and orders.
-//           </p>
-//           <p className="mt-2 text-xs sm:text-sm text-[#6B7280]">Last updated: April 21, 2026</p>
-
-//           <div className="mt-8 space-y-5 sm:space-y-6">
-//             {supportSections.map((section) => (
-//               <article key={section.title} className="rounded-2xl border border-[#F1F5F9] bg-[#FCFCFD] p-4 sm:p-6">
-//                 <h3 className="text-lg sm:text-xl font-bold text-[#111827]">{section.title}</h3>
-//                 <ul className="mt-3 list-disc pl-5 space-y-2 text-sm sm:text-base leading-relaxed text-[#374151]">
-//                   {section.points.map((point) => (
-//                     <li key={point}>{point}</li>
-//                   ))}
-//                 </ul>
-//               </article>
-//             ))}
-//           </div>
-
-//           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-5">
-//             <p className="text-sm sm:text-base text-[#374151]">Need legal details as well? Visit our imprint page.</p>
-//             <Link
-//               href="/Imprint"
-//               className="inline-flex w-full sm:w-auto items-center justify-center rounded-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90 transition-opacity"
-//             >
-//               Imprint (Legal Notice)
-//             </Link>
-//           </div>
-//         </div>
-//       </div>
-//     </section>
-//   );
-// }
-
-
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import gsap from "gsap";
+import { useFaqsQuery } from "@/features/faq/hooks/services";
+import { submitContactMessage } from "@/services/api";
+import { toast } from "sonner";
 
 // ─── DATA ──────────────────────────────────────────────────────────────────────
-const faqs = [
-  {
-    id: 1,
-    question: "How long does it take to receive my photo book?",
-    answer: "Standard delivery takes 5–7 business days after your order is confirmed. Express shipping (2–3 business days) is available at checkout. International orders may take 10–14 business days.",
-  },
-  {
-    id: 2,
-    question: "Can I edit my book after placing the order?",
-    answer: "You can make changes within 1 hour of placing your order. After that, production begins and edits are no longer possible. Please review your book carefully before confirming.",
-  },
-  {
-    id: 3,
-    question: "What photo formats are supported?",
-    answer: "We support JPG, PNG, and HEIC formats. For best print quality, we recommend images with a resolution of at least 300 DPI. Low-resolution photos will be flagged during the upload process.",
-  },
-  {
-    id: 4,
-    question: "Do you offer refunds or reprints?",
-    answer: "If your book arrives damaged or with a print defect, we'll reprint it at no cost. Simply contact our support team within 7 days of receiving your order with photos of the issue.",
-  },
-  {
-    id: 5,
-    question: "How do I apply a promo code?",
-    answer: "Promo codes can be entered at the checkout screen in the 'Discount Code' field. Only one promo code can be applied per order. Codes are case-insensitive.",
-  },
-  {
-    id: 6,
-    question: "Is my payment information secure?",
-    answer: "Yes. All payments are processed through Stripe, a PCI-DSS Level 1 certified provider. We never store your card details on our servers.",
-  },
-];
+type FaqSectionItem = {
+  id: number;
+  question: string;
+  answer: string;
+};
 
 // ─── FAQ ITEM ─────────────────────────────────────────────────────────────────
-function FaqItem({ faq, index }: { faq: typeof faqs[0]; index: number }) {
+function FaqItem({ faq, index }: { faq: FaqSectionItem; index: number }) {
   const [open, setOpen] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
 
@@ -206,10 +67,24 @@ export default function SupportPage() {
   const heroRef    = useRef<HTMLDivElement>(null);
   const faqRef     = useRef<HTMLDivElement>(null);
   const formRef    = useRef<HTMLDivElement>(null);
+  const { data, isLoading, error } = useFaqsQuery();
+
+  const faqs = useMemo<FaqSectionItem[]>(() => {
+    if (!data?.data) return [];
+    return data.data
+      .filter((item) => item.status === 1)
+      .map((item) => ({
+        id: item.id,
+        question: item.question,
+        answer: item.answer,
+      }));
+  }, [data]);
 
   const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState("Thanks for reaching out. We'll get back to you within 2 business hours.");
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // hero entrance
   useEffect(() => {
@@ -232,11 +107,35 @@ export default function SupportPage() {
     return () => io.disconnect();
   }, []);
 
-  const handleSubmit = (e: React.MouseEvent) => {
+  const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!form.name || !form.email || !form.message) return;
+    if (!form.name || !form.email || !form.message) {
+      setSubmitError("Please fill in name, email, and message.");
+      return;
+    }
+
+    setSubmitError(null);
     setLoading(true);
-    setTimeout(() => { setLoading(false); setSubmitted(true); }, 1400);
+
+    try {
+      const result = await submitContactMessage({
+        name: form.name,
+        email: form.email,
+        subject: form.subject || undefined,
+        message: form.message,
+      });
+
+      setSubmitMessage(result.message || "Thank you! We will get back to you soon.");
+      toast.success(result.message || "Thank you! We will get back to you soon.", {
+        duration: 5000,
+      });
+      setSubmitted(true);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to send message";
+      setSubmitError(message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -294,7 +193,13 @@ export default function SupportPage() {
           </div>
 
           <div className="bg-white rounded-2xl overflow-hidden shadow-[0_2px_20px_rgba(0,0,0,0.06)] border border-[#EDE8E2]">
-            {faqs.map((faq, i) => <FaqItem key={faq.id} faq={faq} index={i} />)}
+            {isLoading ? (
+              <div className="px-6 py-8 text-[14px] text-[#78716C]">Loading FAQs...</div>
+            ) : error ? (
+              <div className="px-6 py-8 text-[14px] text-[#B91C1C]">{error.message}</div>
+            ) : (
+              faqs.map((faq, i) => <FaqItem key={faq.id} faq={faq} index={i} />)
+            )}
           </div>
         </div>
 
@@ -359,9 +264,7 @@ export default function SupportPage() {
                     </svg>
                   </div>
                   <h3 className="text-[18px] font-bold text-[#1C1917] mb-2">Message Sent!</h3>
-                  <p className="text-[13px] text-[#78716C] max-w-xs leading-[1.7]">
-                    Thanks for reaching out. We&apos;ll get back to you within 2 business hours.
-                  </p>
+                  <p className="text-[13px] text-[#78716C] max-w-xs leading-[1.7]">{submitMessage}</p>
                   <button
                     onClick={() => { setSubmitted(false); setForm({ name: "", email: "", subject: "", message: "" }); }}
                     className="mt-6 text-[12px] font-bold text-[#C0003C] underline underline-offset-2 bg-transparent border-none cursor-pointer"
@@ -436,6 +339,10 @@ export default function SupportPage() {
                       </>
                     ) : "Send Message →"}
                   </button>
+
+                  {submitError && (
+                    <p className="text-center text-[12px] text-[#B91C1C]">{submitError}</p>
+                  )}
 
                   <p className="text-center text-[11px] text-[#B0A89E]">
                     By submitting, you agree to our{" "}

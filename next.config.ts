@@ -18,6 +18,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "kompas5.thenightowl.team",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
     ],
   },
 };

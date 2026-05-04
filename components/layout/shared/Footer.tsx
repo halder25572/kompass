@@ -34,7 +34,7 @@ export default function Footer() {
                         <Link href="/support" className="hover:text-gray-800">Support</Link>
                     </div>
                     {/* Button */}
-                    <Link href="Imprint" className="w-full md:w-auto">
+                    <Link href="/Imprint" className="w-full md:w-auto">
                         <button className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] cursor-pointer text-white text-sm px-5 py-2 rounded-full shadow-sm hover:opacity-90">
                             Imprint (Legal Notice)
                         </button>

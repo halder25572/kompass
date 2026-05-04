@@ -8,8 +8,10 @@ import {
   FileText,
   Users,
   ExternalLink,
+  Loader,
 } from "lucide-react";
 import gsap from "gsap";
+import { useLegalInformationQuery } from "@/features/legal-info/hooks/services";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -51,7 +53,11 @@ const ImprintLegalNotice: FC = () => {
   const card4Ref   = useRef<HTMLDivElement>(null);
   const euRef      = useRef<HTMLDivElement>(null);
 
+  const { data: legalData, isLoading, error } = useLegalInformationQuery();
+
   useEffect(() => {
+    if (!legalData?.data) return;
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     const headerEls = Array.from(headerRef.current?.children ?? []);
@@ -66,7 +72,7 @@ const ImprintLegalNotice: FC = () => {
     tl.to(headerEls, { opacity: 1, y: 0, duration: 0.65, stagger: 0.12 })
       .to(cards,      { opacity: 1, y: 0, scale: 1, duration: 0.55, stagger: 0.1 }, "-=0.3")
       .to(euRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2");
-  }, []);
+  }, [legalData?.data]);
 
   /* card hover */
   const onCardEnter = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -75,6 +81,41 @@ const ImprintLegalNotice: FC = () => {
   const onCardLeave = (e: React.MouseEvent<HTMLDivElement>) => {
     gsap.to(e.currentTarget, { y: 0, boxShadow: "none", duration: 0.22, ease: "power2.inOut" });
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        backgroundImage: "url('/images/bg1.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}>
+        <div className="flex flex-col items-center gap-3">
+          <Loader className="w-8 h-8 text-[#7A1E3A] animate-spin" />
+          <p className="text-gray-600">Loading legal information...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !legalData?.data) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        backgroundImage: "url('/images/bg1.png')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+      }}>
+        <div className="text-center">
+          <p className="text-red-600 font-medium mb-2">Failed to load legal information</p>
+          <p className="text-gray-600 text-sm">{error?.message || "Please try again later"}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const companyDetails = legalData.data.company_details;
+  const contactInfo = legalData.data.contact_information;
+  const registrationTax = legalData.data.registration_tax;
+  const editorialResponsibility = legalData.data.editorial_responsibility;
 
   return (
     <div
@@ -113,16 +154,18 @@ const ImprintLegalNotice: FC = () => {
             <div className="text-rose-800 mb-4 w-8 h-8"><Home size={20} strokeWidth={1.5} /></div>
             <p className="text-[20px] font-bold text-gray-900 mb-3">Company Details</p>
             <p className="font-serif text-[16px] font-bold text-gray-900 mb-1">
-              Mein HerzGeschenk
+              {companyDetails.company_name}
             </p>
             <div className="text-[16px] text-black font-light leading-relaxed">
-              <p>Musterstraße 123</p>
-              <p>10115 Berlin</p>
-              <p>Germany</p>
+              <p>{companyDetails.street_address}</p>
+              <p>{companyDetails.postal_code} {companyDetails.city}</p>
+              <p>{companyDetails.country}</p>
             </div>
             <Divider />
             <MetaLabel>Represented by</MetaLabel>
-            <p className="text-[15px] text-black">Jane Doe (Managing Director)</p>
+            <p className="text-[15px] text-black">
+              {companyDetails.represented_by_name} ({companyDetails.represented_by_position})
+            </p>
           </div>
 
           {/* Contact Information */}
@@ -136,9 +179,9 @@ const ImprintLegalNotice: FC = () => {
             <p className="text-[20px] font-bold text-gray-900 mb-3">Contact Information</p>
             <div className="space-y-2.5">
               {[
-                { label: "Phone:",   value: "+49 (0) 30 1234 5678",    href: "tel:+4930123456789" },
-                { label: "Email:",   value: "hello@memora-moments.de", href: "mailto:hello@memora-moments.de" },
-                { label: "Website:", value: "www.memora-moments.de",   href: "https://www.memora-moments.de" },
+                { label: "Phone:",   value: contactInfo.phone,    href: `tel:${contactInfo.phone.replace(/\s/g, '')}` },
+                { label: "Email:",   value: contactInfo.email, href: `mailto:${contactInfo.email}` },
+                ...(contactInfo.website ? [{ label: "Website:", value: contactInfo.website, href: `https://${contactInfo.website}` }] : []),
               ].map(({ label, value, href }) => (
                 <div key={label} className="flex items-start gap-3">
                   <span className="text-[16px] font-medium text-[#9CA3AF] min-w-11.5 pt-px">{label}</span>
@@ -166,16 +209,16 @@ const ImprintLegalNotice: FC = () => {
             <p className="text-[20px] font-bold text-gray-900 mb-3">Registration &amp; Tax</p>
             <MetaLabel>Commercial Register</MetaLabel>
             <p className="text-[15px] text-[#9CA3AF] mb-1">
-              Amtsgericht Berlin (Charlottenburg)
+              {registrationTax.register_court}
             </p>
             <p className="text-[15px] text-[#9CA3AF] mb-3">
               Registration No.{" "}
-              <span className="font-medium text-gray-800">HRB 123456 B</span>
+              <span className="font-medium text-gray-800">{registrationTax.registration_number}</span>
             </p>
             <Divider />
             <MetaLabel>VAT ID (according to § 27a UStG)</MetaLabel>
             <p className="text-[16px] font-medium text-gray-800 tracking-wide">
-              DE 999 999 999
+              {registrationTax.vat_number}
             </p>
           </div>
 
@@ -190,12 +233,12 @@ const ImprintLegalNotice: FC = () => {
             <p className="text-[20px] font-bold text-gray-900 mb-3">Editorial Responsibility</p>
             <MetaLabel>Responsible according to § 18 MStV</MetaLabel>
             <p className="font-serif text-[16px] font-semibold text-gray-900 mb-1">
-              Jane Doe
+              {editorialResponsibility.responsible_person_name}
             </p>
             <div className="text-[15px] text-gray-500 font-light leading-relaxed">
-              <p>Memora Moments GmbH</p>
-              <p>Musterstraße 123</p>
-              <p>10115 Berlin</p>
+              <p>{editorialResponsibility.responsible_company_name}</p>
+              <p>{editorialResponsibility.responsible_address}</p>
+              <p>{editorialResponsibility.responsible_postal_code} {editorialResponsibility.responsible_city}</p>
             </div>
           </div>
         </div>

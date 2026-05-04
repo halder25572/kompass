@@ -2,18 +2,23 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import { useUserProfileQuery } from "@/features/auth/components/hooks/services";
 import Image from "next/image";
 import { LayoutGrid, Settings2, KeyRound, LogOut, X, Menu } from "lucide-react";
+import { toast } from "sonner";
+import { updateLanguageUser } from "@/services/api";
+
 
 export default function Navbar() {
-  const [menuOpen, setMenuOpen]     = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [lang, setLang]             = useState<"EN" | "DE">("EN");
-  const pathname  = usePathname();
+  const [isLanguageUpdating, setIsLanguageUpdating] = useState(false);
+  const pathname = usePathname();
+  const { language: lang, setLanguage } = useLanguage();
   const { isAuthenticated, user, logout } = useAuth();
   const { data: profileData } = useUserProfileQuery();
   const profileUser = profileData?.data.user;
@@ -21,12 +26,65 @@ export default function Navbar() {
   const displayEmail = profileUser?.email || user?.email || "";
   const displayAvatar = profileUser?.avatar || user?.avatar || "";
 
+  const labels = {
+    en: {
+      home: "Home",
+      howItWorks: "How it Works",
+      sampleThemes: "Sample Themes and Covers",
+      sampleBooks: "Sample Books",
+      pricing: "Pricing & Delivery",
+      login: "Login",
+      createBook: "Create Book",
+      dashboard: "Dashboard",
+      profileSettings: "Profile Settings",
+      changePassword: "Change Password",
+      logout: "Logout",
+    },
+    de: {
+      home: "Startseite",
+      howItWorks: "So funktioniert's",
+      sampleThemes: "Beispielthemen und Cover",
+      sampleBooks: "Beispielbuecher",
+      pricing: "Preise und Lieferung",
+      login: "Anmelden",
+      createBook: "Buch erstellen",
+      dashboard: "Dashboard",
+      profileSettings: "Profileinstellungen",
+      changePassword: "Passwort aendern",
+      logout: "Abmelden",
+    },
+  } as const;
+
+  const t = labels[lang];
+
+  const changeLanguage = async (language: "en" | "de") => {
+    if (isLanguageUpdating || language === lang) return;
+
+    setIsLanguageUpdating(true);
+    const previousLanguage = lang;
+    setLanguage(language);
+
+   
+    const token = window.localStorage.getItem("token");
+    if (token) {
+      try {
+        const result = await updateLanguageUser({ language });
+        toast.success(result.message);
+      } catch (error) {
+        setLanguage(previousLanguage);
+        console.error("Language update failed:", error);
+      }
+    }
+
+    setIsLanguageUpdating(false);
+  };
+
   const navLinks = [
-    { label: "Home",               href: "/" },
-    { label: "How it Works",       href: "/how-it-works" },
-    { label: "Sample Themes and Covers",      href: "/cover" },
-    { label: "Sample Books",            href: "/sample-books" },
-    { label: "Pricing & Delivery", href: "/pricing-delivery" },
+    { label: t.home, href: "/" },
+    { label: t.howItWorks, href: "/how-it-works" },
+    { label: t.sampleThemes, href: "/cover" },
+    { label: t.sampleBooks, href: "/sample-books" },
+    { label: t.pricing, href: "/pricing-delivery" },
   ];
 
   return (
@@ -93,7 +151,8 @@ export default function Navbar() {
             {(["EN", "DE"] as const).map((l, i) => (
               <button
                 key={l}
-                onClick={() => setLang(l)}
+                onClick={() => changeLanguage(l.toLowerCase() as "en" | "de")}
+                disabled={isLanguageUpdating}
                 style={{
                   padding: "3px 9px",
                   borderRadius: 999,
@@ -102,10 +161,11 @@ export default function Navbar() {
                   fontSize: 12,
                   fontWeight: 600,
                   transition: "background 0.15s, color 0.15s",
-                  background: lang === l
+                  background: lang === l.toLowerCase()
                     ? "linear-gradient(102deg,#BF003A 0%,#59001C 100%)"
                     : "transparent",
-                  color: lang === l ? "#fff" : "#6B7280",
+                  color: lang === l.toLowerCase() ? "#fff" : "#6B7280",
+                  opacity: isLanguageUpdating ? 0.75 : 1,
                 }}
               >
                 {l}
@@ -126,7 +186,7 @@ export default function Navbar() {
                 onMouseEnter={e => ((e.currentTarget as HTMLElement).style.color = "#7A1E3A")}
                 onMouseLeave={e => ((e.currentTarget as HTMLElement).style.color = "#374151")}
               >
-                Login
+                {t.login}
               </Link>
 
               {/* Create Book */}
@@ -144,7 +204,7 @@ export default function Navbar() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Create Book
+                {t.createBook}
               </Link>
             </>
           ) : (
@@ -164,7 +224,7 @@ export default function Navbar() {
                   whiteSpace: "nowrap",
                 }}
               >
-                Create Book
+                {t.createBook}
               </Link>
 
               {/* Profile avatar */}
@@ -241,9 +301,9 @@ export default function Navbar() {
                     {/* Items */}
                     <div style={{ padding: "6px 0" }}>
                       {[
-                        { icon: <LayoutGrid size={15} color="#9A1C37" />, label: "Dashboard",       href: "/dashboard" },
-                        { icon: <Settings2  size={15} color="#9A1C37" />, label: "Profile Settings", href: "/dashboard/profile" },
-                        { icon: <KeyRound   size={15} color="#9A1C37" />, label: "Change Password",  href: "/dashboard/change-password" },
+                        { icon: <LayoutGrid size={15} color="#9A1C37" />, label: t.dashboard, href: "/dashboard" },
+                        { icon: <Settings2 size={15} color="#9A1C37" />, label: t.profileSettings, href: "/dashboard/profile" },
+                        { icon: <KeyRound size={15} color="#9A1C37" />, label: t.changePassword, href: "/dashboard/change-password" },
                       ].map(item => (
                         <Link key={item.label} href={item.href} style={{
                           display: "flex", alignItems: "center", gap: 10,
@@ -273,7 +333,7 @@ export default function Navbar() {
                           onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = "#F9FAFB")}
                           onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = "transparent")}
                         >
-                          <LogOut size={15} color="#9A1C37" /> Logout
+                          <LogOut size={15} color="#9A1C37" /> {t.logout}
                         </button>
                       </div>
                     </div>
@@ -338,17 +398,19 @@ export default function Navbar() {
               {(["EN", "DE"] as const).map((l) => (
                 <button
                   key={l}
-                  onClick={() => setLang(l)}
+                  onClick={() => changeLanguage(l.toLowerCase() as "en" | "de")}
+                  disabled={isLanguageUpdating}
                   style={{
                     padding: "3px 10px",
                     borderRadius: 999,
                     border: "none",
                     cursor: "pointer",
                     fontSize: 12, fontWeight: 600,
-                    background: lang === l
+                    background: lang === l.toLowerCase()
                       ? "linear-gradient(102deg,#BF003A 0%,#59001C 100%)"
                       : "transparent",
-                    color: lang === l ? "#fff" : "#6B7280",
+                    color: lang === l.toLowerCase() ? "#fff" : "#6B7280",
+                    opacity: isLanguageUpdating ? 0.75 : 1,
                   }}
                 >{l}</button>
               ))}
@@ -357,7 +419,7 @@ export default function Navbar() {
             {!isAuthenticated && (
               <Link href="/login" style={{
                 fontSize: 13, fontWeight: 500, color: "#374151", textDecoration: "none",
-              }}>Login</Link>
+              }}>{t.login}</Link>
             )}
 
             <Link href="/create" style={{
@@ -367,7 +429,7 @@ export default function Navbar() {
               padding: "8px 18px", borderRadius: 999,
               textDecoration: "none",
             }}>
-              Create Book
+              {t.createBook}
             </Link>
           </div>
         </div>

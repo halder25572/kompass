@@ -30,6 +30,7 @@ import {
 	VerifyOtpPayload,
 	VerifyOtpResponse,
 } from "@/services/api";
+import { useSession } from "next-auth/react";
 
 export function useRegisterMutation() {
 	return useMutation<RegisterResponse, Error, RegisterPayload>({
@@ -79,11 +80,21 @@ export function useResendOtpMutation() {
 	});
 }
 
+// export function useUserProfileQuery() {
+// 	return useQuery<ShowUserResponse, Error>({
+// 		queryKey: ["user-profile"],
+// 		queryFn: showUser,
+// 		enabled: !!getAuthToken(),
+// 	});
+// }
+
 export function useUserProfileQuery() {
+	const { data: session } = useSession();
+
 	return useQuery<ShowUserResponse, Error>({
 		queryKey: ["user-profile"],
 		queryFn: showUser,
-		enabled: !!getAuthToken(),
+		enabled: !!getAuthToken() || !!session,
 	});
 }
 

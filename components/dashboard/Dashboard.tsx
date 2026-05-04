@@ -158,7 +158,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { useBooksQuery } from "@/features/books/hooks/services";
-import type { BookItem } from "@/services/api";
+import type { BookItem } from "@/types/api";
 
 // ─── Mock data (replace with real API/DB calls) ───────────────────────────────
 

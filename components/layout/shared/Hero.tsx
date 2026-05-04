@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { useLanguage } from "@/hooks/useLanguage";
 
 /* ═══════════════════════════════════════════════════
    SAMPLE BOOKS DATA — updated names & tags
@@ -150,6 +151,7 @@ function FlipModal({ book, onClose }: { book: typeof sampleBooks[0]; onClose: ()
    MAIN PAGE
 ═══════════════════════════════════════════════════ */
 export default function HomePage() {
+  const { language } = useLanguage();
   const [activeBook, setActiveBook] = useState<typeof sampleBooks[0] | null>(null);
   const [contactName, setContactName] = useState("");
   const [contactEmail, setContactEmail] = useState("");
@@ -211,6 +213,39 @@ export default function HomePage() {
     window.location.href = `mailto:hello@mein-herzgeschenk.de?subject=${subject}&body=${body}`;
   };
 
+  const heroText =
+    language === "de"
+      ? {
+          pill: "Erinnerungen schaffen, die fuer immer bleiben",
+          headingLine1: "Persoenliches Geschenk erstellen",
+          headingLine2: "Gemeinsam gemacht",
+          description:
+            "Lade die wichtigsten Menschen ein, ihre Geschichten, Fotos und herzlichen Worte beizutragen. Wir verwandeln alles in ein hochwertiges, gedrucktes Layflat-Buch.",
+          startButton: "Buch starten",
+          howButton: "So funktioniert es",
+          rating: "4.9/5 von tausenden zufriedenen Erstellern",
+          secure: "Sicher und privat",
+          printed: "Gedruckt in Deutschland",
+          occasion: "Perfekt fuer jeden Anlass",
+          freeShipping: "Kostenloser Versand in Deutschland",
+          fastDelivery: "Schnelle Lieferung nach Oesterreich und in die Schweiz.",
+        }
+      : {
+          pill: "Create memories that last forever",
+          headingLine1: "Create a Personal Gift",
+          headingLine2: "Made Together",
+          description:
+            "Invite the people who matter most to contribute their stories, photos and heartfelt messages. We turn it into a beautifully printed, premium lay-flat book - a gift made together.",
+          startButton: "Start Your Book",
+          howButton: "See How It Works",
+          rating: "4.9/5 from thousands of happy creators",
+          secure: "Secure & private",
+          printed: "Printed in Germany",
+          occasion: "Perfect for any occasion",
+          freeShipping: "Free shipping in Germany",
+          fastDelivery: "Fast delivery to Austria and Switzerland.",
+        };
+
   return (
     <main className="font-sans bg-[#EEE8EA]">
 
@@ -237,33 +272,32 @@ export default function HomePage() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
             </svg>
-            <span className="text-[12px] font-semibold text-[#7A1E3A]">Create memories that last forever</span>
+            <span className="text-[12px] font-semibold text-[#7A1E3A]">{heroText.pill}</span>
           </div>
 
           <h1 className="text-[clamp(32px,7vw,55px)] font-extrabold leading-[1.08] tracking-[-1.5px] m-0 px-2">
-            <span className="text-[#1A1A2E]">Create a Personal Gift</span><br />
+            <span className="text-[#1A1A2E]">{heroText.headingLine1}</span><br />
             <span style={{ background: "linear-gradient(102deg,#BF003A 0%,#7A1020 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              Made Together
+              {heroText.headingLine2}
             </span>
           </h1>
 
           <p className="text-[14px] sm:text-[15px] text-gray-400 max-w-115 leading-[1.75] m-0">
-            Invite the people who matter most to contribute their stories, photos and heartfelt messages.
-            We turn it into a beautifully printed, premium lay-flat book — a gift made together.
+            {heroText.description}
           </p>
 
           <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-115 mt-1">
             <Link href="/create"
               className="flex-1 inline-flex items-center justify-center gap-2 text-white text-[14px] font-bold py-3.5 px-5 rounded-[10px] no-underline transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
               style={{ background: "linear-gradient(102deg,#BF003A 0%,#7A1020 100%)", boxShadow: "0 4px 20px rgba(191,0,58,0.30)" }}>
-              Start Your Book
+              {heroText.startButton}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
               </svg>
             </Link>
             <Link href="/how-it-works"
               className="flex-1 inline-flex items-center justify-center text-[14px] font-semibold py-3.5 px-5 rounded-[10px] no-underline backdrop-blur-sm transition-all duration-200 active:scale-[0.98] border border-[#BF003A] bg-white text-[#BF003A] hover:bg-linear-to-r hover:from-[#BF003A] hover:to-[#59001C] hover:text-white hover:border-transparent">
-              See How It Works
+              {heroText.howButton}
             </Link>
           </div>
 
@@ -272,23 +306,23 @@ export default function HomePage() {
               <svg width="13" height="13" viewBox="0 0 24 24">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" fill="#F59E0B" stroke="#F59E0B" strokeWidth="1" />
               </svg>
-              4.9/5 from thousands of happy creators
+              {heroText.rating}
             </span>
             <span className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-gray-500 font-medium">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
               </svg>
-              Secure &amp; private
+              {heroText.secure}
             </span>
             <span className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-gray-500 font-medium">
               <span className="text-[13px]">🇩🇪</span>
-              Printed in Germany
+              {heroText.printed}
             </span>
             <span className="flex items-center gap-1.5 text-[11px] sm:text-[12px] text-gray-500 font-medium">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
               </svg>
-              Perfect for any occasion
+              {heroText.occasion}
             </span>
           </div>
 
@@ -296,10 +330,10 @@ export default function HomePage() {
             <div className="flex items-center text-center gap-2 flex-wrap justify-center">
               <Image src="/Maskgroup.png" alt="Free shipping" width={46} height={34} />
               <span className="text-[14px] sm:text-[15px] font-bold text-[#1A1A2E]">
-                Free shipping in Germany
+                {heroText.freeShipping}
               </span>
             </div>
-            <p className="text-[12px] text-gray-400 m-0 text-center">Fast delivery to Austria and Switzerland.</p>
+            <p className="text-[12px] text-gray-400 m-0 text-center">{heroText.fastDelivery}</p>
           </div>
         </div>
       </section>

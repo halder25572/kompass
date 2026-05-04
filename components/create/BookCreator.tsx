@@ -32,12 +32,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// ── Data ─────────────────────────────────────────────────
-const fallbackOccasions = [
-    { id: 1, name: "Birthday", image: "", status: 1, sub_occasions: [{ id: 1, occasion_id: 1, name: "Birthday", image: "", status: 1 }, { id: 3, occasion_id: 1, name: "Anniversary", image: "", status: 1 }] },
-    { id: 2, name: "School", image: "", status: 1, sub_occasions: [{ id: 2, occasion_id: 2, name: "Farewell Teacher", image: "", status: 1 }] },
-];
-
 function renderOccasionIcon(name: string) {
     switch (name) {
         case "Birthday":
@@ -433,7 +427,7 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
     const modalCardRef = useRef<HTMLDivElement>(null);
     const { data: occasionsResponse } = useOccasionsQuery();
 
-    const occasions = occasionsResponse?.data?.length ? occasionsResponse.data : fallbackOccasions;
+    const occasions = occasionsResponse?.data ?? [];
 
     const ph = selectedOccasion
         ? (placeholdersByOccasion[selectedOccasion] ?? defaultPlaceholders)

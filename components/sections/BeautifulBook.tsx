@@ -5,6 +5,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Link from "next/link";
+import { useLanguage } from "@/hooks/useLanguage";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -61,6 +62,7 @@ const seasonalTheme = {
 };
 
 export default function TemplatesSection() {
+  const { language } = useLanguage();
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLSpanElement>(null);
@@ -69,9 +71,75 @@ export default function TemplatesSection() {
   const cardsRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
 
+  const localizedTemplates: Template[] =
+    language === "de"
+      ? [
+          {
+            id: 1,
+            title: "Klassische Eleganz",
+            description: "Zeitloses Design mit Serifenschrift und warmen Toenen.",
+            image: "/1.jpg",
+          },
+          {
+            id: 2,
+            title: "Warme Erinnerungen",
+            description: "Gemuetliche Layouts mit weichen Farbverlaeufen und Fotorahmen.",
+            image: "/2.jpg",
+          },
+          {
+            id: 3,
+            title: "Modern Minimal",
+            description: "Klare Linien und grosszuegiger Weissraum fuer mehr Wirkung.",
+            image: "/3.jpg",
+          },
+          {
+            id: 4,
+            title: "Frohes Fest",
+            description: "Verspielte Farben mit von Konfetti inspirierten Akzenten.",
+            image: "/4.jpg",
+          },
+          {
+            id: 5,
+            title: "Gartenparty",
+            description: "Frische Blumen und sanftes Gruen fuer ein luftiges Outdoor-Gefuehl.",
+            image: "/1.jpg",
+          },
+        ]
+      : templates;
+
+  const localizedSeasonalTheme: Template =
+    language === "de"
+      ? {
+          id: 99,
+          title: "Saisonales Highlight",
+          description: "Ein limitiertes Design fuer die aktuelle Jahreszeit.",
+          image: "/seasonal.jpg",
+          badge: "Saisonal",
+        }
+      : seasonalTheme;
+
   const displayedTemplates = SHOW_SEASONAL_THEME
-    ? [...templates, seasonalTheme]
-    : templates;
+    ? [...localizedTemplates, localizedSeasonalTheme]
+    : localizedTemplates;
+
+  const text =
+    language === "de"
+      ? {
+          badge: "Themen und Cover",
+          headingBefore: "Wunderschoene Buch",
+          headingAccent: "Designs",
+          subtitle:
+            "Waehle professionell gestaltete Themen und Cover, um dein Erinnerungsbuch besonders zu machen.",
+          browse: "Alle Themen und Cover ansehen",
+        }
+      : {
+          badge: "Themes and Covers",
+          headingBefore: "Beautiful Book",
+          headingAccent: "Designs",
+          subtitle:
+            "Choose from professionally crafted themes and covers to make your memory book truly special.",
+          browse: "Browse all themes and covers",
+        };
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -187,22 +255,22 @@ export default function TemplatesSection() {
             ref={badgeRef}
             className="text-[18px] font-bold tracking-[0.18em] uppercase text-[#7A1E3A]"
           >
-            Themes and Covers
+            {text.badge}
           </span>
           <h2
             ref={titleRef}
             className="text-3xl sm:text-4xl font-extrabold text-[#1a1a2e]"
           >
-            Beautiful Book{" "}
+            {text.headingBefore}{" "}
             <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
-              Designs
+              {text.headingAccent}
             </span>
           </h2>
           <p
             ref={subtitleRef}
             className="text-[#6b7280] text-sm sm:text-base max-w-md"
           >
-            Choose from professionally crafted themes and covers to make your memory book truly special.
+            {text.subtitle}
           </p>
         </div>
 
@@ -251,7 +319,7 @@ export default function TemplatesSection() {
             href="/cover"
             className="flex items-center gap-2 border border-[#7A1E3A] text-[#7A1E3A] hover:bg-[#7A1E3A] hover:text-white text-sm font-semibold px-7 py-3 rounded-full transition-all duration-200"
           >
-            Browse all themes and covers
+            {text.browse}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12" />
               <polyline points="12 5 19 12 12 19" />

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -10,75 +11,31 @@ import {
   useLoginMutation,
 } from "@/features/auth/components/hooks/services";
 import { toast } from "sonner";
-import { useGoogleLogin } from "@react-oauth/google";
+import { signIn } from "next-auth/react";
 
 
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { login } = useAuth();
   const { mutate, isPending } = useLoginMutation();
-  const { mutate: googleMutate, isPending: isGooglePending } = useGoogleLoginMutation();
+  const {isPending: isGooglePending } = useGoogleLoginMutation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const redirectTo = searchParams.get("redirect") || "/";
 
   const saveSessionAndRedirect = (apiUser: { id: number; name: string; email: string }, token: string) => {
     localStorage.setItem("token", token);
+    window.dispatchEvent(new Event("auth-token-updated"));
     localStorage.setItem("user", JSON.stringify(apiUser));
     login({
       id: String(apiUser.id),
       name: apiUser.name,
       email: apiUser.email,
     });
-    router.push("/");
-  };
-
-  const loginWithGoogle = useGoogleLogin({
-    flow: "implicit",
-    scope: "openid profile email",
-    onSuccess: (tokenResponse) => {
-      googleMutate(
-        { token: tokenResponse.access_token },
-        {
-          onSuccess: (response) => {
-            const apiUser = response.data.user;
-            const apiToken = response.data.access_token || response.data.token;
-
-            if (!apiToken) {
-              const message = "Google login succeeded but token is missing in response.";
-              toast.error(message);
-              setError(message);
-              return;
-            }
-
-            toast.success(response.message);
-            saveSessionAndRedirect(apiUser, apiToken);
-          },
-          onError: (mutationError) => {
-            toast.error(mutationError.message);
-            setError(mutationError.message);
-          },
-        }
-      );
-    },
-    onError: () => {
-      const message = "Google sign-in was cancelled or failed.";
-      toast.error(message);
-      setError(message);
-    },
-  });
-
-  const handleGoogleLogin = () => {
-    if (!process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID) {
-      const message = "Set NEXT_PUBLIC_GOOGLE_CLIENT_ID in .env to enable Google login.";
-      toast.error(message);
-      setError(message);
-      return;
-    }
-
-    setError("");
-    loginWithGoogle();
+    router.push(redirectTo);
   };
 
   const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
@@ -211,7 +168,7 @@ export default function LoginPage() {
             <div className="flex gap-3">
               <button
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={() => signIn("google", { callbackUrl: redirectTo })}
                 disabled={isGooglePending}
                 className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
               >

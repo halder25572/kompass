@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const ReadytoCreate = () => {
+    const { language } = useLanguage();
     const sectionRef = useRef<HTMLElement>(null);
     const headingRef = useRef<HTMLHeadingElement>(null);
     const paraRef = useRef<HTMLParagraphElement>(null);
@@ -84,6 +86,20 @@ const ReadytoCreate = () => {
         });
     };
 
+    const text = language === "de"
+        ? {
+            headingTop: "Bereit, etwas",
+            headingAccent: "Wunderschoenes zu erstellen?",
+            body: "Beginne noch heute Erinnerungen zu sammeln und ueberrasche jemanden mit einem einzigartigen Buch, das fuer immer bleibt.",
+            cta: "Erstes Buch erstellen",
+        }
+        : {
+            headingTop: "Ready to Create Something",
+            headingAccent: "Beautiful?",
+            body: "Start collecting memories today and surprise someone with a one-of-a-kind book they'll treasure forever.",
+            cta: "Create Your First Book",
+        };
+
     return (
         <section ref={sectionRef} className="py-18 bg-[#EEE]">
             <div className="max-w-7xl mx-auto text-center px-4">
@@ -91,9 +107,9 @@ const ReadytoCreate = () => {
                     ref={headingRef}
                     className="text-2xl lg:text-[36px] font-extrabold leading-snug"
                 >
-                    Ready to Create Something <br />
+                    {text.headingTop} <br />
                     <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
-                        Beautiful?
+                        {text.headingAccent}
                     </span>
                 </h1>
 
@@ -101,8 +117,7 @@ const ReadytoCreate = () => {
                     ref={paraRef}
                     className="text-[#9CA3AF] text-[16px] mt-1.5"
                 >
-                    Start collecting memories today and surprise someone with a <br className="hidden sm:block" />
-                    one-of-a-kind book they&apos;ll treasure forever.
+                    {text.body}
                 </p>
 
                 <Link
@@ -114,7 +129,7 @@ const ReadytoCreate = () => {
                     onMouseLeave={handleBtnLeave}
                     onClick={handleBtnClick}
                 >
-                    Create Your First Book
+                    {text.cta}
                     <svg
                         className="btn-arrow"
                         width="16" height="16"
