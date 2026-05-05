@@ -1,54 +1,4 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-// /* eslint-disable react-hooks/set-state-in-effect */
-// 'use client';
-
-// import { useState, useEffect } from 'react';
-
-// interface User {
-//   id: string;
-//   email: string;
-//   name: string;
-//   avatar?: string | null;
-// }
-
-// export function useAuth() {
-//   const [user, setUser] = useState<User | null>(null);
-//   const [isLoading, setIsLoading] = useState(true);
-
-//   useEffect(() => {
-//     // Check if user is logged in from localStorage or API
-//     const storedUser = localStorage.getItem('user');
-//     if (storedUser) {
-//       try {
-//         setUser(JSON.parse(storedUser));
-//       } catch {
-//         setUser(null);
-//       }
-//     }
-//     setIsLoading(false);
-//   }, []);
-
-//   const login = (userData: User) => {
-//     setUser(userData);
-//     localStorage.setItem('user', JSON.stringify(userData));
-//   };
-
-//   const logout = () => {
-//     setUser(null);
-//     localStorage.removeItem('user');
-//   };
-
-//   return {
-//     user,
-//     isLoading,
-//     login,
-//     logout,
-//     isAuthenticated: !!user,
-//   };
-// }
-
-
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -78,7 +28,7 @@ export function useAuth() {
     if (status !== 'loading') setIsLoading(false);
   }, [status]);
 
-  // Google login → session থেকে, Email login → localStorage থেকে
+  // Google login → from session; Email login → from localStorage
   const user: User | null = session?.user
     ? {
         id: session.user.email ?? '',

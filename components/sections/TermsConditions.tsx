@@ -82,20 +82,18 @@ function splitDescription(description: string) {
     .filter(Boolean);
 }
 
-function SectionCard({ section, active }: { section: LocalTermsSection; active: boolean }) {
+function SectionCard({ section, active, ui }: { section: LocalTermsSection; active: boolean; ui: { email: string } }) {
   return (
     <article
       id={section.id}
-      className={`group scroll-mt-28 rounded-2xl border transition-all duration-300 ${
-        active
+      className={`group scroll-mt-28 rounded-2xl border transition-all duration-300 ${active
           ? "border-[#BF003A]/20 bg-white shadow-[0_8px_32px_rgba(191,0,58,0.08)]"
           : "border-[#E8E2DC] bg-white/60 hover:bg-white hover:border-[#D5CBC4] hover:shadow-[0_4px_20px_rgba(0,0,0,0.06)]"
-      }`}
+        }`}
     >
       <div className="flex items-start gap-5 p-6 sm:p-8">
-        <span className={`shrink-0 font-mono text-[11px] font-bold tracking-widest mt-1 transition-colors duration-200 ${
-          active ? "text-[#BF003A]" : "text-[#C4B5AC] group-hover:text-[#A89590]"
-        }`}>
+        <span className={`shrink-0 font-mono text-[11px] font-bold tracking-widest mt-1 transition-colors duration-200 ${active ? "text-[#BF003A]" : "text-[#C4B5AC] group-hover:text-[#A89590]"
+          }`}>
           {section.index}
         </span>
 
@@ -116,9 +114,8 @@ function SectionCard({ section, active }: { section: LocalTermsSection; active: 
 
               return (
                 <li key={i} className="flex items-start gap-3">
-                  <span className={`mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full transition-colors duration-200 ${
-                    active ? "bg-[#BF003A]" : "bg-[#D1C7C0] group-hover:bg-[#BF003A]/50"
-                  }`} />
+                  <span className={`mt-1.5 shrink-0 w-1.5 h-1.5 rounded-full transition-colors duration-200 ${active ? "bg-[#BF003A]" : "bg-[#D1C7C0] group-hover:bg-[#BF003A]/50"
+                    }`} />
                   <span className="text-[13.5px] sm:text-[14.5px] text-[#4B5563] leading-[1.75]">
                     {email ? (
                       <>
@@ -294,11 +291,10 @@ export default function TermsConditionsSection() {
                   <button
                     key={section.id}
                     onClick={() => scrollTo(section.id)}
-                    className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-left transition-all duration-200 text-[12.5px] font-medium cursor-pointer border-none ${
-                      activeId === section.id
+                    className={`w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-left transition-all duration-200 text-[12.5px] font-medium cursor-pointer border-none ${activeId === section.id
                         ? "bg-[#BF003A]/8 text-[#BF003A]"
                         : "text-[#78716C] hover:text-[#1A1A2E] hover:bg-[#F5F0EC] bg-transparent"
-                    }`}
+                      }`}
                   >
                     <span className={`font-mono text-[10px] font-bold shrink-0 ${activeId === section.id ? "text-[#BF003A]" : "text-[#C4B5AC]"}`}>
                       {section.index}
@@ -321,7 +317,13 @@ export default function TermsConditionsSection() {
               </div>
             ) : (
               sections.map((section) => (
-                <SectionCard key={section.id} section={section} active={activeId === section.id} />
+                // <SectionCard key={section.id} section={section} active={activeId === section.id} />
+                <SectionCard
+                  key={section.id}
+                  section={section}
+                  active={activeId === section.id}
+                  ui={{ email: "your@email.com" }}  // pass the required ui prop
+                />
               ))
             )}
 
