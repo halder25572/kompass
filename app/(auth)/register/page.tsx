@@ -5,15 +5,49 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useRegisterMutation } from "@/features/auth/components/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
+  const { language } = useLanguage();
   const router = useRouter();
   const { mutate, isPending } = useRegisterMutation();
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const text = language === "de"
+    ? {
+      leftTitle: "Erstelle ein persoenliches Geschenk gemeinsam.",
+      leftSubtitle: "Schliesse dich tausenden Menschen an, die ihre schoensten Momente in hochwertige gedruckte Buecher verwandelt haben.",
+      headerTag: "Erstelle ein wunderschoenes Erinnerungsbuch",
+      title: "Konto erstellen",
+      subtitle: "Beginne in wenigen Minuten mit deinem Erinnerungsbuch",
+      fullName: "Vollstaendiger Name",
+      email: "E-Mail",
+      password: "Passwort",
+      signingUp: "Registrierung laeuft...",
+      signUp: "Registrieren ->",
+      continueWith: "oder weiter mit",
+      hasAccount: "Bereits ein Konto?",
+      login: "Anmelden",
+    }
+    : {
+      leftTitle: "Create a personal gift made together.",
+      leftSubtitle: "Join thousands of people who’ve turned their favorite moments into beautiful printed books.",
+      headerTag: "Create Amazing Memory Book",
+      title: "Create your account",
+      subtitle: "Start creating memory books in minutes",
+      fullName: "Full Name",
+      email: "Email",
+      password: "Password",
+      signingUp: "Signing up...",
+      signUp: "Sign Up ->",
+      continueWith: "or continue with",
+      hasAccount: "Already have an account?",
+      login: "Log in",
+    };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,10 +97,10 @@ export default function RegisterPage() {
           {/* Bottom Text */}
           <div>
             <h2 className="text-3xl font-bold leading-tight mb-2">
-              Create a personal gift made together.
+              {text.leftTitle}
             </h2>
             <p className="text-sm text-gray-200 max-w-sm">
-              Join thousands of people who’ve turned their favorite moments into beautiful printed books.
+              {text.leftSubtitle}
             </p>
           </div>
         </div>
@@ -79,14 +113,14 @@ export default function RegisterPage() {
 
           {/* Header */}
           <p className="text-sm text-[#7A1E3A] mb-2">
-            ✦ Create Amazing Memory Book
+            ✦ {text.headerTag}
           </p>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Create your account
+            {text.title}
           </h1>
           <p className="text-sm text-gray-500 mb-6">
-            Start creating memory books in minutes
+            {text.subtitle}
           </p>
 
           {/* Form */}
@@ -94,7 +128,7 @@ export default function RegisterPage() {
 
             {/* Full Name */}
             <div>
-              <label className="text-sm text-gray-700">Full Name</label>
+              <label className="text-sm text-gray-700">{text.fullName}</label>
               <input
                 type="text"
                 placeholder="Jane Doe"
@@ -107,7 +141,7 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div>
-              <label className="text-sm text-gray-700">Email</label>
+              <label className="text-sm text-gray-700">{text.email}</label>
               <input
                 type="email"
                 placeholder="jane@example.com"
@@ -120,7 +154,7 @@ export default function RegisterPage() {
 
             {/* Password */}
             <div>
-              <label className="text-sm text-gray-700">Password</label>
+              <label className="text-sm text-gray-700">{text.password}</label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -139,13 +173,13 @@ export default function RegisterPage() {
               disabled={isPending}
               className="w-full mt-2 cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
-              {isPending ? "Signing up..." : "Sign Up →"}
+              {isPending ? text.signingUp : text.signUp}
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-gray-300" />
-              <span className="text-xs text-gray-400">or continue with</span>
+              <span className="text-xs text-gray-400">{text.continueWith}</span>
               <div className="flex-1 h-px bg-gray-300" />
             </div>
 
@@ -161,9 +195,9 @@ export default function RegisterPage() {
 
             {/* Login */}
             <p className="text-center text-xs text-gray-500 mt-4">
-              Already have an account?{" "}
+              {text.hasAccount}{" "}
               <Link href="/login" className="text-[#7A1E3A] font-medium">
-                Log in
+                {text.login}
               </Link>
             </p>
 

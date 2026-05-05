@@ -40,6 +40,8 @@
     FaqsResponse,
     ContactPayload,
     ContactResponse,
+    ApplyCouponPayload,
+    AppliedCouponResponse,
 } from "@/types/api";
 
 // Re-export types for backward compatibility
@@ -85,6 +87,8 @@ export type {
     FaqsResponse,
     ContactPayload,
     ContactResponse,
+    ApplyCouponPayload,
+    AppliedCouponResponse,
 };
 
 type ApiErrorShape = {
@@ -119,7 +123,12 @@ function getAuthToken() {
         return "";
     }
 
-    return localStorage.getItem("token") || "";
+    return (
+        localStorage.getItem("authToken") ||
+        localStorage.getItem("token") ||
+        localStorage.getItem("accessToken") ||
+        ""
+    );
 }
 
 // ── Safe JSON parser (handles empty body & non-JSON responses) ───────────────
@@ -418,22 +427,50 @@ export async function updateLanguageUser(
         throw new Error("Authentication token is missing.");
     }
 
-    const response = await fetch(`${BASE_URL}/user/update_language`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+    const attempts: Array<{ headers: Record<string, string>; body: BodyInit }> = [
+        {
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-    });
+        {
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+                "Accept": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: new URLSearchParams({ language: payload.language }).toString(),
+        },
+    ];
 
-    const result = (await response.json()) as UpdateLanguageResponse;
+    let lastError = "Failed to update language";
 
-    if (!response.ok || !result.success) {
-        throw new Error(result?.message || "Failed to update language");
+    for (const attempt of attempts) {
+        const response = await fetch(`${BASE_URL}/user/update_language`, {
+            method: "POST",
+            cache: "no-store",
+            headers: attempt.headers,
+            body: attempt.body,
+        });
+
+        let result: UpdateLanguageResponse | null = null;
+        try {
+            result = await safeParseJson<UpdateLanguageResponse>(response);
+        } catch {
+            result = null;
+        }
+
+        if (result && response.ok && result.success) {
+            return result;
+        }
+
+        lastError = result?.message || `Language update failed (HTTP ${response.status})`;
     }
 
-    return result;
+    throw new Error(lastError);
 }
 
 export async function fetchOccasions(): Promise<OccasionsResponse> {
@@ -871,4 +908,29 @@ export async function submitContactMessage(payload: ContactPayload): Promise<Con
     }
 
     return result;
+    }
+
+    export async function applyCoupon(payload: ApplyCouponPayload): Promise<AppliedCouponResponse> {
+        if (!BASE_URL) {
+            throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+        }
+
+        const token = getAuthToken();
+
+        const response = await fetch(`${BASE_URL}/coupons/apply`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const result = (await response.json()) as AppliedCouponResponse;
+
+        if (!response.ok || !result.success) {
+            throw new Error(result?.message || "Failed to apply coupon");
+        }
+
+        return result;
 }

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import gsap from "gsap";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // ─── DATA ──────────────────────────────────────────────────────────────────────
 const themes = [
@@ -81,12 +82,64 @@ function Card({ item, btnLabel }: { item: Item; btnLabel: string }) {
 
 // ─── PAGE ──────────────────────────────────────────────────────────────────────
 export default function ThemesAndCoversPage() {
+  const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<"themes" | "covers">("themes");
   const gridRef   = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
 
-  const items    = activeTab === "themes" ? themes : covers;
-  const btnLabel = activeTab === "themes" ? "Use This Theme" : "Use This Cover";
+  const localizedThemes = language === "de"
+    ? [
+      { id: 1, title: "Warm & nostalgisch", tag: "Goldene Toene", detail: "Bernsteinfarben, sanfte Texturen und Vintage-Layouts wie ein altes Fotoalbum.", image: "/icon/1.jpg", badge: "Beliebt" },
+      { id: 2, title: "Modern minimal", tag: "Klare Linien", detail: "Viel Weissraum, starke Typografie und dezente Akzente fuer maximalen Fokus.", image: "/icon/2.jpg", badge: "Trend" },
+      { id: 3, title: "Blumenromantik", tag: "Sanfte Botanik", detail: "Zarte Blumenmotive und warme Farben fuer eine liebevolle Stimmung.", image: "/icon/3.jpg", badge: "Beliebt" },
+      { id: 4, title: "Himmelstraum", tag: "Sterne & Himmel", detail: "Nachtblaue Farbverlaeufe und Sterne fuer besondere Meilensteine.", image: "/icon/4.jpg", badge: "Neu" },
+      { id: 5, title: "Tropischer Moment", tag: "Kräftig & bunt", detail: "Lebendige Farben und Blaetter fuer sonnige Feiern und Abenteuer.", image: "/icon/5.jpg", badge: "Lebendig" },
+      { id: 6, title: "Eleganter Marmor", tag: "Luxurioes", detail: "Marmorstruktur mit Goldakzenten fuer einen zeitlosen Premium-Look.", image: "/icon/6.jpg", badge: "Premium" },
+    ]
+    : themes;
+
+  const localizedCovers = language === "de"
+    ? [
+      { id: 1, title: "Einfarbig", tag: "Minimal", detail: "Ein klares Cover in einer Farbe, das deinen Titel in den Fokus stellt.", image: "/icon/11.jpg", badge: "Minimal" },
+      { id: 2, title: "Sanftes Muster", tag: "Subtile Struktur", detail: "Dezente Muster bringen Waerme, ohne Fotos zu ueberladen.", image: "/icon/12.jpg", badge: "Beliebt" },
+      { id: 3, title: "Vollfoto", tag: "Persoenlich", detail: "Ein starkes Foto auf dem ganzen Cover fuer maximale Persoenlichkeit.", image: "/icon/15.jpg", badge: "Beliebt" },
+      { id: 4, title: "Split / Duo-Tone", tag: "Editorial", detail: "Zwei Kontrastfarben fuer einen modernen, editoriellen Look.", image: "/icon/14.jpg", badge: "Trend" },
+      { id: 5, title: "Foto mit Rahmen", tag: "Klassischer Rahmen", detail: "Dein Foto in einem eleganten Rahmen - klassisch und stilvoll.", image: "/icon/15.jpg", badge: "Klassisch" },
+    ]
+    : covers;
+
+  const text = language === "de"
+    ? {
+      btnTheme: "Dieses Thema nutzen",
+      btnCover: "Dieses Cover nutzen",
+      customize: "Buch personalisieren",
+      titleBefore: "Themen &",
+      titleAccent: "Cover",
+      subtitle: "Waehle ein Innenthema fuer die Stimmung und dann ein Cover, das zu dir passt.",
+      tabThemes: "Themen",
+      tabCovers: "Cover",
+      themesHint: "Waehle ein Thema fuer Seitenlayout, Farben und dekorative Details.",
+      coversHint: "Entdecke fuenf Coverstile fuer dein ganz persoenliches Erinnerungsbuch.",
+      ready: "Bereit fuer dein Buch?",
+      start: "Buch starten",
+    }
+    : {
+      btnTheme: "Use This Theme",
+      btnCover: "Use This Cover",
+      customize: "Customize Your Book",
+      titleBefore: "Themes &",
+      titleAccent: "Covers",
+      subtitle: "Pick an interior theme to set the mood, then choose a cover style to make it yours.",
+      tabThemes: "Themes",
+      tabCovers: "Covers",
+      themesHint: "Choose a theme that flows through every page — layouts, color palette, and decorative details.",
+      coversHint: "Browse five distinct cover styles — each a different way to make your memory book feel uniquely yours.",
+      ready: "Ready to create your book? Choose your style inside.",
+      start: "Start Your Book",
+    };
+
+  const items    = activeTab === "themes" ? localizedThemes : localizedCovers;
+  const btnLabel = activeTab === "themes" ? text.btnTheme : text.btnCover;
 
   // header entrance animation
   useEffect(() => {
@@ -122,18 +175,18 @@ export default function ThemesAndCoversPage() {
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2" strokeLinecap="round">
               <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
-            <span className="text-[12px] font-semibold text-[#7A1E3A]">Customize Your Book</span>
+            <span className="text-[12px] font-semibold text-[#7A1E3A]">{text.customize}</span>
           </div>
 
           <h1 className="text-[clamp(32px,5vw,54px)] font-extrabold text-[#1A1A2E] leading-[1.1] tracking-tight mb-3.5">
-            Themes &{" "}
+            {text.titleBefore}{" "}
             <span className="bg-linear-to-r from-[#BF003A] to-[#59001C] bg-clip-text text-transparent">
-              Covers
+              {text.titleAccent}
             </span>
           </h1>
 
           <p className="text-[14px] text-gray-400 max-w-110 mx-auto leading-[1.65]">
-            Pick an interior theme to set the mood, then choose a cover style to make it yours.
+            {text.subtitle}
           </p>
         </div>
 
@@ -155,7 +208,7 @@ export default function ThemesAndCoversPage() {
                   activeTab === tab ? "text-white" : "text-gray-500"
                 }`}
               >
-                {tab === "themes" ? "Themes" : "Covers"}
+                {tab === "themes" ? text.tabThemes : text.tabCovers}
               </button>
             ))}
           </div>
@@ -164,8 +217,8 @@ export default function ThemesAndCoversPage() {
         {/* ── Tab subtitle ── */}
         <p className="text-center text-[13px] text-gray-400 mb-9 leading-[1.6]">
           {activeTab === "themes"
-            ? "Choose a theme that flows through every page — layouts, color palette, and decorative details."
-            : "Browse five distinct cover styles — each a different way to make your memory book feel uniquely yours."}
+            ? text.themesHint
+            : text.coversHint}
         </p>
 
         {/* ── Cards Grid ── */}
@@ -180,13 +233,13 @@ export default function ThemesAndCoversPage() {
         {/* ── CTA ── */}
         <div className="text-center">
           <p className="text-[14px] text-gray-500 mb-4">
-            Ready to create your book? Choose your style inside.
+            {text.ready}
           </p>
           <Link
             href="/create"
             className="inline-block bg-linear-to-r from-[#BF003A] to-[#59001C] text-white text-[15px] font-bold px-11 py-3.5 rounded-full no-underline shadow-[0_4px_20px_rgba(191,0,58,0.25)] transition-[opacity,transform] duration-150 hover:opacity-90 hover:-translate-y-0.5"
           >
-            Start Your Book
+            {text.start}
           </Link>
         </div>
 

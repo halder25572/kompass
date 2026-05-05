@@ -5,13 +5,45 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useResetPasswordMutation } from "@/features/auth/components/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function ResetPasswordPage() {
+  const { language } = useLanguage();
   const router = useRouter();
   const { mutate, isPending } = useResetPasswordMutation();
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
+
+  const text = language === "de"
+    ? {
+      requestOtpAgain: "Bitte fordere den OTP-Code erneut ueber Passwort zurücksetzen an.",
+      passwordMismatch: "Passwort und Passwortbestaetigung stimmen nicht ueberein.",
+      leftTitle: "Sichere deine Erinnerungen.",
+      leftSubtitle: "Erstelle ein starkes neues Passwort, um deine persoenlichen Geschichten und wertvollen Momente zu schuetzen.",
+      title: "Passwort zuruecksetzen",
+      subtitle: "Gib unten dein neues Passwort ein und bestaetige es",
+      newPassword: "Neues Passwort",
+      newPasswordPlaceholder: "Neues Passwort eingeben",
+      confirmPassword: "Neues Passwort bestaetigen",
+      confirmPasswordPlaceholder: "Neues Passwort bestaetigen",
+      updating: "Wird aktualisiert...",
+      updatePassword: "Schluessel Passwort aktualisieren",
+    }
+    : {
+      requestOtpAgain: "Please request OTP again from reset password.",
+      passwordMismatch: "Password and confirm password do not match.",
+      leftTitle: "Secure your memories.",
+      leftSubtitle: "Create a strong new password to keep your personal stories and cherished moments safe.",
+      title: "Reset Your Password",
+      subtitle: "Enter and confirm your new password below",
+      newPassword: "New Password",
+      newPasswordPlaceholder: "Enter new password",
+      confirmPassword: "Confirm New Password",
+      confirmPasswordPlaceholder: "Confirm new password",
+      updating: "Updating...",
+      updatePassword: "Update Password",
+    };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -20,14 +52,14 @@ export default function ResetPasswordPage() {
     const email = localStorage.getItem("reset_email") || "";
 
     if (!email) {
-      const message = "Please request OTP again from reset password.";
+      const message = text.requestOtpAgain;
       toast.error(message);
       setError(message);
       return;
     }
 
     if (password !== confirm) {
-      const message = "Password and confirm password do not match.";
+      const message = text.passwordMismatch;
       toast.error(message);
       setError(message);
       return;
@@ -80,10 +112,10 @@ export default function ResetPasswordPage() {
           {/* Bottom text */}
           <div>
             <h2 className="text-3xl font-bold mb-3">
-              Secure your memories.
+              {text.leftTitle}
             </h2>
             <p className="text-sm text-gray-200 max-w-sm">
-              Create a strong new password to keep your personal stories and cherished moments safe.
+              {text.leftSubtitle}
             </p>
           </div>
         </div>
@@ -101,10 +133,10 @@ export default function ResetPasswordPage() {
 
           {/* Title */}
           <h1 className="text-2xl font-semibold text-center text-gray-900 mb-2">
-            Reset Your Password
+            {text.title}
           </h1>
           <p className="text-sm text-gray-500 text-center mb-8">
-            Enter and confirm your new password below
+            {text.subtitle}
           </p>
 
           {/* FORM */}
@@ -113,11 +145,11 @@ export default function ResetPasswordPage() {
             {/* New Password */}
             <div>
               <label className="text-sm font-medium text-gray-700">
-                New Password
+                {text.newPassword}
               </label>
               <input
                 type="password"
-                placeholder="Enter new password"
+                placeholder={text.newPasswordPlaceholder}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 w-full rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
@@ -128,11 +160,11 @@ export default function ResetPasswordPage() {
             {/* Confirm Password */}
             <div>
               <label className="text-sm font-medium text-gray-700">
-                Confirm New Password
+                {text.confirmPassword}
               </label>
               <input
                 type="password"
-                placeholder="Confirm new password"
+                placeholder={text.confirmPasswordPlaceholder}
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
                 className="mt-1 w-full rounded-md px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#BF003A]"
@@ -148,7 +180,7 @@ export default function ResetPasswordPage() {
               disabled={isPending}
               className="w-full cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] hover:opacity-90 transition text-white py-2.5 rounded-md font-medium flex items-center justify-center gap-2"
             >
-              {isPending ? "Updating..." : "🔑 Update Password"}
+              {isPending ? text.updating : `🔑 ${text.updatePassword}`}
             </button>
           </form>
 

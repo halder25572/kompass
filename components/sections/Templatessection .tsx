@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import gsap from "gsap";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const templates = [
     { id: 1, title: "Classic Elegance", description: "Refined design with typography and warm tones.", image: "/images/t1.jpg", popular: true },
@@ -29,10 +30,45 @@ function StarIcon() {
 }
 
 export default function SampleThemesAndCovers() {
+    const { language } = useLanguage();
     const router = useRouter();
     const headerRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const paginationRef = useRef<HTMLDivElement>(null);
+
+    const localizedTemplates = language === "de"
+        ? [
+            { id: 1, title: "Klassische Eleganz", description: "Elegantes Design mit warmer Typografie.", image: "/images/t1.jpg", popular: true },
+            { id: 2, title: "Warme Erinnerungen", description: "Sanfte Farbverlaeufe und fotofreundliches Layout.", image: "/images/t2.jpg", popular: true },
+            { id: 3, title: "Modern minimal", description: "Klares und ruhiges Design fuer jeden Anlass.", image: "/images/t3.jpg", popular: false },
+            { id: 4, title: "Frohe Feier", description: "Buntes, lebendiges Layout fuer besondere Momente.", image: "/images/t4.jpg", popular: true },
+            { id: 5, title: "Gartenparty", description: "Frische, natuerliche Gestaltung mit sanften Toenen.", image: "/images/t5.jpg", popular: false },
+        ]
+        : templates;
+
+    const text = language === "de"
+        ? {
+            titleBefore: "Beispiel Themen &",
+            titleAccent: "Cover",
+            subtitle: "Entdecke Themen und Cover-Stile - passend fuer jeden Anlass.",
+            popular: "Beliebt",
+            useCover: "Dieses Cover nutzen",
+            seasonalBefore: "Saisonale",
+            seasonalAccent: "Cover",
+            seasonalSubtitle: "Besondere Designs fuer die jeweilige Saison.",
+            browseAll: "Alle Themen und Cover ansehen",
+        }
+        : {
+            titleBefore: "Sample Themes &",
+            titleAccent: "Covers",
+            subtitle: "Browse our example themes and cover styles — suitable for any occasion.",
+            popular: "Popular",
+            useCover: "Use This Cover",
+            seasonalBefore: "Seasonal",
+            seasonalAccent: "Covers",
+            seasonalSubtitle: "Special designs for the season.",
+            browseAll: "Browse all themes and covers",
+        };
 
     // Header animation
     useEffect(() => {
@@ -140,19 +176,19 @@ export default function SampleThemesAndCovers() {
             {/* Header */}
             <div ref={headerRef} className="text-center mb-8 px-4">
                 <h2 className="text-[32px] sm:text-[44px] md:text-[56px] font-extrabold text-[#1a1a2e]">
-                    Sample Themes &{" "}
+                    {text.titleBefore}{" "}
                     <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
-                        Covers
+                        {text.titleAccent}
                     </span>
                 </h2>
                 <p className="text-[14px] sm:text-[16px] text-[#9CA3AF] mt-2">
-                    Browse our example themes and cover styles — suitable for any occasion.
+                    {text.subtitle}
                 </p>
             </div>
 
             {/* Main Grid */}
             <div ref={gridRef} className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 px-4">
-                {templates.map((template) => (
+                {localizedTemplates.map((template) => (
                     <div
                         key={template.id}
                         className="tmpl-card bg-white rounded-2xl overflow-hidden cursor-pointer"
@@ -169,7 +205,7 @@ export default function SampleThemesAndCovers() {
                             />
                             {template.popular && (
                                 <div className="absolute top-3 right-3 flex items-center gap-1 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                                    <StarIcon /> Popular
+                                    <StarIcon /> {text.popular}
                                 </div>
                             )}
                         </div>
@@ -186,7 +222,7 @@ export default function SampleThemesAndCovers() {
                                 onClick={() => handleUseCover(template.id)}
                                 className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
                             >
-                                Use This Cover
+                                {text.useCover}
                             </button>
                         </div>
                     </div>
@@ -198,12 +234,12 @@ export default function SampleThemesAndCovers() {
                 <div className="max-w-5xl mx-auto mt-14 px-4">
                     <div className="text-center mb-6">
                         <h3 className="text-[22px] font-extrabold text-[#1a1a2e]">
-                            🎄 Seasonal{" "}
+                            🎄 {text.seasonalBefore}{" "}
                             <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
-                                Covers
+                                {text.seasonalAccent}
                             </span>
                         </h3>
-                        <p className="text-[13px] text-[#9CA3AF] mt-1">Special designs for the season.</p>
+                        <p className="text-[13px] text-[#9CA3AF] mt-1">{text.seasonalSubtitle}</p>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                         {seasonalTemplates.map((template) => (
@@ -229,7 +265,7 @@ export default function SampleThemesAndCovers() {
                                         onClick={() => handleUseCover(template.id)}
                                         className="w-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[12px] font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity cursor-pointer"
                                     >
-                                        Use This Cover
+                                        {text.useCover}
                                     </button>
                                 </div>
                             </div>
@@ -244,7 +280,7 @@ export default function SampleThemesAndCovers() {
                     onClick={() => router.push("/sample-themes-and-covers")}
                     className="px-6 py-2.5 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] cursor-pointer text-white rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity"
                 >
-                    Browse all themes and covers
+                    {text.browseAll}
                 </button>
             </div>
 

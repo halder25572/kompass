@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTermsConditionsQuery } from "@/features/terms/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type LocalTermsSection = {
   id: string;
@@ -121,7 +122,7 @@ function SectionCard({ section, active }: { section: LocalTermsSection; active: 
                   <span className="text-[13.5px] sm:text-[14.5px] text-[#4B5563] leading-[1.75]">
                     {email ? (
                       <>
-                        <span className="font-semibold text-[#374151]">Email:</span>{" "}
+                        <span className="font-semibold text-[#374151]">{ui.email}</span>{" "}
                         <a
                           href={`mailto:${email}`}
                           className="text-[#BF003A] underline underline-offset-2 hover:opacity-75 transition-opacity"
@@ -144,9 +145,44 @@ function SectionCard({ section, active }: { section: LocalTermsSection; active: 
 }
 
 export default function TermsConditionsSection() {
+  const { language } = useLanguage();
   const [activeId, setActiveId] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const { data, isLoading, error } = useTermsConditionsQuery();
+
+  const ui = language === "de"
+    ? {
+      email: "E-Mail:",
+      pill: "AGB",
+      titlePrefix: "Faire Bedingungen,",
+      titleAccent: "transparenter",
+      titleSuffix: "Service.",
+      subtitle: "Klare Regeln fuer die Nutzung unserer Plattform, Bestellungen und den Schutz aller Beteiligten.",
+      lastUpdated: "Zuletzt aktualisiert: 21. April 2026",
+      sections: "Abschnitte",
+      protected: "Verbraucherschutz",
+      contents: "Inhalte",
+      loading: "AGB werden geladen...",
+      legalDetails: "Mehr rechtliche Details?",
+      legalHint: "Besuche unser Impressum fuer den vollstaendigen rechtlichen Hinweis.",
+      imprint: "Impressum (Rechtlicher Hinweis)",
+    }
+    : {
+      email: "Email:",
+      pill: "Terms & Conditions",
+      titlePrefix: "Fair terms,",
+      titleAccent: "transparent",
+      titleSuffix: "service.",
+      subtitle: "Clear rules for using our platform, placing orders, and protecting everyone involved.",
+      lastUpdated: "Last updated: April 21, 2026",
+      sections: "Sections",
+      protected: "Consumer Protected",
+      contents: "Contents",
+      loading: "Loading terms and conditions...",
+      legalDetails: "Need more legal details?",
+      legalHint: "Visit our Imprint page for full legal notice.",
+      imprint: "Imprint (Legal Notice)",
+    };
 
   const sections = useMemo<LocalTermsSection[]>(() => {
     if (!data?.data) {
@@ -209,20 +245,20 @@ export default function TermsConditionsSection() {
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <polyline points="14 2 14 8 20 8" />
             </svg>
-            <span className="text-[11px] font-bold tracking-widest text-[#7A1E3A] uppercase">Terms &amp; Conditions</span>
+            <span className="text-[11px] font-bold tracking-widest text-[#7A1E3A] uppercase">{ui.pill}</span>
           </div>
 
           <h1 className="text-[clamp(38px,6vw,66px)] font-extrabold text-[#1A1A2E] leading-[1.06] tracking-[-1.5px] mb-5">
-            Fair terms,{" "}
+            {ui.titlePrefix}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10 text-[#BF003A]">transparent</span>
+              <span className="relative z-10 text-[#BF003A]">{ui.titleAccent}</span>
               <span className="absolute -bottom-1 left-0 w-full h-1.5 bg-[#BF003A]/12 rounded-full" />
             </span>
-            {" "}service.
+            {" "}{ui.titleSuffix}
           </h1>
 
           <p className="text-[15px] text-[#8B8480] max-w-md mx-auto leading-[1.7]">
-            Clear rules for using our platform, placing orders, and protecting everyone involved.
+            {ui.subtitle}
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
@@ -230,21 +266,21 @@ export default function TermsConditionsSection() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round">
                 <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
               </svg>
-              Last updated: April 21, 2026
+              {ui.lastUpdated}
             </span>
             <span className="w-px h-3 bg-[#D5CEC9]" />
             <span className="flex items-center gap-1.5 text-[12px] text-[#9B9490] font-medium">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" />
               </svg>
-              {sections.length || 9} Sections
+              {sections.length || 9} {ui.sections}
             </span>
             <span className="w-px h-3 bg-[#D5CEC9]" />
             <span className="flex items-center gap-1.5 text-[12px] text-[#9B9490] font-medium">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round">
                 <rect x="3" y="11" width="18" height="11" rx="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" />
               </svg>
-              Consumer Protected
+              {ui.protected}
             </span>
           </div>
         </div>
@@ -252,7 +288,7 @@ export default function TermsConditionsSection() {
         <div className="flex gap-8 items-start">
           <aside className="hidden lg:block w-52 shrink-0 sticky top-8">
             <div className="bg-white rounded-2xl border border-[#E8E2DC] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.05)]">
-              <p className="text-[10px] font-bold tracking-widest text-[#BF003A] uppercase px-2 mb-3">Contents</p>
+              <p className="text-[10px] font-bold tracking-widest text-[#BF003A] uppercase px-2 mb-3">{ui.contents}</p>
               <nav className="space-y-0.5">
                 {sections.map((section) => (
                   <button
@@ -277,7 +313,7 @@ export default function TermsConditionsSection() {
           <div className="flex-1 min-w-0 space-y-4">
             {isLoading ? (
               <div className="rounded-2xl border border-[#E8E2DC] bg-white p-6 sm:p-8 text-[#78716C] shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
-                Loading terms and conditions...
+                {ui.loading}
               </div>
             ) : error ? (
               <div className="rounded-2xl border border-[#E8E2DC] bg-white p-6 sm:p-8 text-[#B91C1C] shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
@@ -292,14 +328,14 @@ export default function TermsConditionsSection() {
             {!isLoading && !error && (
               <div className="rounded-2xl border border-[#E8E2DC] bg-white p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-0 sm:justify-between shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
                 <div>
-                  <p className="text-[14px] font-semibold text-[#1A1A2E] mb-0.5">Need more legal details?</p>
-                  <p className="text-[13px] text-[#78716C]">Visit our Imprint page for full legal notice.</p>
+                  <p className="text-[14px] font-semibold text-[#1A1A2E] mb-0.5">{ui.legalDetails}</p>
+                  <p className="text-[13px] text-[#78716C]">{ui.legalHint}</p>
                 </div>
                 <Link
                   href="/Imprint"
                   className="shrink-0 inline-flex items-center gap-2 rounded-full bg-linear-to-r from-[#BF003A] to-[#59001C] px-6 py-2.5 text-[13px] font-bold text-white hover:opacity-90 transition-opacity no-underline"
                 >
-                  Imprint (Legal Notice)
+                  {ui.imprint}
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <line x1="5" y1="12" x2="19" y2="12" /><polyline points="12 5 19 12 12 19" />
                   </svg>

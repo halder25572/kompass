@@ -202,7 +202,54 @@ export interface OccasionsResponse {
     code: number;
 }
 
+// ── Coupon Interfaces ───────────────────────────────────────────────────────
+export interface Coupon {
+    id: number;
+    code: string;
+    discount: number;
+    discount_type?: string;
+    description?: string;
+    expiry_date?: string;
+    status: number;
+}
+
+export interface CouponsResponse {
+    success: boolean;
+    message: string;
+    data: Coupon[];
+    meta: Record<string, unknown>;
+    code: number;
+}
+
 export interface BookPageStyle {
+    export interface ApplyCouponPayload {
+        code: string;
+    }
+
+    export interface AppliedCoupon {
+        id: number;
+        code: string;
+        type: string;
+        value: string;
+        discount_amount: string;
+        min_order_amount: string;
+        max_discount: string | null;
+        usage_limit: string | null;
+        used_count: number;
+        start_date: string;
+        end_date: string;
+        is_active: boolean;
+    }
+
+    export interface AppliedCouponResponse {
+        success: boolean;
+        message: string;
+        data: AppliedCoupon;
+        meta: Record<string, unknown>;
+        code: number;
+    }
+
+    export interface BookPageStyle {
     id: number;
     occasion_id: number;
     occasion_name: string;

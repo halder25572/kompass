@@ -8,14 +8,44 @@ import {
   useResendOtpMutation,
   useVerifyOtpMutation,
 } from "@/features/auth/components/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function VerifyOtpPage() {
+  const { language } = useLanguage();
   const router = useRouter();
   const { mutate, isPending } = useVerifyOtpMutation();
   const { mutate: resendMutate, isPending: isResending } = useResendOtpMutation();
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [error, setError] = useState("");
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+
+  const text = language === "de"
+    ? {
+      requestOtpAgain: "Bitte fordere den OTP-Code erneut ueber Passwort zurücksetzen an.",
+      incompleteOtp: "Bitte gib den vollstaendigen 4-stelligen OTP-Code ein.",
+      leftTitle: "Bestaetige deine Identitaet",
+      leftSubtitle: "Gib den OTP-Code aus deiner E-Mail ein, um fortzufahren.",
+      title: "OTP eingeben",
+      subtitle: "Wir haben einen 4-stelligen Code an deine E-Mail gesendet",
+      verifying: "Wird verifiziert...",
+      verifyOtp: "OTP bestaetigen",
+      didntReceive: "Code nicht erhalten?",
+      resending: "Erneut senden...",
+      resend: "Erneut senden",
+    }
+    : {
+      requestOtpAgain: "Please request OTP again from reset password.",
+      incompleteOtp: "Please enter complete 4-digit OTP.",
+      leftTitle: "Verify your identity",
+      leftSubtitle: "Enter the OTP sent to your email to continue.",
+      title: "Enter OTP",
+      subtitle: "We’ve sent a 4-digit code to your email",
+      verifying: "Verifying...",
+      verifyOtp: "Verify OTP",
+      didntReceive: "Didn’t receive the code?",
+      resending: "Resending...",
+      resend: "Resend",
+    };
 
   const handleChange = (value: string, index: number) => {
     if (!/^\d?$/.test(value)) return;
@@ -44,14 +74,14 @@ export default function VerifyOtpPage() {
     const email = localStorage.getItem("reset_email") || "";
 
     if (!email) {
-      const message = "Please request OTP again from reset password.";
+      const message = text.requestOtpAgain;
       toast.error(message);
       setError(message);
       return;
     }
 
     if (otpValue.length !== 4) {
-      const message = "Please enter complete 4-digit OTP.";
+      const message = text.incompleteOtp;
       toast.error(message);
       setError(message);
       return;
@@ -79,7 +109,7 @@ export default function VerifyOtpPage() {
     const email = localStorage.getItem("reset_email") || "";
 
     if (!email) {
-      const message = "Please request OTP again from reset password.";
+      const message = text.requestOtpAgain;
       toast.error(message);
       setError(message);
       return;
@@ -121,10 +151,10 @@ export default function VerifyOtpPage() {
 
           <div>
             <h2 className="text-3xl font-bold mb-2">
-              Verify your identity
+              {text.leftTitle}
             </h2>
             <p className="text-sm text-gray-200">
-              Enter the OTP sent to your email to continue.
+              {text.leftSubtitle}
             </p>
           </div>
         </div>
@@ -144,10 +174,10 @@ export default function VerifyOtpPage() {
           </div>
 
           <h1 className="text-xl font-semibold text-gray-900 mb-1">
-            Enter OTP
+            {text.title}
           </h1>
           <p className="text-sm text-gray-500 mb-6">
-            We’ve sent a 4-digit code to your email
+            {text.subtitle}
           </p>
 
           <form onSubmit={handleVerify}>
@@ -176,19 +206,19 @@ export default function VerifyOtpPage() {
               disabled={isPending}
               className="w-full cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
-              {isPending ? "Verifying..." : "Verify OTP"}
+              {isPending ? text.verifying : text.verifyOtp}
             </button>
           </form>
 
           <p className="text-xs text-gray-500 mt-4">
-            Didn’t receive the code?{" "}
+            {text.didntReceive}{" "}
             <button
               type="button"
               onClick={handleResend}
               disabled={isResending}
               className="text-[#7A1E3A] cursor-pointer font-medium disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isResending ? "Resending..." : "Resend"}
+              {isResending ? text.resending : text.resend}
             </button>
           </p>
 

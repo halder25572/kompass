@@ -65,13 +65,18 @@ export default function Navbar() {
     setLanguage(language);
 
    
-    const token = window.localStorage.getItem("token");
+    const token =
+      window.localStorage.getItem("authToken") ||
+      window.localStorage.getItem("token") ||
+      window.localStorage.getItem("accessToken");
     if (token) {
       try {
         const result = await updateLanguageUser({ language });
         toast.success(result.message);
       } catch (error) {
         setLanguage(previousLanguage);
+        const message = error instanceof Error ? error.message : "Failed to update language";
+        toast.error(message);
         console.error("Language update failed:", error);
       }
     }

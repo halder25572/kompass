@@ -5,6 +5,7 @@ import gsap from "gsap";
 import { useFaqsQuery } from "@/features/faq/hooks/services";
 import { submitContactMessage } from "@/services/api";
 import { toast } from "sonner";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // ─── DATA ──────────────────────────────────────────────────────────────────────
 type FaqSectionItem = {
@@ -64,6 +65,7 @@ function FaqItem({ faq, index }: { faq: FaqSectionItem; index: number }) {
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function SupportPage() {
+  const { language } = useLanguage();
   const heroRef    = useRef<HTMLDivElement>(null);
   const faqRef     = useRef<HTMLDivElement>(null);
   const formRef    = useRef<HTMLDivElement>(null);
@@ -85,6 +87,76 @@ export default function SupportPage() {
   const [loading, setLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState("Thanks for reaching out. We'll get back to you within 2 business hours.");
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const text = language === "de"
+    ? {
+      fill: "Bitte Name, E-Mail und Nachricht ausfuellen.",
+      thank: "Danke! Wir melden uns bald bei dir.",
+      supportCenter: "Support-Center",
+      heroPrefix: "Wie koennen wir",
+      heroAccent: "helfen",
+      heroSuffix: "?",
+      loadingFaq: "FAQs werden geladen...",
+      getInTouch: "Kontakt",
+      sendMessage: "Nachricht senden",
+      heroSubtitle: "Durchsuche haeufige Fragen oder sende uns eine Nachricht - wir antworten meist innerhalb weniger Stunden.",
+      avgRate: "Durchschnittliche Zufriedenheit",
+      sent: "Nachricht gesendet!",
+      sendAnother: "Weitere Nachricht senden",
+      yourName: "Dein Name",
+      email: "E-Mail",
+      emailPlaceholder: "name@email.de",
+      supportDesc: "Ob Frage zur Bestellung, Druckqualitaet oder etwas anderem - wir helfen dir schnell weiter.",
+      statEmail: "E-Mail",
+      statHours: "Zeiten",
+      statHoursVal: "Mo-Fr, 9-18 Uhr",
+      statResponse: "Antwort",
+      statResponseVal: "Innerhalb von 2 Geschaeftsstunden",
+      selectTopic: "Thema auswaehlen...",
+      topic1: "Bestellung & Versand",
+      topic2: "Problem mit Druckqualitaet",
+      topic3: "Konto & Abrechnung",
+      topic4: "Problem beim Foto-Upload",
+      topic5: "Sonstiges",
+      sendBtn: "Nachricht senden ->",
+      sending: "Wird gesendet...",
+      agreeText: "Mit dem Absenden stimmst du unserer",
+      privacy: "Datenschutzerklaerung",
+    }
+    : {
+      fill: "Please fill in name, email, and message.",
+      thank: "Thank you! We will get back to you soon.",
+      supportCenter: "Support Center",
+      heroPrefix: "How can we",
+      heroAccent: "help",
+      heroSuffix: "you?",
+      loadingFaq: "Loading FAQs...",
+      getInTouch: "Get In Touch",
+      sendMessage: "Send a Message",
+      heroSubtitle: "Browse our frequently asked questions or send us a message — we typically respond within a few hours.",
+      avgRate: "Average satisfaction rate",
+      sent: "Message Sent!",
+      sendAnother: "Send another message",
+      yourName: "Your Name",
+      email: "Email",
+      emailPlaceholder: "john@email.com",
+      supportDesc: "Whether it's a question about your order, a print issue, or anything else — reach out and we'll sort it out.",
+      statEmail: "Email",
+      statHours: "Hours",
+      statHoursVal: "Mon–Fri, 9am–6pm",
+      statResponse: "Response",
+      statResponseVal: "Within 2 business hours",
+      selectTopic: "Select a topic...",
+      topic1: "Order & Shipping",
+      topic2: "Print Quality Issue",
+      topic3: "Account & Billing",
+      topic4: "Photo Upload Problem",
+      topic5: "Other",
+      sendBtn: "Send Message ->",
+      sending: "Sending...",
+      agreeText: "By submitting, you agree to our",
+      privacy: "Privacy Policy",
+    };
 
   // hero entrance
   useEffect(() => {
@@ -110,7 +182,7 @@ export default function SupportPage() {
   const handleSubmit = async (e: React.MouseEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
-      setSubmitError("Please fill in name, email, and message.");
+      setSubmitError(text.fill);
       return;
     }
 
@@ -125,8 +197,8 @@ export default function SupportPage() {
         message: form.message,
       });
 
-      setSubmitMessage(result.message || "Thank you! We will get back to you soon.");
-      toast.success(result.message || "Thank you! We will get back to you soon.", {
+      setSubmitMessage(result.message || text.thank);
+      toast.success(result.message || text.thank, {
         duration: 5000,
       });
       setSubmitted(true);
@@ -151,17 +223,17 @@ export default function SupportPage() {
           {/* pill */}
           <div className="inline-flex items-center gap-2 bg-white/8 border border-white/12 rounded-full px-4 py-1.5 mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-[#C0003C] animate-pulse" />
-            <span className="text-[11px] font-bold tracking-widest text-white/60 uppercase">Support Center</span>
+            <span className="text-[11px] font-bold tracking-widest text-white/60 uppercase">{text.supportCenter}</span>
           </div>
 
           <h1 className="text-[clamp(36px,6vw,62px)] font-bold text-white leading-[1.08] tracking-[-1px] mb-5">
-            How can we{" "}
-            <em className="not-italic text-[#C0003C]">help</em>
-            {" "}you?
+            {text.heroPrefix}{" "}
+            <em className="not-italic text-[#C0003C]">{text.heroAccent}</em>
+            {" "}{text.heroSuffix}
           </h1>
 
           <p className="text-[15px] text-white/50 leading-[1.7] max-w-md mx-auto">
-            Browse our frequently asked questions or send us a message — we typically respond within a few hours.
+            {text.heroSubtitle}
           </p>
 
           {/* quick stat chips */}
@@ -194,7 +266,7 @@ export default function SupportPage() {
 
           <div className="bg-white rounded-2xl overflow-hidden shadow-[0_2px_20px_rgba(0,0,0,0.06)] border border-[#EDE8E2]">
             {isLoading ? (
-              <div className="px-6 py-8 text-[14px] text-[#78716C]">Loading FAQs...</div>
+              <div className="px-6 py-8 text-[14px] text-[#78716C]">{text.loadingFaq}</div>
             ) : error ? (
               <div className="px-6 py-8 text-[14px] text-[#B91C1C]">{error.message}</div>
             ) : (
@@ -212,8 +284,8 @@ export default function SupportPage() {
               </svg>
             </div>
             <div>
-              <p className="text-[10px] font-bold tracking-widest text-[#C0003C] uppercase">Get In Touch</p>
-              <h2 className="text-[22px] font-bold text-[#1C1917] leading-tight">Send a Message</h2>
+              <p className="text-[10px] font-bold tracking-widest text-[#C0003C] uppercase">{text.getInTouch}</p>
+              <h2 className="text-[22px] font-bold text-[#1C1917] leading-tight">{text.sendMessage}</h2>
             </div>
           </div>
 
@@ -223,14 +295,14 @@ export default function SupportPage() {
               <div>
                 <h3 className="text-[17px] font-bold mb-2 text-black">We&apos;re here for you</h3>
                 <p className="text-[13px] leading-[1.7] mb-8 text-black">
-                  Whether it&apos;s a question about your order, a print issue, or anything else — reach out and we&apos;ll sort it out.
+                  {text.supportDesc}
                 </p>
 
                 <div className="space-y-5">
                   {[
-                    { icon: "✉", label: "Email", value: "support@memorybook.com" },
-                    { icon: "🕐", label: "Hours", value: "Mon–Fri, 9am–6pm" },
-                    { icon: "⏱", label: "Response", value: "Within 2 business hours" },
+                    { icon: "✉", label: text.statEmail, value: "support@memorybook.com" },
+                    { icon: "🕐", label: text.statHours, value: text.statHoursVal },
+                    { icon: "⏱", label: text.statResponse, value: text.statResponseVal },
                   ].map(item => (
                     <div key={item.label} className="flex items-start gap-3">
                       <span className="text-base mt-0.5">{item.icon}</span>
@@ -244,7 +316,7 @@ export default function SupportPage() {
               </div>
 
               <div className="mt-8 pt-6 border-t border-white/10">
-                <p className="text-[11px] text-black">Average satisfaction rate</p>
+                <p className="text-[11px] text-black">{text.avgRate}</p>
                 <div className="flex items-center gap-2 mt-1.5">
                   <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                     <div className="h-full w-[96%] bg-linear-to-r from-[#C0003C] to-[#FF4D7D] rounded-full" />
@@ -263,20 +335,20 @@ export default function SupportPage() {
                       <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
                     </svg>
                   </div>
-                  <h3 className="text-[18px] font-bold text-[#1C1917] mb-2">Message Sent!</h3>
+                  <h3 className="text-[18px] font-bold text-[#1C1917] mb-2">{text.sent}</h3>
                   <p className="text-[13px] text-[#78716C] max-w-xs leading-[1.7]">{submitMessage}</p>
                   <button
                     onClick={() => { setSubmitted(false); setForm({ name: "", email: "", subject: "", message: "" }); }}
                     className="mt-6 text-[12px] font-bold text-[#C0003C] underline underline-offset-2 bg-transparent border-none cursor-pointer"
                   >
-                    Send another message
+                    {text.sendAnother}
                   </button>
                 </div>
               ) : (
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-[#78716C] uppercase mb-1.5">Your Name</label>
+                      <label className="block text-[11px] font-bold tracking-wider text-[#78716C] uppercase mb-1.5">{text.yourName}</label>
                       <input
                         type="text"
                         value={form.name}
@@ -286,12 +358,12 @@ export default function SupportPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-bold tracking-wider text-[#78716C] uppercase mb-1.5">Email</label>
+                      <label className="block text-[11px] font-bold tracking-wider text-[#78716C] uppercase mb-1.5">{text.email}</label>
                       <input
                         type="email"
                         value={form.email}
                         onChange={e => setForm({ ...form, email: e.target.value })}
-                        placeholder="john@email.com"
+                        placeholder={text.emailPlaceholder}
                         className="w-full bg-[#FAF7F4] border border-[#E8E0D5] rounded-xl px-4 py-3 text-[13.5px] text-[#1C1917] placeholder-[#C4B9B0] outline-none focus:border-[#C0003C] focus:ring-2 focus:ring-[#C0003C]/10 transition-all duration-200"
                       />
                     </div>
@@ -304,12 +376,12 @@ export default function SupportPage() {
                       onChange={e => setForm({ ...form, subject: e.target.value })}
                       className="w-full bg-[#FAF7F4] border border-[#E8E0D5] rounded-xl px-4 py-3 text-[13.5px] text-[#1C1917] outline-none focus:border-[#C0003C] focus:ring-2 focus:ring-[#C0003C]/10 transition-all duration-200 appearance-none cursor-pointer"
                     >
-                      <option value="" disabled>Select a topic...</option>
-                      <option>Order & Shipping</option>
-                      <option>Print Quality Issue</option>
-                      <option>Account & Billing</option>
-                      <option>Photo Upload Problem</option>
-                      <option>Other</option>
+                      <option value="" disabled>{text.selectTopic}</option>
+                      <option>{text.topic1}</option>
+                      <option>{text.topic2}</option>
+                      <option>{text.topic3}</option>
+                      <option>{text.topic4}</option>
+                      <option>{text.topic5}</option>
                     </select>
                   </div>
 
@@ -335,9 +407,9 @@ export default function SupportPage() {
                           <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" strokeWidth="3"/>
                           <path d="M12 2a10 10 0 0 1 10 10" stroke="#fff" strokeWidth="3" strokeLinecap="round"/>
                         </svg>
-                        Sending...
+                        {text.sending}
                       </>
-                    ) : "Send Message →"}
+                    ) : text.sendBtn}
                   </button>
 
                   {submitError && (
@@ -345,8 +417,8 @@ export default function SupportPage() {
                   )}
 
                   <p className="text-center text-[11px] text-[#B0A89E]">
-                    By submitting, you agree to our{" "}
-                    <a href="#" className="text-[#C0003C] underline underline-offset-1">Privacy Policy</a>.
+                    {text.agreeText}{" "}
+                    <a href="#" className="text-[#C0003C] underline underline-offset-1">{text.privacy}</a>.
                   </p>
                 </div>
               )}

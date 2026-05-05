@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useLanguage } from "@/hooks/useLanguage";
 import {
   useGoogleLoginMutation,
   useLoginMutation,
@@ -16,6 +17,7 @@ import { signIn } from "next-auth/react";
 
 
 export default function LoginPage() {
+  const { language } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { login } = useAuth();
@@ -25,6 +27,42 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const redirectTo = searchParams.get("redirect") || "/";
+
+  const text = language === "de"
+    ? {
+      leftTitle: "Erstelle dein persoenliches Geschenk weiter.",
+      leftSubtitle: "Melde dich an, um dein Buch fortzusetzen.",
+      welcome: "Willkommen zurueck",
+      title: "Melde dich in deinem Konto an",
+      subtitle: "Mach dort weiter, wo du aufgehort hast",
+      email: "E-Mail",
+      emailPlaceholder: "jane@example.com",
+      password: "Passwort",
+      forgotPassword: "Passwort vergessen?",
+      loggingIn: "Anmeldung laeuft...",
+      login: "Anmelden ->",
+      continueWith: "oder weiter mit",
+      signingIn: "Anmeldung...",
+      noAccount: "Noch kein Konto?",
+      signUp: "Registrieren",
+    }
+    : {
+      leftTitle: "Continue creating your personal gift.",
+      leftSubtitle: "Sign in to continue your book.",
+      welcome: "Welcome back",
+      title: "Log in to your account",
+      subtitle: "Pick up where you left off",
+      email: "Email",
+      emailPlaceholder: "jane@example.com",
+      password: "Password",
+      forgotPassword: "Forgot password?",
+      loggingIn: "Logging in...",
+      login: "Log In ->",
+      continueWith: "or continue with",
+      signingIn: "Signing in...",
+      noAccount: "Don’t have an account?",
+      signUp: "Sign up",
+    };
 
   const saveSessionAndRedirect = (apiUser: { id: number; name: string; email: string }, token: string) => {
     localStorage.setItem("token", token);
@@ -85,10 +123,10 @@ export default function LoginPage() {
           {/* Bottom Text */}
           <div>
             <h2 className="text-3xl font-bold leading-tight mb-2">
-              Continue creating your personal gift.
+              {text.leftTitle}
             </h2>
             <p className="text-sm text-gray-200">
-              Sign in to continue your book.
+              {text.leftSubtitle}
             </p>
           </div>
         </div>
@@ -100,13 +138,13 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
 
           {/* Welcome */}
-          <p className="text-sm text-[#7A1E3A] mb-2">✦ Welcome back</p>
+          <p className="text-sm text-[#7A1E3A] mb-2">✦ {text.welcome}</p>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
-            Log in to your account
+            {text.title}
           </h1>
           <p className="text-sm text-gray-500 mb-6">
-            Pick up where you left off
+            {text.subtitle}
           </p>
 
 
@@ -116,10 +154,10 @@ export default function LoginPage() {
 
             {/* Email */}
             <div>
-              <label className="text-sm text-gray-700">Email</label>
+              <label className="text-sm text-gray-700">{text.email}</label>
               <input
                 type="email"
-                placeholder="jane@example.com"
+                placeholder={text.emailPlaceholder}
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
@@ -129,7 +167,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="text-sm text-gray-700">Password</label>
+              <label className="text-sm text-gray-700">{text.password}</label>
               <input
                 type="password"
                 placeholder="••••••••"
@@ -141,7 +179,7 @@ export default function LoginPage() {
 
               <div className="text-right mt-1">
                 <Link href="/reset-password" className="text-xs text-[#7A1E3A] hover:underline">
-                  Forgot password?
+                  {text.forgotPassword}
                 </Link>
               </div>
             </div>
@@ -152,7 +190,7 @@ export default function LoginPage() {
               disabled={isPending}
               className="w-full mt-2 cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
-              {isPending ? "Logging in..." : "Log In →"}
+              {isPending ? text.loggingIn : text.login}
             </button>
 
             {error && <p className="text-sm text-red-600">{error}</p>}
@@ -160,7 +198,7 @@ export default function LoginPage() {
             {/* Divider */}
             <div className="flex items-center gap-3 my-4">
               <div className="flex-1 h-px bg-gray-300" />
-              <span className="text-xs text-gray-400">or continue with</span>
+              <span className="text-xs text-gray-400">{text.continueWith}</span>
               <div className="flex-1 h-px bg-gray-300" />
             </div>
 
@@ -172,7 +210,7 @@ export default function LoginPage() {
                 disabled={isGooglePending}
                 className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {isGooglePending ? "Signing in..." : "Google"}
+                {isGooglePending ? text.signingIn : "Google"}
               </button>
               <button type="button" className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
                 Apple
@@ -181,9 +219,9 @@ export default function LoginPage() {
 
             {/* Signup */}
             <p className="text-center text-xs text-gray-500 mt-4">
-              Don’t have an account?{' '}
+              {text.noAccount}{' '}
               <Link href="/register" className="text-[#7A1E3A] font-medium">
-                Sign up
+                {text.signUp}
               </Link>
             </p>
 

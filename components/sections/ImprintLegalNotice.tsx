@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import gsap from "gsap";
 import { useLegalInformationQuery } from "@/features/legal-info/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ const Card: FC<CardProps> = ({ icon, title, children, animRef }) => (
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const ImprintLegalNotice: FC = () => {
+  const { language } = useLanguage();
   const headerRef  = useRef<HTMLDivElement>(null);
   const card1Ref   = useRef<HTMLDivElement>(null);
   const card2Ref   = useRef<HTMLDivElement>(null);
@@ -54,6 +56,54 @@ const ImprintLegalNotice: FC = () => {
   const euRef      = useRef<HTMLDivElement>(null);
 
   const { data: legalData, isLoading, error } = useLegalInformationQuery();
+
+  const text = language === "de"
+    ? {
+      loading: "Rechtliche Informationen werden geladen...",
+      failed: "Rechtliche Informationen konnten nicht geladen werden",
+      retryLater: "Bitte spaeter erneut versuchen",
+      legalInfo: "Rechtliche Informationen",
+      imprintTitle: "Impressum & Rechtlicher Hinweis",
+      accordInfo: "Information gemaess",
+      companyDetails: "Unternehmensdaten",
+      representedBy: "Vertreten durch",
+      contactInformation: "Kontaktinformationen",
+      phone: "Telefon:",
+      email: "E-Mail:",
+      website: "Webseite:",
+      registrationTax: "Register & Steuern",
+      commercialRegister: "Handelsregister",
+      registrationNo: "Registernr.",
+      vatId: "USt-IdNr. (gemaess § 27a UStG)",
+      editorial: "Redaktionelle Verantwortung",
+      responsible: "Verantwortlich gemaess § 18 MStV",
+      euDispute: "EU-Streitbeilegung",
+      euText: "Die Europaeische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:",
+      euEnd: "Unsere E-Mail-Adresse findest du oben in den Kontaktinformationen. Wir sind nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.",
+    }
+    : {
+      loading: "Loading legal information...",
+      failed: "Failed to load legal information",
+      retryLater: "Please try again later",
+      legalInfo: "Legal Information",
+      imprintTitle: "Imprint & Legal Notice",
+      accordInfo: "Information in accordance with",
+      companyDetails: "Company Details",
+      representedBy: "Represented by",
+      contactInformation: "Contact Information",
+      phone: "Phone:",
+      email: "Email:",
+      website: "Website:",
+      registrationTax: "Registration & Tax",
+      commercialRegister: "Commercial Register",
+      registrationNo: "Registration No.",
+      vatId: "VAT ID (according to § 27a UStG)",
+      editorial: "Editorial Responsibility",
+      responsible: "Responsible according to § 18 MStV",
+      euDispute: "EU Dispute Resolution",
+      euText: "The European Commission provides a platform for online dispute resolution (OS):",
+      euEnd: "Please find our email in the contact information above. We are not willing or obligated to participate in dispute resolution proceedings before a consumer arbitration board.",
+    };
 
   useEffect(() => {
     if (!legalData?.data) return;
@@ -91,7 +141,7 @@ const ImprintLegalNotice: FC = () => {
       }}>
         <div className="flex flex-col items-center gap-3">
           <Loader className="w-8 h-8 text-[#7A1E3A] animate-spin" />
-          <p className="text-gray-600">Loading legal information...</p>
+          <p className="text-gray-600">{text.loading}</p>
         </div>
       </div>
     );
@@ -105,8 +155,8 @@ const ImprintLegalNotice: FC = () => {
         backgroundPosition: "center",
       }}>
         <div className="text-center">
-          <p className="text-red-600 font-medium mb-2">Failed to load legal information</p>
-          <p className="text-gray-600 text-sm">{error?.message || "Please try again later"}</p>
+          <p className="text-red-600 font-medium mb-2">{text.failed}</p>
+          <p className="text-gray-600 text-sm">{error?.message || text.retryLater}</p>
         </div>
       </div>
     );
@@ -129,13 +179,13 @@ const ImprintLegalNotice: FC = () => {
       {/* Header */}
       <div ref={headerRef} className="text-center pt-12 pb-2 px-4">
         <span className="text-[13px] uppercase tracking-[0.18em] text-[#7A1E3A] font-semibold block mb-3">
-          Legal Information
+          {text.legalInfo}
         </span>
         <h1 className="font-serif text-3xl sm:text-[44px] font-bold text-gray-900 tracking-tight leading-tight mb-3">
-          Imprint &amp; Legal Notice
+          {text.imprintTitle}
         </h1>
         <p className="text-[18px] text-[#9CA3AF] font-light mx-auto leading-relaxed">
-          Information in accordance with{" "}
+          {text.accordInfo}{" "}
           <em>§ 5 TMG</em> and <em>§ 18 MStV</em>
         </p>
       </div>
@@ -152,7 +202,7 @@ const ImprintLegalNotice: FC = () => {
             className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
             <div className="text-rose-800 mb-4 w-8 h-8"><Home size={20} strokeWidth={1.5} /></div>
-            <p className="text-[20px] font-bold text-gray-900 mb-3">Company Details</p>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">{text.companyDetails}</p>
             <p className="font-serif text-[16px] font-bold text-gray-900 mb-1">
               {companyDetails.company_name}
             </p>
@@ -162,7 +212,7 @@ const ImprintLegalNotice: FC = () => {
               <p>{companyDetails.country}</p>
             </div>
             <Divider />
-            <MetaLabel>Represented by</MetaLabel>
+            <MetaLabel>{text.representedBy}</MetaLabel>
             <p className="text-[15px] text-black">
               {companyDetails.represented_by_name} ({companyDetails.represented_by_position})
             </p>
@@ -176,12 +226,12 @@ const ImprintLegalNotice: FC = () => {
             className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
             <div className="text-rose-800 mb-4 w-8 h-8"><Phone size={20} strokeWidth={1.5} /></div>
-            <p className="text-[20px] font-bold text-gray-900 mb-3">Contact Information</p>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">{text.contactInformation}</p>
             <div className="space-y-2.5">
               {[
-                { label: "Phone:",   value: contactInfo.phone,    href: `tel:${contactInfo.phone.replace(/\s/g, '')}` },
-                { label: "Email:",   value: contactInfo.email, href: `mailto:${contactInfo.email}` },
-                ...(contactInfo.website ? [{ label: "Website:", value: contactInfo.website, href: `https://${contactInfo.website}` }] : []),
+                { label: text.phone,   value: contactInfo.phone,    href: `tel:${contactInfo.phone.replace(/\s/g, '')}` },
+                { label: text.email,   value: contactInfo.email, href: `mailto:${contactInfo.email}` },
+                ...(contactInfo.website ? [{ label: text.website, value: contactInfo.website, href: `https://${contactInfo.website}` }] : []),
               ].map(({ label, value, href }) => (
                 <div key={label} className="flex items-start gap-3">
                   <span className="text-[16px] font-medium text-[#9CA3AF] min-w-11.5 pt-px">{label}</span>
@@ -206,17 +256,17 @@ const ImprintLegalNotice: FC = () => {
             className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
             <div className="text-rose-800 mb-4 w-8 h-8"><FileText size={20} strokeWidth={1.5} /></div>
-            <p className="text-[20px] font-bold text-gray-900 mb-3">Registration &amp; Tax</p>
-            <MetaLabel>Commercial Register</MetaLabel>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">{text.registrationTax}</p>
+            <MetaLabel>{text.commercialRegister}</MetaLabel>
             <p className="text-[15px] text-[#9CA3AF] mb-1">
               {registrationTax.register_court}
             </p>
             <p className="text-[15px] text-[#9CA3AF] mb-3">
-              Registration No.{" "}
+              {text.registrationNo}{" "}
               <span className="font-medium text-gray-800">{registrationTax.registration_number}</span>
             </p>
             <Divider />
-            <MetaLabel>VAT ID (according to § 27a UStG)</MetaLabel>
+            <MetaLabel>{text.vatId}</MetaLabel>
             <p className="text-[16px] font-medium text-gray-800 tracking-wide">
               {registrationTax.vat_number}
             </p>
@@ -230,8 +280,8 @@ const ImprintLegalNotice: FC = () => {
             className="bg-white border border-[#7A1E3A] rounded-2xl p-6 transition-all duration-200"
           >
             <div className="text-rose-800 mb-4 w-8 h-8"><Users size={20} strokeWidth={1.5} /></div>
-            <p className="text-[20px] font-bold text-gray-900 mb-3">Editorial Responsibility</p>
-            <MetaLabel>Responsible according to § 18 MStV</MetaLabel>
+            <p className="text-[20px] font-bold text-gray-900 mb-3">{text.editorial}</p>
+            <MetaLabel>{text.responsible}</MetaLabel>
             <p className="font-serif text-[16px] font-semibold text-gray-900 mb-1">
               {editorialResponsibility.responsible_person_name}
             </p>
@@ -252,10 +302,10 @@ const ImprintLegalNotice: FC = () => {
         >
           <div className="flex items-center gap-2 mb-2">
             <ExternalLink size={14} strokeWidth={1.5} className="text-rose-800" />
-            <p className="text-[20px] font-bold text-gray-900">EU Dispute Resolution</p>
+            <p className="text-[20px] font-bold text-gray-900">{text.euDispute}</p>
           </div>
           <p className="text-[15px] text-[#9CA3AF] font-light leading-relaxed max-w-2xl">
-            The European Commission provides a platform for online dispute resolution (OS):{" "}
+            {text.euText}{" "}
             <a
               href="https://ec.europa.eu/consumers/odr"
               target="_blank"
@@ -264,9 +314,7 @@ const ImprintLegalNotice: FC = () => {
             >
               https://ec.europa.eu/consumers/odr
             </a>
-            . Please find our email in the contact information above. We are not willing or
-            obligated to participate in dispute resolution proceedings before a consumer
-            arbitration board.
+            . {text.euEnd}
           </p>
         </div>
       </div>

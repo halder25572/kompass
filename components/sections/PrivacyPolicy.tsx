@@ -5,6 +5,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef, useMemo, type ReactNode } from "react";
 import { usePrivacyPoliciesQuery } from "@/features/privacy/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 
 // Local section type (built from API)
 type LocalPolicySection = {
@@ -106,10 +107,37 @@ function SectionCard({ section, active }: { section: LocalPolicySection; active:
 
 // ─── PAGE ─────────────────────────────────────────────────────────────────────
 export default function PrivacyPolicySection() {
+  const { language } = useLanguage();
   const [activeId, setActiveId] = useState<string | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   const { data, isLoading, error } = usePrivacyPoliciesQuery();
+
+  const ui = language === "de"
+    ? {
+      email: "E-Mail:",
+      pill: "Datenschutz",
+      titlePrefix: "Deine Daten,",
+      titleAccent: "sicher",
+      titleSuffix: "geschuetzt.",
+      subtitle: "Klare Informationen, wie wir deine personenbezogenen Daten erheben, nutzen und schuetzen.",
+      lastUpdated: "Zuletzt aktualisiert: 21. April 2026",
+      sections: "Abschnitte",
+      compliant: "DSGVO-konform",
+      contents: "Inhalte",
+    }
+    : {
+      email: "Email:",
+      pill: "Privacy Policy",
+      titlePrefix: "Your data,",
+      titleAccent: "safely",
+      titleSuffix: "protected.",
+      subtitle: "Clear information on how we collect, use, and protect your personal data.",
+      lastUpdated: "Last updated: April 21, 2026",
+      sections: "Sections",
+      compliant: "GDPR Compliant",
+      contents: "Contents",
+    };
 
   const sections = useMemo<LocalPolicySection[]>(() => {
     if (!data?.data) return [];
@@ -171,20 +199,20 @@ export default function PrivacyPolicySection() {
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2.2" strokeLinecap="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
             </svg>
-            <span className="text-[11px] font-bold tracking-widest text-[#7A1E3A] uppercase">Privacy Policy</span>
+            <span className="text-[11px] font-bold tracking-widest text-[#7A1E3A] uppercase">{ui.pill}</span>
           </div>
 
           <h1 className="text-[clamp(38px,6vw,66px)] font-extrabold text-[#1A1A2E] leading-[1.06] tracking-[-1.5px] mb-5">
-            Your data,{" "}
+            {ui.titlePrefix}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10 text-[#BF003A]">safely</span>
+              <span className="relative z-10 text-[#BF003A]">{ui.titleAccent}</span>
               <span className="absolute -bottom-1 left-0 w-full h-1.5 bg-[#BF003A]/12 rounded-full" />
             </span>
-            {" "}protected.
+            {" "}{ui.titleSuffix}
           </h1>
 
           <p className="text-[15px] text-[#8B8480] max-w-md mx-auto leading-[1.7]">
-            Clear information on how we collect, use, and protect your personal data.
+            {ui.subtitle}
           </p>
 
           {/* meta row */}
@@ -193,21 +221,21 @@ export default function PrivacyPolicySection() {
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round">
                 <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
               </svg>
-              Last updated: April 21, 2026
+              {ui.lastUpdated}
             </span>
             <span className="w-px h-3 bg-[#D5CEC9]" />
             <span className="flex items-center gap-1.5 text-[12px] text-[#9B9490] font-medium">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
               </svg>
-              7 Sections
+              {sections.length || 7} {ui.sections}
             </span>
             <span className="w-px h-3 bg-[#D5CEC9]" />
             <span className="flex items-center gap-1.5 text-[12px] text-[#9B9490] font-medium">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round">
                 <path d="M1 6s1-1 4-1 5 2 8 2 4-1 4-1V22s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="1" y1="1" x2="1" y2="6"/>
               </svg>
-              GDPR Compliant
+              {ui.compliant}
             </span>
           </div>
         </div>
@@ -218,7 +246,7 @@ export default function PrivacyPolicySection() {
           {/* sticky sidebar nav — hidden on mobile */}
           <aside className="hidden lg:block w-52 shrink-0 sticky top-8">
             <div className="bg-white rounded-2xl border border-[#E8E2DC] p-4 shadow-[0_2px_12px_rgba(0,0,0,0.05)]">
-              <p className="text-[10px] font-bold tracking-widest text-[#BF003A] uppercase px-2 mb-3">Contents</p>
+              <p className="text-[10px] font-bold tracking-widest text-[#BF003A] uppercase px-2 mb-3">{ui.contents}</p>
               <nav className="space-y-0.5">
                 {sections.map((s: LocalPolicySection) => (
                   <button

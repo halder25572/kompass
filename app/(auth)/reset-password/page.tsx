@@ -6,12 +6,36 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useForgotPasswordMutation } from "@/features/auth/components/hooks/services";
+import { useLanguage } from "@/hooks/useLanguage";
 
 export default function ResetPasswordPage() {
+  const { language } = useLanguage();
   const router = useRouter();
   const { mutate, isPending } = useForgotPasswordMutation();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+
+  const text = language === "de"
+    ? {
+      leftTitle: "Stelle dein Konto wieder her",
+      leftSubtitle: "Deine Erinnerungen sind sicher. Gib einfach deine E-Mail ein, um dein Passwort sicher zurueckzusetzen.",
+      title: "Passwort zuruecksetzen",
+      subtitle: "Gib deine E-Mail ein, wir senden dir einen OTP-Code",
+      email: "E-Mail",
+      sendingOtp: "OTP wird gesendet...",
+      sendOtp: "OTP senden",
+      backToLogin: "<- Zurueck zur Anmeldung",
+    }
+    : {
+      leftTitle: "Recover your account",
+      leftSubtitle: "Our memories are safe with us. Simply enter your email to securely reset your password and continue your journey.",
+      title: "Reset password",
+      subtitle: "Enter your email and we’ll send you a OTP",
+      email: "Email",
+      sendingOtp: "Sending OTP...",
+      sendOtp: "Send OTP",
+      backToLogin: "<- Back to login",
+    };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -60,10 +84,10 @@ export default function ResetPasswordPage() {
           {/* Bottom Text */}
           <div>
             <h2 className="text-3xl font-bold leading-tight mb-2">
-              Recover your account
+              {text.leftTitle}
             </h2>
             <p className="text-sm text-gray-200 max-w-sm">
-              Our memories are safe with us. Simply enter your email to securely reset your password and continue your journey.
+              {text.leftSubtitle}
             </p>
           </div>
         </div>
@@ -84,10 +108,10 @@ export default function ResetPasswordPage() {
 
           {/* Heading */}
           <h1 className="text-xl font-semibold text-gray-900 mb-1">
-            Reset password
+            {text.title}
           </h1>
           <p className="text-sm text-gray-500 mb-6">
-            Enter your email and we’ll send you a OTP
+            {text.subtitle}
           </p>
 
           {/* Form */}
@@ -95,7 +119,7 @@ export default function ResetPasswordPage() {
 
             {/* Email */}
             <div>
-              <label className="text-sm text-gray-700">Email</label>
+              <label className="text-sm text-gray-700">{text.email}</label>
               <input
                 type="email"
                 placeholder="jane@example.com"
@@ -114,7 +138,7 @@ export default function ResetPasswordPage() {
               disabled={isPending}
               className="w-full mt-2 cursor-pointer bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white py-2.5 rounded-full text-sm font-semibold"
             >
-              {isPending ? "Sending OTP..." : "Send OTP"}
+              {isPending ? text.sendingOtp : text.sendOtp}
             </button>
 
             {/* Back to login */}
@@ -123,7 +147,7 @@ export default function ResetPasswordPage() {
                 href="/login"
                 className="text-xs text-[#7A1E3A] hover:underline"
               >
-                ← Back to login
+                {text.backToLogin}
               </Link>
             </div>
 

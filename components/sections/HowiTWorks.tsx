@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Link from "next/link";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const steps = [
     {
@@ -55,8 +56,64 @@ function GridIcon() {
 }
 
 export default function HowItWorksSection() {
+    const { language } = useLanguage();
     const headerRef = useRef<HTMLDivElement>(null);
     const stepsRef = useRef<HTMLDivElement>(null);
+
+    const text = language === "de"
+        ? {
+            badge: "So funktioniert's",
+            headingBefore: "Drei einfache Schritte zu einem",
+            headingAccent: "wunderschoenen Buch",
+            subtitle: "Vom Erstellen bis zum gedruckten Buch in deinen Haenden - der Prozess ist einfach, gemeinsam und besonders.",
+            createBook: "Buch erstellen",
+            step1: "Schritt 1 - Buch erstellen",
+            step2: "Schritt 2 - Teilnehmende einladen",
+            step3: "Schritt 3 - Vorschau & Bestellung",
+            ready: "Bereit, etwas Wunderschoenes zu erstellen?",
+            cta: "Buch erstellen",
+        }
+        : {
+            badge: "How it Works",
+            headingBefore: "Three Simple Steps to a",
+            headingAccent: "Beautiful Book",
+            subtitle: "From creating your project to holding a printed book in your hands - the entire process is simple, collaborative, and magical.",
+            createBook: "Create Your Book",
+            step1: "Step 1 - Create Your Book",
+            step2: "Step 2 - Invite Participants",
+            step3: "Step 3 - Preview & Order",
+            ready: "Ready to Create Something Beautiful?",
+            cta: "Create Your Book",
+        };
+
+    const localizedSteps = language === "de"
+        ? [
+            {
+                ...steps[0],
+                title: "Anlass und Stil waehlen",
+                points: [
+                    { icon: "user", text: "Anlass waehlen" },
+                    { icon: "grid", text: "Premium-Vorlagen auswaehlen" },
+                ],
+            },
+            {
+                ...steps[1],
+                title: "Teilnehmende einladen",
+                points: [
+                    { icon: "grid", text: "Informationen per Einladung sammeln" },
+                    { icon: "user", text: "Einfach per Link oder E-Mail einladen" },
+                ],
+            },
+            {
+                ...steps[2],
+                title: "Buch drucken",
+                points: [
+                    { icon: "grid", text: "Buch in Vorschau pruefen und freigeben" },
+                    { icon: "user", text: "Druckbestellung bestaetigen" },
+                ],
+            },
+        ]
+        : steps;
 
     // Header reveal
     useEffect(() => {
@@ -126,25 +183,23 @@ export default function HowItWorksSection() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                     </svg>
-                    <span className="text-[12px] font-semibold text-[#7A1E3A]">How it Works</span>
+                    <span className="text-[12px] font-semibold text-[#7A1E3A]">{text.badge}</span>
                 </div>
 
                 <h2 className="text-[32px] sm:text-[40px] font-extrabold leading-tight">
-                    Three Simple Steps to a{" "}
+                    {text.headingBefore}{" "}
                     <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">
-                        Beautiful Book
+                        {text.headingAccent}
                     </span>
                 </h2>
                 <p className="text-[16px] mt-3 text-[#9CA3AF]">
-                    From creating your project to holding a printed book in your hands - the entire{" "}
-                    <br className="hidden sm:block" />
-                    process is simple, collaborative, and magical.
+                    {text.subtitle}
                 </p>
             </div>
 
             {/* Steps */}
             <div ref={stepsRef} className="max-w-175 mx-auto flex flex-col gap-10">
-                {steps.map((step, idx) => {
+                {localizedSteps.map((step, idx) => {
                     const blobLeft = step.blobSide === "left";
 
                     return (
@@ -197,7 +252,7 @@ export default function HowItWorksSection() {
             <div className="max-w-5xl mx-auto mt-14 rounded-3xl bg-white border border-[#E5E7EB] p-6 sm:p-10 shadow-[0_16px_50px_rgba(17,24,39,0.08)] text-[#111827]">
 
                 <section className="pb-10 border-b border-[#E5E7EB]">
-                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">Step 1 — Create Your Book</h3>
+                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">{text.step1}</h3>
                     <p className="mt-2 text-[18px] font-bold italic">Choose Occasion, Theme & Cover</p>
                     <p className="mt-4 text-[16px] leading-relaxed text-[#374151]">
                         Start by selecting the occasion for your book — birthday, school, work, love, family or a seasonal celebration.
@@ -222,7 +277,7 @@ export default function HowItWorksSection() {
                 </section>
 
                 <section className="py-10 border-b border-[#E5E7EB]">
-                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">Step 2 — Invite Participants</h3>
+                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">{text.step2}</h3>
                     <p className="mt-2 text-[18px] font-bold italic">Friends, family, classmates or colleagues — everyone can join</p>
                     <p className="mt-4 text-[16px] leading-relaxed text-[#374151]">
                         Share your invitation link with the people who matter most.
@@ -245,7 +300,7 @@ export default function HowItWorksSection() {
                 </section>
 
                 <section className="py-10 border-b border-[#E5E7EB]">
-                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">Step 3 — Preview & Order</h3>
+                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">{text.step3}</h3>
                     <p className="mt-2 text-[18px] font-bold italic">See the whole book before printing</p>
                     <p className="mt-4 text-[16px] leading-relaxed text-[#374151]">
                         Once all contributions are in, or when you decide the book is ready, you can:
@@ -272,13 +327,13 @@ export default function HowItWorksSection() {
                 </section>
 
                 <section className="pt-10 text-center">
-                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">Ready to Create Something Beautiful?</h3>
+                    <h3 className="text-[24px] sm:text-[30px] font-extrabold leading-tight text-[#111827]">{text.ready}</h3>
                     <Link
                         href="/create"
                         className="mt-6 inline-flex items-center justify-center rounded-full px-8 py-3 text-[14px] font-semibold text-white"
                         style={{ background: "linear-gradient(102deg,#BF003A 0%,#59001C 100%)" }}
                     >
-                        Create Your Book
+                        {text.cta}
                     </Link>
                 </section>
             </div>

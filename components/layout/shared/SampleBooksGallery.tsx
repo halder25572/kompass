@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
+import { useLanguage } from "@/hooks/useLanguage";
 
 type SampleBook = {
   id: number;
@@ -178,12 +179,53 @@ function SampleBookPreviewModal({ book, onClose }: { book: SampleBook; onClose: 
 }
 
 export default function SampleBooksGallery() {
+  const { language } = useLanguage();
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeBook, setActiveBook] = useState<SampleBook | null>(null);
   const headerRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLDivElement>(null);
   const gridRef = useRef<HTMLDivElement>(null);
   const featuredBooks = sampleBooks.slice(0, 3);
+
+  const text = language === "de"
+    ? {
+      realExamples: "Echte Beispiele aus fertigen Buechern",
+      heroTitle: "Beispielbuecher, die sich echt anfuehlen.",
+      heroSubtitle: "Groessere Cover-Vorschauen ansehen, nach Anlass filtern und jedes Beispiel oeffnen, bevor du dein eigenes Buch startest.",
+      startBook: "Buch starten",
+      browseGallery: "Galerie ansehen",
+      filterBy: "Nach Anlass filtern",
+      findSample: "Passendes Beispiel in Sekunden finden.",
+      filterHint: "Jede Karte nutzt eine groessere Darstellung, damit das Cover im Mittelpunkt steht.",
+      showing: "Angezeigt",
+      sampleBooks: "Beispielbuecher",
+      for: "fuer",
+      skip: "Direkt zum Buch-Editor",
+      openPreview: "Vorschau oeffnen",
+      ready: "Bereit zum Erstellen?",
+      readySubtitle: "Waehle ein Beispiel-Cover und starte dein eigenes Buch.",
+      readyHint: "Du kannst Anlass, Cover und Teilnehmende spaeter jederzeit anpassen.",
+      contributors: "Mitwirkende",
+    }
+    : {
+      realExamples: "Real examples from finished books",
+      heroTitle: "Sample books that feel like the real thing.",
+      heroSubtitle: "Browse large cover previews, filter by occasion, and open each sample to see the interior before you start your own book.",
+      startBook: "Start Your Book",
+      browseGallery: "Browse the gallery",
+      filterBy: "Filter by occasion",
+      findSample: "Find the right sample in seconds.",
+      filterHint: "Each card uses a larger visual treatment so the book cover feels like the hero of the page, not a thumbnail.",
+      showing: "Showing",
+      sampleBooks: "sample books",
+      for: "for",
+      skip: "Skip to book creator",
+      openPreview: "Open preview",
+      ready: "Ready to create?",
+      readySubtitle: "Pick a sample cover and start your own book.",
+      readyHint: "You can jump into the book creator from any example and adjust the cover, occasion, and contributors later.",
+      contributors: "contributors",
+    };
 
   const filteredBooks = useMemo(() => {
     if (activeFilter === "All") return sampleBooks;
@@ -218,13 +260,13 @@ export default function SampleBooksGallery() {
             <div ref={headerRef} className="relative z-10">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#F4C7D0] bg-white px-4 py-1.5 text-[12px] font-semibold text-[#7A1E3A] shadow-sm">
                 <span className="h-2 w-2 rounded-full bg-[#BF003A]" />
-                Real examples from finished books
+                {text.realExamples}
               </div>
               <h1 className="mt-6 max-w-3xl text-[clamp(38px,6vw,44px)] font-black leading-[0.92] tracking-tight text-[#1A1A2E]">
-                Sample books that feel like the real thing.
+                {text.heroTitle}
               </h1>
               <p className="mt-6 max-w-2xl text-[16px] sm:text-[18px] leading-8 text-[#6B7280]">
-                Browse large cover previews, filter by occasion, and open each sample to see the interior before you start your own book.
+                {text.heroSubtitle}
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
@@ -245,7 +287,7 @@ export default function SampleBooksGallery() {
                   href="/create"
                   className="inline-flex items-center justify-center gap-2 rounded-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] px-6 py-3.5 text-[14px] font-bold text-white shadow-[0_10px_24px_rgba(191,0,58,0.24)] transition-opacity hover:opacity-90"
                 >
-                  Start Your Book
+                  {text.startBook}
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
@@ -255,7 +297,7 @@ export default function SampleBooksGallery() {
                   href="#gallery"
                   className="inline-flex items-center justify-center rounded-full border border-[#E5E7EB] bg-white px-6 py-3.5 text-[14px] font-semibold text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
                 >
-                  Browse the gallery
+                  {text.browseGallery}
                 </a>
               </div>
             </div>
@@ -294,11 +336,11 @@ export default function SampleBooksGallery() {
           <div className="flex flex-col gap-4 rounded-4xl border border-[#F0E6EA] bg-white/95 p-4 sm:p-5 shadow-[0_14px_36px_rgba(26,26,46,0.06)] backdrop-blur-sm">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#BF003A]">Filter by occasion</p>
-                <h2 className="mt-2 text-[22px] sm:text-[26px] font-extrabold text-[#1A1A2E]">Find the right sample in seconds.</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#BF003A]">{text.filterBy}</p>
+                <h2 className="mt-2 text-[22px] sm:text-[26px] font-extrabold text-[#1A1A2E]">{text.findSample}</h2>
               </div>
               <p className="max-w-xl text-[13px] sm:text-[14px] leading-7 text-[#6B7280]">
-                Each card uses a larger visual treatment so the book cover feels like the hero of the page, not a thumbnail.
+                {text.filterHint}
               </p>
             </div>
 
@@ -324,11 +366,11 @@ export default function SampleBooksGallery() {
 
           <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <p className="text-[13px] text-[#6B7280]">
-              Showing <span className="font-semibold text-[#1A1A2E]">{filteredBooks.length}</span> sample books
-              {activeFilter !== "All" ? <> for <span className="font-semibold text-[#1A1A2E]">{activeFilter}</span></> : null}.
+              {text.showing} <span className="font-semibold text-[#1A1A2E]">{filteredBooks.length}</span> {text.sampleBooks}
+              {activeFilter !== "All" ? <> {text.for} <span className="font-semibold text-[#1A1A2E]">{activeFilter}</span></> : null}.
             </p>
             <Link href="/create" className="text-[13px] font-semibold text-[#BF003A] hover:opacity-80">
-              Skip to book creator
+              {text.skip}
             </Link>
           </div>
 
@@ -356,7 +398,7 @@ export default function SampleBooksGallery() {
                         <div className="mt-1.5 flex items-center gap-2 text-[11px] text-white/80">
                           <span>{book.pages} pages</span>
                           <span>•</span>
-                          <span>{book.contributors} contributors</span>
+                          <span>{book.contributors} {text.contributors}</span>
                         </div>
                       </div>
                     </div>
@@ -378,7 +420,7 @@ export default function SampleBooksGallery() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-[13px] font-semibold text-[#BF003A]">
-                      Open preview
+                      {text.openPreview}
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
                         <circle cx="12" cy="12" r="3" />
@@ -396,17 +438,17 @@ export default function SampleBooksGallery() {
         <div className="mx-auto max-w-420 rounded-4xl border border-[#F0E6EA] bg-[#1A1A2E] px-6 py-8 sm:px-8 sm:py-10 text-white shadow-[0_24px_64px_rgba(26,26,46,0.22)]">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#F6C5CF]">Ready to create?</p>
-              <h2 className="mt-2 text-[clamp(24px,4vw,36px)] font-extrabold leading-tight">Pick a sample cover and start your own book.</h2>
+              <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#F6C5CF]">{text.ready}</p>
+              <h2 className="mt-2 text-[clamp(24px,4vw,36px)] font-extrabold leading-tight">{text.readySubtitle}</h2>
               <p className="mt-3 max-w-2xl text-[15px] leading-7 text-white/75">
-                You can jump into the book creator from any example and adjust the cover, occasion, and contributors later.
+                {text.readyHint}
               </p>
             </div>
             <Link
               href="/create"
               className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-[#1A1A2E] transition-colors hover:bg-[#FFF0F3]"
             >
-              Create Your Book
+              {text.startBook}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="5" y1="12" x2="19" y2="12" />
                 <polyline points="12 5 19 12 12 19" />

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Image from "next/image";
+import { useLanguage } from "@/hooks/useLanguage";
 
 const pricingTiers = [
     { range: "0 – 4 friends", price: "€5.50", unit: "per friend" },
@@ -30,6 +31,7 @@ const deliveryOptions = [
 ];
 
 export default function PricingDelivery() {
+    const { language } = useLanguage();
     const sectionRef = useRef<HTMLElement>(null);
     const headerRef = useRef<HTMLDivElement>(null);
     const pricingCardRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,83 @@ export default function PricingDelivery() {
     const deliveryGridRef = useRef<HTMLDivElement>(null);
     const ctaRef = useRef<HTMLDivElement>(null);
     const btnRef = useRef<HTMLButtonElement>(null);
+
+    const text = language === "de"
+        ? {
+            simple: "Einfach & transparent",
+            title: "Preise & Lieferung",
+            subtitle: "Starte kostenlos und upgrade erst beim Druck.",
+            freeShipping: "Kostenloser Versand in Deutschland",
+            fastDelivery: "Schnelle Lieferung nach Oesterreich und in die Schweiz.",
+            costPerFriend: "Kosten pro Freund",
+            priceDepends: "Der Preis haengt von der Anzahl der Teilnehmenden ab",
+            optionalExtras: "Optionale Extras",
+            titleCover: "Personalisierter Titel auf dem Cover",
+            photoPage: "Fotoseite",
+            perPages: "pro 1-3 Seiten",
+            annualReview: "Jahresrueckblick",
+            perSeven: "pro 7 Seiten",
+            extraCopies: "Weitere Exemplare",
+            extraDiscount: "Du erhaeltst 35% Rabatt auf jedes weitere identische Familienbuch.",
+            extraContact: "Wenn du mehr als 15 Exemplare bestellen moechtest, helfen wir dir gerne mit einem unverbindlichen Angebot.",
+            deliveryOptions: "Lieferoptionen",
+            receiveTitlePrefix: "So",
+            receiveTitleAccent: "erhaeltst",
+            receiveTitleSuffix: "du dein Buch",
+            startBook: "Buch starten",
+        }
+        : {
+            simple: "Simple & transparent",
+            title: "Pricing & Delivery",
+            subtitle: "Start free, upgrade when you're ready to print.",
+            freeShipping: "Free shipping in Germany",
+            fastDelivery: "Fast delivery to Austria and Switzerland.",
+            costPerFriend: "Cost per friend",
+            priceDepends: "Price depends on the number of friends participating",
+            optionalExtras: "Optional Extras",
+            titleCover: "Personalised title on cover",
+            photoPage: "Photo page",
+            perPages: "per 1-3 pages",
+            annualReview: "Annual review",
+            perSeven: "per 7 pages",
+            extraCopies: "Extra Copies",
+            extraDiscount: "You will receive a 35% discount on each additional identical family book.",
+            extraContact: "If you would like to order more than 15 copies, please contact us for a no-obligation quote.",
+            deliveryOptions: "Delivery Options",
+            receiveTitlePrefix: "How You'll",
+            receiveTitleAccent: "Receive",
+            receiveTitleSuffix: "Your Book",
+            startBook: "Start Your Book",
+        };
+
+    const localizedTiers = language === "de"
+        ? [
+            { range: "0 - 4 Freunde", price: "€5.50", unit: "pro Freund" },
+            { range: "5 - 9 Freunde", price: "€3.75", unit: "pro Freund" },
+            { range: "10 - 14 Freunde", price: "€3.05", unit: "pro Freund" },
+            { range: "15 - 19 Freunde", price: "€2.75", unit: "pro Freund" },
+            { range: "20 - 29 Freunde", price: "€2.50", unit: "pro Freund" },
+            { range: "30 - 39 Freunde", price: "€2.35", unit: "pro Freund" },
+            { range: "40 - 49 Freunde", price: "€1.95", unit: "pro Freund" },
+            { range: "50 - 74 Freunde", price: "€1.75", unit: "pro Freund" },
+            { range: "75 oder mehr Freunde", price: "€1.50", unit: "pro Freund" },
+        ]
+        : pricingTiers;
+
+    const localizedDelivery = language === "de"
+        ? [
+            {
+                ...deliveryOptions[0],
+                title: "Standardversand",
+                description: "Gedruckte Buecher in 7-10 Werktagen. Sendungsverfolgung inklusive.",
+            },
+            {
+                ...deliveryOptions[1],
+                title: "Expressversand",
+                description: "Expresslieferung in 3-5 Werktagen fuer gedruckte Bestellungen.",
+            },
+        ]
+        : deliveryOptions;
 
     useEffect(() => {
         const observe = (el: HTMLElement | null, fn: () => void, threshold = 0.2) => {
@@ -152,22 +231,22 @@ export default function PricingDelivery() {
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                     </svg>
-                    <span className="text-[12px] font-semibold text-[#7A1E3A]">Simple & transparent</span>
+                    <span className="text-[12px] font-semibold text-[#7A1E3A]">{text.simple}</span>
                 </div>
 
 
                 <h2 className="text-[28px] sm:text-[40px] md:text-[52px] font-extrabold text-[#1a1a2e] leading-tight">
-                    Pricing & Delivery
+                    {text.title}
                 </h2>
                 <p className="text-[13px] sm:text-[15px] text-[#9CA3AF] my-6">
-                    Start free, upgrade when you&apos;re ready to print.
+                    {text.subtitle}
                 </p>
                 <div className="mb-20">
                     <div className="flex items-center gap-2 justify-center">
                         <Image src="/Maskgroup.png" alt="images" width={50} height={38} />
-                        <h2 className="text-2xl font-semibold">Free shipping in Germany</h2>
+                        <h2 className="text-2xl font-semibold">{text.freeShipping}</h2>
                     </div>
-                    <p className="text-[16px] font-medium text-[#9CA3AF] pb-0">Fast delivery to Austria and Switzerland.</p>
+                    <p className="text-[16px] font-medium text-[#9CA3AF] pb-0">{text.fastDelivery}</p>
                 </div>
             </div>
 
@@ -181,12 +260,12 @@ export default function PricingDelivery() {
                         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                     </svg>
                     <div>
-                        <p className="text-[14px] font-bold text-[#1a1a2e]">Cost per friend</p>
-                        <p className="text-[11px] text-[#9CA3AF]">Price depends on the number of friends participating</p>
+                        <p className="text-[14px] font-bold text-[#1a1a2e]">{text.costPerFriend}</p>
+                        <p className="text-[11px] text-[#9CA3AF]">{text.priceDepends}</p>
                     </div>
                 </div>
                 <div ref={pricingRowsRef} className="divide-y divide-[#f3f4f6]">
-                    {pricingTiers.map((tier, idx) => (
+                    {localizedTiers.map((tier, idx) => (
                         <div
                             key={idx}
                             className={`pricing-row flex items-center justify-between px-6 py-3 cursor-default ${idx % 2 === 0 ? "bg-white" : "bg-[#fafafa]"}`}
@@ -211,19 +290,19 @@ export default function PricingDelivery() {
                             <circle cx="12" cy="12" r="3" />
                             <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83" />
                         </svg>
-                        <p className="text-[14px] font-bold text-[#1a1a2e]">Optional Extras</p>
+                        <p className="text-[14px] font-bold text-[#1a1a2e]">{text.optionalExtras}</p>
                     </div>
                     <div className="space-y-3">
                         <div className="flex items-center justify-between">
-                            <span className="text-[12px] text-[#374151]">Personalised title on cover</span>
+                            <span className="text-[12px] text-[#374151]">{text.titleCover}</span>
                             <span className="text-[13px] font-bold text-[#7A1E3A]">€0.50</span>
                         </div>
                         <div className="flex items-start justify-between gap-2">
-                            <div><p className="text-[12px] text-[#374151]">Photo page</p><p className="text-[10px] text-[#9CA3AF]">per 1–3 pages</p></div>
+                            <div><p className="text-[12px] text-[#374151]">{text.photoPage}</p><p className="text-[10px] text-[#9CA3AF]">{text.perPages}</p></div>
                             <span className="text-[13px] font-bold text-[#7A1E3A] shrink-0">€2.25</span>
                         </div>
                         <div className="flex items-start justify-between gap-2">
-                            <div><p className="text-[12px] text-[#374151]">Annual review</p><p className="text-[10px] text-[#9CA3AF]">per 7 pages</p></div>
+                            <div><p className="text-[12px] text-[#374151]">{text.annualReview}</p><p className="text-[10px] text-[#9CA3AF]">{text.perSeven}</p></div>
                             <span className="text-[13px] font-bold text-[#7A1E3A] shrink-0">€2.25</span>
                         </div>
                     </div>
@@ -234,13 +313,13 @@ export default function PricingDelivery() {
                             <rect x="9" y="9" width="13" height="13" rx="2" />
                             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                         </svg>
-                        <p className="text-[14px] font-bold text-[#1a1a2e]">Extra Copies</p>
+                        <p className="text-[14px] font-bold text-[#1a1a2e]">{text.extraCopies}</p>
                     </div>
                     <p className="text-[12px] text-[#374151] leading-relaxed">
-                        You will receive a <span className="font-bold text-[#7A1E3A]">35% discount</span> on each additional identical family book.
+                        {text.extraDiscount}
                     </p>
                     <p className="text-[12px] text-[#374151] leading-relaxed mt-3">
-                        If you would like to order more than 15 copies, please <a href="#" className="text-[#7A1E3A] underline">We&apos;re here to help</a> for a no-obligation quote.
+                        {text.extraContact}
                     </p>
                 </div>
             </div>
@@ -248,16 +327,16 @@ export default function PricingDelivery() {
             {/* Delivery */}
             <div className="max-w-2xl mx-auto">
                 <div ref={deliveryHeaderRef} className="text-center mb-8">
-                    <p className="text-[11px] font-bold text-[#7A1E3A] uppercase tracking-widest mb-2">Delivery Options</p>
+                    <p className="text-[11px] font-bold text-[#7A1E3A] uppercase tracking-widest mb-2">{text.deliveryOptions}</p>
                     <h3 className="text-[24px] sm:text-[32px] font-extrabold text-[#1a1a2e] leading-tight">
-                        How You&apos;ll{" "}
+                        {text.receiveTitlePrefix}{" "}
                         <span className="bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] bg-clip-text text-transparent">Receive</span>{" "}
-                        Your Book
+                        {text.receiveTitleSuffix}
                     </h3>
                 </div>
 
                 <div ref={deliveryGridRef} className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    {deliveryOptions.map((opt, idx) => (
+                    {localizedDelivery.map((opt, idx) => (
                         <div
                             key={idx}
                             className="delivery-item flex flex-col gap-2 cursor-default"
@@ -282,7 +361,7 @@ export default function PricingDelivery() {
                         onMouseEnter={handleBtnEnter}
                         onMouseLeave={handleBtnLeave}
                     >
-                        Start Your Book
+                        {text.startBook}
                         <svg className="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="9 18 15 12 9 6" />
                         </svg>
