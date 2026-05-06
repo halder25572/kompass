@@ -42,6 +42,9 @@
     ContactResponse,
     ApplyCouponPayload,
     AppliedCouponResponse,
+    DeliveryTypesResponse,
+    OrderPreviewPayload,
+    OrderPreviewResponse,
 } from "@/types/api";
 
 // Re-export types for backward compatibility
@@ -89,6 +92,9 @@ export type {
     ContactResponse,
     ApplyCouponPayload,
     AppliedCouponResponse,
+    DeliveryTypesResponse,
+    OrderPreviewPayload,
+    OrderPreviewResponse,
 };
 
 type ApiErrorShape = {
@@ -910,7 +916,7 @@ export async function submitContactMessage(payload: ContactPayload): Promise<Con
     return result;
     }
 
-    export async function applyCoupon(payload: ApplyCouponPayload): Promise<AppliedCouponResponse> {
+export async function applyCoupon(payload: ApplyCouponPayload): Promise<AppliedCouponResponse> {
         if (!BASE_URL) {
             throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
         }
@@ -933,4 +939,52 @@ export async function submitContactMessage(payload: ContactPayload): Promise<Con
         }
 
         return result;
+}
+
+// Delivery Types API
+export async function fetchDeliveryTypes(countryCode: string): Promise<DeliveryTypesResponse> {
+    if (!BASE_URL) {
+        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+    }
+
+    const response = await fetch(`${BASE_URL}/delivery-types?country_code=${countryCode}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    const result = (await response.json()) as DeliveryTypesResponse;
+
+    if (!response.ok || !result.success) {
+        throw new Error(result?.message || "Failed to fetch delivery types");
+    }
+
+    return result;
+}
+
+// Order Preview API
+export async function fetchOrderPreview(payload: OrderPreviewPayload): Promise<OrderPreviewResponse> {
+    if (!BASE_URL) {
+        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+    }
+
+    const token = getAuthToken();
+
+    const response = await fetch(`${BASE_URL}/user/orders/preview`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const result = (await response.json()) as OrderPreviewResponse;
+
+    if (!response.ok || !result.success) {
+        throw new Error(result?.message || "Failed to fetch order preview");
+    }
+
+    return result;
 }

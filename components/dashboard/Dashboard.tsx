@@ -250,6 +250,9 @@ const DashboardPageMain: FC = () => {
         ? book.page_count
         : 0;
 
+    const submitted = typeof (book as any).submitted === "number" ? (book as any).submitted : undefined;
+    const totalPages = typeof book.page_count === "number" ? book.page_count : (typeof book.pages === "number" ? book.pages : undefined);
+
     const dueDate = typeof book.dueDate === "string"
       ? book.dueDate
       : typeof book.due_date === "string"
@@ -268,7 +271,7 @@ const DashboardPageMain: FC = () => {
         ? 100
         : rawStatus.toLowerCase() === "draft"
           ? 20
-          : 0;
+          : 5; // default small progress for newly created/in-progress books
 
     const status: Book["status"] = rawStatus.toLowerCase() === "completed"
       ? "Completed"
@@ -280,6 +283,8 @@ const DashboardPageMain: FC = () => {
       id: String(book.id ?? index + 1),
       title,
       pages,
+      submitted,
+      totalPages,
       dueDate,
       status,
       progress,

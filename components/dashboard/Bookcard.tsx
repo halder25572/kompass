@@ -37,8 +37,12 @@ const BookCard: FC<{ book: Book }> = ({ book }) => (
                 </div>
                 <div className="flex items-center gap-3 mt-1">
                     <span className="flex items-center gap-1 text-[11px] text-gray-400">
-                        <BookOpen size={10} /> {book.pages} pgs
-                    </span>
+                            <BookOpen size={10} /> {
+                                (typeof book.submitted === 'number' && typeof book.totalPages === 'number')
+                                    ? `${book.submitted}/${book.totalPages}`
+                                    : `${book.pages} pgs`
+                            }
+                        </span>
                     <span className="flex items-center gap-1 text-[11px] text-gray-400">
                         <Calendar size={10} /> {book.dueDate}
                     </span>

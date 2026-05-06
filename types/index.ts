@@ -2,6 +2,8 @@ export interface Book {
   id: string;
   title: string;
   pages: number;
+  submitted?: number;
+  totalPages?: number;
   dueDate: string;
   status: "In Progress" | "Completed" | "Draft";
   progress: number;

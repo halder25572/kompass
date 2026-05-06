@@ -585,3 +585,51 @@ export interface ContactResponse {
     meta: Record<string, unknown>;
     code: number;
 }
+
+// ── Delivery Types Interfaces ────────────────────────────────────────────────
+export interface DeliveryTypeVat {
+    amount: number;
+    type: string;
+}
+
+export interface DeliveryType {
+    id: number;
+    delivery_ty_name: string;
+    country_code: string;
+    country_name: string;
+    fee: string;
+    days: string;
+    vat: DeliveryTypeVat;
+}
+
+export interface DeliveryTypesResponse {
+    success: boolean;
+    message: string;
+    data: DeliveryType[];
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+// ── Order Preview Interfaces ─────────────────────────────────────────────────
+export interface OrderPreviewPayload {
+    // Add fields based on your backend requirements
+    // Common fields might include: book_id, delivery_type_id, country_code, etc.
+    [key: string]: unknown;
+}
+
+export interface OrderPreviewData {
+    subtotal: number;
+    delivery_fee: number;
+    vat_amount: number;
+    discount: number;
+    total_amount: number;
+    currency: string;
+}
+
+export interface OrderPreviewResponse {
+    success: boolean;
+    message: string;
+    data: OrderPreviewData;
+    meta: Record<string, unknown>;
+    code: number;
+}
