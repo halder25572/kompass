@@ -20,13 +20,13 @@ type Template = {
 const templates: Template[] = [
   {
     id: 1,
-    title: "Classic Elegance",
+    title: "Classic Neutral",
     description: "Timeless design with serif typography and warm tones.",
     image: "/1.jpg",
   },
   {
     id: 2,
-    title: "Warm Memories",
+    title: "Elegant Floral",
     description: "Cozy layouts with soft gradients and photo frames.",
     image: "/2.jpg",
   },
@@ -126,16 +126,16 @@ export default function TemplatesSection() {
     language === "de"
       ? {
           badge: "Themen und Cover",
-          headingBefore: "Wunderschoene Buch",
-          headingAccent: "Designs",
+          headingBefore: "Themen und",
+          headingAccent: "Covers",
           subtitle:
             "Waehle professionell gestaltete Themen und Cover, um dein Erinnerungsbuch besonders zu machen.",
           browse: "Alle Themen und Cover ansehen",
         }
       : {
           badge: "Themes and Covers",
-          headingBefore: "Beautiful Book",
-          headingAccent: "Designs",
+          headingBefore: "Themes and",
+          headingAccent: "Covers",
           subtitle:
             "Choose from professionally crafted themes and covers to make your memory book truly special.",
           browse: "Browse all themes and covers",

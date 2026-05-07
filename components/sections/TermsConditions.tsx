@@ -1,7 +1,4 @@
-"use client";
-
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+"use client";import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useTermsConditionsQuery } from "@/features/terms/hooks/services";
 import { useLanguage } from "@/hooks/useLanguage";
 
@@ -327,7 +324,7 @@ export default function TermsConditionsSection() {
               ))
             )}
 
-            {!isLoading && !error && (
+            {/* {!isLoading && !error && (
               <div className="rounded-2xl border border-[#E8E2DC] bg-white p-6 sm:p-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-0 sm:justify-between shadow-[0_2px_12px_rgba(0,0,0,0.04)]">
                 <div>
                   <p className="text-[14px] font-semibold text-[#1A1A2E] mb-0.5">{ui.legalDetails}</p>
@@ -343,7 +340,7 @@ export default function TermsConditionsSection() {
                   </svg>
                 </Link>
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </div>

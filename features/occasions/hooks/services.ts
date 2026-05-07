@@ -8,7 +8,12 @@ function getAuthToken() {
 		return "";
 	}
 
-	return localStorage.getItem("token") || "";
+	return (
+		localStorage.getItem("authToken") ||
+		localStorage.getItem("token") ||
+		localStorage.getItem("accessToken") ||
+		""
+	);
 }
 
 export function useOccasionsQuery() {
@@ -29,7 +34,6 @@ export function useOccasionsQuery() {
 
 	return useQuery<OccasionsResponse, Error>({
 		queryKey: ["occasions", authToken || "anonymous"],
-		enabled: !!authToken,
 		queryFn: () => fetchOccasions(authToken),
 		retry: false,
 	});

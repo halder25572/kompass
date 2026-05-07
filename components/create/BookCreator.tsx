@@ -4,10 +4,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { JSX } from "react/jsx-runtime";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 import { useOccasionsQuery } from "@/features/occasions/hooks/services";
 import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/services";
 import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
@@ -94,6 +95,94 @@ const defaultPlaceholders = {
     subtitle: "e.g., A collection of beautiful memories",
     recipient: "e.g., Your Name",
 };
+
+const fallbackOccasions = [
+    {
+        id: 1,
+        name: "Birthday",
+        image: "",
+        status: 1,
+        sub_occasions: [
+            { id: 101, occasion_id: 1, name: "Birthday", image: "", status: 1 },
+            { id: 102, occasion_id: 1, name: "Anniversary", image: "", status: 1 },
+        ],
+    },
+    {
+        id: 2,
+        name: "School",
+        image: "",
+        status: 1,
+        sub_occasions: [
+            { id: 201, occasion_id: 2, name: "Class Book", image: "", status: 1 },
+            { id: 202, occasion_id: 2, name: "Kindergarten", image: "", status: 1 },
+            { id: 203, occasion_id: 2, name: "Farewell Teacher", image: "", status: 1 },
+            { id: 204, occasion_id: 2, name: "End-of-Year Book", image: "", status: 1 },
+        ],
+    },
+    {
+        id: 3,
+        name: "Farewell",
+        image: "",
+        status: 1,
+        sub_occasions: [
+            { id: 301, occasion_id: 3, name: "Retirement", image: "", status: 1 },
+            { id: 302, occasion_id: 3, name: "Team Memory Book", image: "", status: 1 },
+        ],
+    },
+    {
+        id: 4,
+        name: "Love",
+        image: "",
+        status: 1,
+        sub_occasions: [
+            { id: 401, occasion_id: 4, name: "Wedding", image: "", status: 1 },
+            { id: 402, occasion_id: 4, name: "Bachelorette Party (JGA)", image: "", status: 1 },
+        ],
+    },
+    {
+        id: 5,
+        name: "Family",
+        image: "",
+        status: 1,
+        sub_occasions: [
+            { id: 501, occasion_id: 5, name: "Family Book", image: "", status: 1 },
+            { id: 502, occasion_id: 5, name: "For Mom", image: "", status: 1 },
+            { id: 503, occasion_id: 5, name: "For Dad", image: "", status: 1 },
+            { id: 504, occasion_id: 5, name: "Baby Book", image: "", status: 1 },
+            { id: 505, occasion_id: 5, name: "For Grandma / Grandpa", image: "", status: 1 },
+        ],
+    },
+    {
+        id: 6,
+        name: "Seasonal",
+        image: "",
+        status: 1,
+        sub_occasions: [
+            { id: 601, occasion_id: 6, name: "Christmas", image: "", status: 1 },
+            { id: 602, occasion_id: 6, name: "New Year", image: "", status: 1 },
+            { id: 603, occasion_id: 6, name: "Easter", image: "", status: 1 },
+            { id: 604, occasion_id: 6, name: "Halloween", image: "", status: 1 },
+        ],
+    },
+];
+
+const fallbackThemes = [
+    { id: 1, name: "Classic", description: "", image: "/icon/1.jpg" },
+    { id: 2, name: "Modern", description: "", image: "/icon/2.jpg" },
+    { id: 3, name: "Warm", description: "", image: "/icon/3.jpg" },
+    { id: 4, name: "Minimal", description: "", image: "/icon/4.jpg" },
+    { id: 5, name: "Elegant", description: "", image: "/icon/5.jpg" },
+    { id: 6, name: "Soft", description: "", image: "/icon/6.jpg" },
+];
+
+const fallbackCovers = [
+    { id: 1, name: "Cover 1", description: "", image: "/icon/11.jpg" },
+    { id: 2, name: "Cover 2", description: "", image: "/icon/12.jpg" },
+    { id: 3, name: "Cover 3", description: "", image: "/icon/13.jpg" },
+    { id: 4, name: "Cover 4", description: "", image: "/icon/14.jpg" },
+    { id: 5, name: "Cover 5", description: "", image: "/icon/15.jpg" },
+    { id: 6, name: "Cover 6", description: "", image: "/icon/16.jpg" },
+];
 
 const questionnairesBySubOccasion: Record<
     string,
@@ -427,7 +516,7 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
     const modalCardRef = useRef<HTMLDivElement>(null);
     const { data: occasionsResponse } = useOccasionsQuery();
 
-    const occasions = occasionsResponse?.data ?? [];
+    const occasions = occasionsResponse?.data?.length ? occasionsResponse.data : fallbackOccasions;
 
     const ph = selectedOccasion
         ? (placeholdersByOccasion[selectedOccasion] ?? defaultPlaceholders)
@@ -688,14 +777,14 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
     const gridRef = useRef<HTMLDivElement>(null);
     const { data: bookPageStylesResponse } = useBookPageStylesQuery();
 
-    console.log("Theme API response:", bookPageStylesResponse);
-
-    const templates = bookPageStylesResponse?.data?.map((style) => ({
+    const templatesFromApi = bookPageStylesResponse?.data?.map((style) => ({
         id: style.id,
         name: style.name,
         description: style.description,
         image: style.image[0] || "/icon/1.jpg",
     })) ?? [];
+
+    const templates = templatesFromApi.length > 0 ? templatesFromApi : fallbackThemes;
 
     useEffect(() => {
         if (templates.length > 0 && !templates.some((template) => template.id === selected)) {
@@ -766,12 +855,14 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
     const gridRef = useRef<HTMLDivElement>(null);
     const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
 
-    const covers = coverPageStylesResponse?.data?.map((style) => ({
+    const coversFromApi = coverPageStylesResponse?.data?.map((style) => ({
         id: style.id,
         name: style.name,
         description: style.description,
         image: style.image[0] || "/icon/11.jpg",
     })) ?? [];
+
+    const covers = coversFromApi.length > 0 ? coversFromApi : fallbackCovers;
 
     useEffect(() => {
         if (covers.length > 0 && !covers.some((cover) => cover.id === selected)) {
@@ -845,11 +936,12 @@ function Step5({
     const headingRef = useRef<HTMLDivElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
     const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
-    const covers = coverPageStylesResponse?.data?.map((style) => ({
+    const coversFromApi = coverPageStylesResponse?.data?.map((style) => ({
         id: style.id,
         name: style.name,
         image: style.image[0] || "/icon/11.jpg",
     })) ?? [];
+    const covers = coversFromApi.length > 0 ? coversFromApi : fallbackCovers;
     const selectedCover = covers.find((cover) => cover.id === coverId) ?? covers[0];
 
     useEffect(() => {
@@ -1539,7 +1631,11 @@ function SuccessModal({ onClose }: { onClose: () => void }) {
 
 // ── Main ─────────────────────────────────────────────────
 export default function BookCreator() {
+    const CREATE_WIZARD_STORAGE_KEY = "create-book-wizard-state";
+    const router = useRouter();
+    const pathname = usePathname();
     const searchParams = useSearchParams();
+    const { isAuthenticated, isLoading } = useAuth();
     const [step, setStep] = useState(1);
     const [showSuccess, setShowSuccess] = useState(false);
     const [selectedSubTab, setSelectedSubTab] = useState("Birthday");
@@ -1548,13 +1644,80 @@ export default function BookCreator() {
     const createBookMutation = useCreateBookMutation();
 
     const urlCoverId = searchParams ? Number(searchParams.get("cover")) || undefined : undefined;
+    const urlStep = searchParams?.get("step")?.toLowerCase() ?? "";
+
+    const stepFromQuery = (() => {
+        switch (urlStep) {
+            case "book-details":
+                return 1;
+            case "choose-theme":
+                return 2;
+            case "choose-cover":
+                return 3;
+            case "questionnaire":
+                return 4;
+            case "preview":
+                return 5;
+            case "invite":
+            case "send-invites":
+                return 6;
+            default:
+                return undefined;
+        }
+    })();
 
     useEffect(() => {
-        if (urlCoverId) {
+        if (typeof window === "undefined") return;
+
+        const shouldRestoreFromStorage =
+            searchParams?.get("resume") === "1" ||
+            urlStep === "invite" ||
+            urlStep === "send-invites";
+
+        if (!shouldRestoreFromStorage) return;
+
+        try {
+            const rawState = window.sessionStorage.getItem(CREATE_WIZARD_STORAGE_KEY);
+            if (!rawState) return;
+
+            const parsedState = JSON.parse(rawState) as {
+                step?: number;
+                selectedSubTab?: string;
+                selectedCoverId?: number;
+                bookDraft?: BookDraft | null;
+            };
+
+            if (parsedState.selectedSubTab) {
+                setSelectedSubTab(parsedState.selectedSubTab);
+            }
+
+            if (typeof parsedState.selectedCoverId === "number") {
+                setSelectedCoverId(parsedState.selectedCoverId);
+            }
+
+            if (parsedState.bookDraft) {
+                setBookDraft(parsedState.bookDraft);
+            }
+
+            if (typeof parsedState.step === "number") {
+                setStep(parsedState.step);
+            }
+        } catch {
+            window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
+        }
+    }, [searchParams, urlStep]);
+
+    useEffect(() => {
+        if (stepFromQuery) {
+            setStep(stepFromQuery);
+        } else if (urlCoverId) {
             setStep(3);
+        }
+
+        if (urlCoverId) {
             setSelectedCoverId(urlCoverId);
         }
-    }, [urlCoverId]);
+    }, [stepFromQuery, urlCoverId]);
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -1592,6 +1755,34 @@ export default function BookCreator() {
                 <Step6
                     onBack={() => setStep(5)}
                     onDone={async () => {
+                        if (isLoading) {
+                            toast.info("Checking login status...");
+                            return;
+                        }
+
+                        if (!isAuthenticated) {
+                            if (typeof window !== "undefined") {
+                                window.sessionStorage.setItem(
+                                    CREATE_WIZARD_STORAGE_KEY,
+                                    JSON.stringify({
+                                        step,
+                                        selectedSubTab,
+                                        selectedCoverId,
+                                        bookDraft,
+                                    })
+                                );
+                            }
+
+                            const params = new URLSearchParams(searchParams.toString());
+                            params.set("step", "invite");
+                            params.set("resume", "1");
+                            const query = params.toString();
+                            const currentUrl = query ? `${pathname}?${query}` : pathname;
+                            toast.info("Please log in to save and send invites.");
+                            router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+                            return;
+                        }
+
                         if (!bookDraft) {
                             toast.error("Book details are missing");
                             return;
@@ -1611,6 +1802,9 @@ export default function BookCreator() {
                                 occasion: bookDraft.occasion || null,
                                 sub_occasion: bookDraft.subTab || null,
                             });
+                            if (typeof window !== "undefined") {
+                                window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
+                            }
                             toast.success(result.message || "Book created successfully!");
                             setShowSuccess(true);
                         } catch (error) {

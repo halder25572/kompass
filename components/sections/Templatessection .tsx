@@ -7,11 +7,11 @@ import gsap from "gsap";
 import { useLanguage } from "@/hooks/useLanguage";
 
 const templates = [
-    { id: 1, title: "Classic Elegance", description: "Refined design with typography and warm tones.", image: "/images/t1.jpg", popular: true },
-    { id: 2, title: "Warm Memories", description: "Soft gradients and photo-friendly layout.", image: "/images/t2.jpg", popular: true },
+    { id: 1, title: "Classic Neutral", description: "Refined design with typography and warm tones.", image: "/images/t1.jpg", popular: true },
+    { id: 2, title: "Elegant Floral", description: "Soft gradients and photo-friendly layout.", image: "/images/t2.jpg", popular: true },
     { id: 3, title: "Modern Minimal", description: "Clean and simple design for any occasion.", image: "/images/t3.jpg", popular: false },
-    { id: 4, title: "Joyful Celebration", description: "Colorful and vibrant layout for all uses.", image: "/images/t4.jpg", popular: true },
-    { id: 5, title: "Garden Party", description: "Fresh and aesthetic layout with natural tones.", image: "/images/t5.jpg", popular: false },
+    { id: 4, title: "Soft Playful", description: "Colorful and vibrant layout for all uses.", image: "/images/t4.jpg", popular: true },
+    { id: 5, title: "Bold Professional", description: "Fresh and aesthetic layout with natural tones.", image: "/images/t5.jpg", popular: false },
 ];
 
 // ✅ Seasonal templates — uncomment the relevant one when the season is active
@@ -40,9 +40,9 @@ export default function SampleThemesAndCovers() {
         ? [
             { id: 1, title: "Klassische Eleganz", description: "Elegantes Design mit warmer Typografie.", image: "/images/t1.jpg", popular: true },
             { id: 2, title: "Warme Erinnerungen", description: "Sanfte Farbverlaeufe und fotofreundliches Layout.", image: "/images/t2.jpg", popular: true },
-            { id: 3, title: "Modern minimal", description: "Klares und ruhiges Design fuer jeden Anlass.", image: "/images/t3.jpg", popular: false },
+            { id: 3, title: "Modern Minimal", description: "Klares und ruhiges Design fuer jeden Anlass.", image: "/images/t3.jpg", popular: false },
             { id: 4, title: "Frohe Feier", description: "Buntes, lebendiges Layout fuer besondere Momente.", image: "/images/t4.jpg", popular: true },
-            { id: 5, title: "Gartenparty", description: "Frische, natuerliche Gestaltung mit sanften Toenen.", image: "/images/t5.jpg", popular: false },
+            { id: 5, title: "Bold Professional", description: "Frische, natuerliche Gestaltung mit sanften Toenen.", image: "/images/t5.jpg", popular: false },
         ]
         : templates;
 

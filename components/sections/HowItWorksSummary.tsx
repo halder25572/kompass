@@ -33,7 +33,7 @@ export default function HowItWorksSummary() {
           cta: "View Full How It Works",
           steps: [
             {
-              title: "Create Your Project",
+              title: "Create Your Book",
               description: "Choose occasion, add recipient details, and pick your theme and cover.",
             },
             {

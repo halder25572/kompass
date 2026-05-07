@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -55,7 +54,7 @@ export default function ContactSection() {
         }
         : {
             title: "We're here to help",
-            subtitle1: "for all questions, please send us a message and we'll get back to you",
+            subtitle1: "For all questions, please send us a message and we'll get back to you shortly.",
             subtitle2: "We usually respond within 24 hours",
             name: "Name",
             namePlaceholder: "Your name",

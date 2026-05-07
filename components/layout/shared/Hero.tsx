@@ -46,7 +46,7 @@ const whyPoints = [
       </svg>
     ),
     title: "Memory-Based Design",
-    desc: "Every page is unique. Photos, stories and inside jokes combine into something truly irreplaceable.",
+    desc: "Every page is unique. Combining photos, stories and shared memories into something truly irreplaceable.",
   },
   {
     icon: (
@@ -216,35 +216,35 @@ export default function HomePage() {
   const heroText =
     language === "de"
       ? {
-          pill: "Erinnerungen schaffen, die fuer immer bleiben",
-          headingLine1: "Persoenliches Geschenk erstellen",
-          headingLine2: "Gemeinsam gemacht",
-          description:
-            "Lade die wichtigsten Menschen ein, ihre Geschichten, Fotos und herzlichen Worte beizutragen. Wir verwandeln alles in ein hochwertiges, gedrucktes Layflat-Buch.",
-          startButton: "Buch starten",
-          howButton: "So funktioniert es",
-          rating: "4.9/5 von tausenden zufriedenen Erstellern",
-          secure: "Sicher und privat",
-          printed: "Gedruckt in Deutschland",
-          occasion: "Perfekt fuer jeden Anlass",
-          freeShipping: "Kostenloser Versand in Deutschland",
-          fastDelivery: "Schnelle Lieferung nach Oesterreich und in die Schweiz.",
-        }
+        pill: "Erinnerungen schaffen, die fuer immer bleiben",
+        headingLine1: "Persoenliches Geschenk erstellen",
+        headingLine2: "Gemeinsam gemacht",
+        description:
+          "Lade die wichtigsten Menschen ein, ihre Geschichten, Fotos und herzlichen Worte beizutragen. Wir verwandeln alles in ein hochwertiges, gedrucktes Layflat-Buch.",
+        startButton: "Buch starten",
+        howButton: "So funktioniert es",
+        rating: "4.9/5 von tausenden zufriedenen Erstellern",
+        secure: "Sicher und privat",
+        printed: "Gedruckt in Deutschland",
+        occasion: "Perfekt fuer jeden Anlass",
+        freeShipping: "Kostenloser Versand in Deutschland",
+        fastDelivery: "Schnelle Lieferung nach Oesterreich und in die Schweiz.",
+      }
       : {
-          pill: "Create memories that last forever",
-          headingLine1: "Create a Personal Gift",
-          headingLine2: "Made Together",
-          description:
-            "Invite the people who matter most to contribute their stories, photos and heartfelt messages. We turn it into a beautifully printed, premium lay-flat book - a gift made together.",
-          startButton: "Start Your Book",
-          howButton: "See How It Works",
-          rating: "4.9/5 from thousands of happy creators",
-          secure: "Secure & private",
-          printed: "Printed in Germany",
-          occasion: "Perfect for any occasion",
-          freeShipping: "Free shipping in Germany",
-          fastDelivery: "Fast delivery to Austria and Switzerland.",
-        };
+        pill: "A gift made together",
+        headingLine1: "Create a Personal Gift",
+        headingLine2: "Made Together",
+        description:
+          "Invite the people who matter most to contribute their stories, photos and heartfelt messages. We turn it into a beautifully printed, premium lay-flat memory book.",
+        startButton: "Start Your Book",
+        howButton: "See How It Works",
+        rating: "4.9/5 from thousands of happy creators",
+        secure: "Secure & private",
+        printed: "Printed in Germany",
+        occasion: "Perfect for any occasion",
+        freeShipping: "Free shipping in Germany",
+        fastDelivery: "Fast delivery to Austria and Switzerland.",
+      };
 
   return (
     <main className="font-sans bg-[#EEE8EA]">
@@ -260,13 +260,6 @@ export default function HomePage() {
           style={{ background: "radial-gradient(ellipse 60% 50% at 50% 35%, rgba(191,0,58,0.07) 0%, transparent 65%)" }} />
 
         <div ref={heroRef} className="relative z-10 w-full max-w-145 mx-auto flex flex-col items-center text-center gap-4 sm:gap-5">
-
-          {/* <div className="inline-flex items-center gap-1.5 text-[12px] sm:text-[13px] font-medium text-[#7A1E3A]">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-            </svg>
-            Create memories that last forever
-          </div> */}
 
           <div className="inline-flex items-center gap-2 bg-white border border-[#F3C5CE] rounded-full px-4 py-1.5 mb-5">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -347,8 +340,8 @@ export default function HomePage() {
           <div className="text-center mb-11">
             <p className="text-[12px] font-bold text-[#BF003A] tracking-widest uppercase mb-2.5">Real examples</p>
             <h2 className="text-[clamp(26px,4vw,42px)] font-extrabold text-[#1A1A2E] mb-3.5 tracking-tight">Sample Books</h2>
-            <p className="text-[15px] text-gray-500 max-w-105 mx-auto">
-              Click any book to see what a finished memory book really looks like inside.
+            <p className="text-[14px] text-gray-500 max-w-105 mx-auto">
+              These are real, completed memory books made by families, friends and colleagues. Flip through the pages to experience how messages, stories and photos come together in the final book. All sample books are shown with permission.
             </p>
           </div>
 

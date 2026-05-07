@@ -1,6 +1,15 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
+import { useEffect, useState } from "react";
+import {
+  fetchOccasions,
+  fetchBookPageStyles,
+  fetchCoverPageStyles,
+  fetchBooks,
+  showUser,
+} from "@/services/api";
+
 // components/BookFlipLoader.tsx
 // Usage:
 //   <BookFlipLoader />
@@ -24,11 +33,76 @@ const scaleMap: Record<Size, string> = {
   lg: "scale-[1.45]",
 };
 
+interface LoadingState {
+  occasions: boolean;
+  bookPageStyles: boolean;
+  coverPageStyles: boolean;
+  books: boolean;
+  userProfile: boolean;
+}
+
 export default function BookFlipLoader({
   size = "md",
   label,
   className = "",
 }: BookFlipLoaderProps) {
+  const [loadingState, setLoadingState] = useState<LoadingState>({
+    occasions: false,
+    bookPageStyles: false,
+    coverPageStyles: false,
+    books: false,
+    userProfile: false,
+  });
+
+  const [statusMessage, setStatusMessage] = useState("Initializing...");
+
+  // Fetch all APIs
+  useEffect(() => {
+    const fetchAllData = async () => {
+      try {
+        // Fetch Occasions
+        setStatusMessage("Loading occasions...");
+        setLoadingState((prev) => ({ ...prev, occasions: true }));
+        await fetchOccasions().catch(() => null);
+        setLoadingState((prev) => ({ ...prev, occasions: false }));
+
+        // Fetch Book Page Styles
+        setStatusMessage("Loading book page styles...");
+        setLoadingState((prev) => ({ ...prev, bookPageStyles: true }));
+        await fetchBookPageStyles().catch(() => null);
+        setLoadingState((prev) => ({ ...prev, bookPageStyles: false }));
+
+        // Fetch Cover Page Styles
+        setStatusMessage("Loading cover page styles...");
+        setLoadingState((prev) => ({ ...prev, coverPageStyles: true }));
+        await fetchCoverPageStyles().catch(() => null);
+        setLoadingState((prev) => ({ ...prev, coverPageStyles: false }));
+
+        // Fetch Books
+        setStatusMessage("Loading books...");
+        setLoadingState((prev) => ({ ...prev, books: true }));
+        await fetchBooks().catch(() => null);
+        setLoadingState((prev) => ({ ...prev, books: false }));
+
+        // Fetch User Profile
+        setStatusMessage("Loading user profile...");
+        setLoadingState((prev) => ({ ...prev, userProfile: true }));
+        await showUser().catch(() => null);
+        setLoadingState((prev) => ({ ...prev, userProfile: false }));
+
+        setStatusMessage("Ready!");
+      } catch (error) {
+        console.error("Error loading data:", error);
+        setStatusMessage("Loading complete");
+      }
+    };
+
+    fetchAllData();
+  }, []);
+
+  const activeLoads = Object.values(loadingState).filter((v) => v).length;
+  const displayLabel = activeLoads > 0 ? statusMessage : label ?? "Ready";
+
   return (
     <>
       <style>{`
@@ -53,7 +127,7 @@ export default function BookFlipLoader({
       <div
         className={`fixed inset-0 z-50 flex flex-col items-center justify-center gap-5 ${className}`}
         role="status"
-        aria-label={label ?? "Loading"}
+        aria-label={displayLabel ?? "Loading"}
       >
         {/* ── Book wrapper ── */}
         <div
@@ -139,13 +213,13 @@ export default function BookFlipLoader({
         </div>
 
         {/* ── Optional label ── */}
-        {label && (
+        {displayLabel && (
           <p
             className="text-[13px] font-medium tracking-widest text-[#BF003A] uppercase"
             style={{ animation: "labelPulse 2.2s ease-in-out infinite" }}
             aria-hidden="true"
           >
-            {label}
+            {displayLabel}
           </p>
         )}
       </div>

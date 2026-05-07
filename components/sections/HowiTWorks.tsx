@@ -7,7 +7,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 
 const steps = [
     {
-        title: "Choose Occasion & Style",
+        title: "Choose Occasion, Theme & Cover",
         points: [
             { icon: "user", text: "Select Occasion" },
             { icon: "grid", text: "Choose from premium templates" },
@@ -25,7 +25,7 @@ const steps = [
         blobSide: "right",
     },
     {
-        title: "Print Your Book",
+        title: "Preview & Order",
         points: [
             { icon: "grid", text: "Preview and approve your book" },
             { icon: "user", text: "Confirm print order" },

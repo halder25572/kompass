@@ -109,7 +109,7 @@ export function FloatingTextToolbar({ textItem, onUpdate, position }: FloatingTe
             onClick={() => { setShowFontMenu(!showFontMenu); setShowColorMenu(false); setShowSpacingMenu(false); }}
             className="flex items-center justify-between w-28 px-2 py-1.5 bg-zinc-800 rounded-md text-xs text-zinc-200 hover:bg-zinc-700 transition-colors"
           >
-            <span className="truncate max-w-[80px]">{textItem.fontFamily || 'Arial'}</span>
+            <span className="truncate max-w-20">{textItem.fontFamily || 'Arial'}</span>
             <ChevronDown className="w-3 h-3 text-zinc-400" />
           </button>
           
@@ -261,16 +261,16 @@ export function FloatingTextToolbar({ textItem, onUpdate, position }: FloatingTe
 
       {/* 5. Advanced (Transforms & Spacing) */}
       <div className="flex items-center gap-0.5 relative">
-        <div className="flex flex-col gap-[1px]">
+        <div className="flex flex-col gap-px">
             <button 
                 onClick={() => applyTransform('uppercase')}
                 title="Uppercase"
-                className={cn("px-1 py-[1px] text-[10px] rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors", textItem.textTransform === 'uppercase' && "text-indigo-400 bg-zinc-700")}
+                className={cn("px-1 py-px text-[10px] rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors", textItem.textTransform === 'uppercase' && "text-indigo-400 bg-zinc-700")}
             >AA</button>
             <button 
                 onClick={() => applyTransform('capitalize')}
                 title="Capitalize"
-                className={cn("px-1 py-[1px] text-[10px] rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors", textItem.textTransform === 'capitalize' && "text-indigo-400 bg-zinc-700")}
+                className={cn("px-1 py-px text-[10px] rounded hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors", textItem.textTransform === 'capitalize' && "text-indigo-400 bg-zinc-700")}
             >Aa</button>
         </div>
 
