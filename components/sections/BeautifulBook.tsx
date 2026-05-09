@@ -21,13 +21,13 @@ const templates: Template[] = [
   {
     id: 1,
     title: "Classic Neutral",
-    description: "Timeless design with serif typography and warm tones.",
+    description: "Soft natural tones with a calm, timeless and sophisticated feel.",
     image: "/1.jpg",
   },
   {
     id: 2,
     title: "Elegant Floral",
-    description: "Cozy layouts with soft gradients and photo frames.",
+    description: "Gentle floral accents and warm tones for a refined, romantic look.",
     image: "/2.jpg",
   },
   {
@@ -38,14 +38,14 @@ const templates: Template[] = [
   },
   {
     id: 4,
-    title: "Joyful Celebration",
-    description: "Playful colors with confetti-inspired accents.",
+    title: "Soft Playful",
+    description: "Light pastel colors and friendly shapes for joyful moments.",
     image: "/4.jpg",
   },
   {
     id: 5,
-    title: "Garden Party",
-    description: "Fresh florals and soft greens for a breezy, outdoor feel.",
+    title: "Bold Professional",
+    description: "Modern contrasts and clean typography for a confident, polished style.",
     image: "/1.jpg",
   },
 ];
@@ -89,7 +89,7 @@ export default function TemplatesSection() {
           {
             id: 3,
             title: "Modern Minimal",
-            description: "Klare Linien und grosszuegiger Weissraum fuer mehr Wirkung.",
+            description: "Clean lines, soft colors and timeless simplicity.",
             image: "/3.jpg",
           },
           {
@@ -133,11 +133,11 @@ export default function TemplatesSection() {
           browse: "Alle Themen und Cover ansehen",
         }
       : {
-          badge: "Themes and Covers",
+          // badge: "Themes and Covers",
           headingBefore: "Themes and",
           headingAccent: "Covers",
           subtitle:
-            "Choose from professionally crafted themes and covers to make your memory book truly special.",
+            "Choose from our universal themes and cover styles to shape the look of your book",
           browse: "Browse all themes and covers",
         };
 

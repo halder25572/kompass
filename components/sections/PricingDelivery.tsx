@@ -21,7 +21,7 @@ const deliveryOptions = [
     {
         icon: (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 3v5h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>),
         title: "Standard Shipping",
-        description: "Printed books delivered in 7–10 business days. Tracked shipping included.",
+        description: "Printed books delivered in 7–10 business days after final approval. Tracked shipping included.",
     },
     {
         icon: (<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#7A1E3A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" /></svg>),
@@ -50,13 +50,13 @@ export default function PricingDelivery() {
             freeShipping: "Kostenloser Versand in Deutschland",
             fastDelivery: "Schnelle Lieferung nach Oesterreich und in die Schweiz.",
             costPerFriend: "Kosten pro Freund",
-            priceDepends: "Der Preis haengt von der Anzahl der Teilnehmenden ab",
+            priceDepends: "Die Gesamtkosten koennen auf alle Teilnehmenden aufgeteilt werden – der Preis sinkt, je mehr Personen mitmachen.",
             optionalExtras: "Optionale Extras",
-            titleCover: "Personalisierter Titel auf dem Cover",
+            titleCover: "Folientitel auf dem Cover (Gold oder Silber)",
             photoPage: "Fotoseite",
             perPages: "pro 1-3 Seiten",
-            annualReview: "Jahresrueckblick",
-            perSeven: "pro 7 Seiten",
+            annualReview: "Zusaetzliche Fotoseiten",
+            perSeven: "(2 Seiten)",
             extraCopies: "Weitere Exemplare",
             extraDiscount: "Du erhaeltst 35% Rabatt auf jedes weitere identische Familienbuch.",
             extraContact: "Wenn du mehr als 15 Exemplare bestellen moechtest, helfen wir dir gerne mit einem unverbindlichen Angebot.",
@@ -73,13 +73,13 @@ export default function PricingDelivery() {
             freeShipping: "Free shipping in Germany",
             fastDelivery: "Fast delivery to Austria and Switzerland.",
             costPerFriend: "Cost per friend",
-            priceDepends: "Price depends on the number of friends participating",
+            priceDepends: "The total cost can be shared between participants — pricing decreases as more people contribute.",
             optionalExtras: "Optional Extras",
-            titleCover: "Personalised title on cover",
+            titleCover: "Foil title on cover (gold or silver)",
             photoPage: "Photo page",
             perPages: "per 1-3 pages",
-            annualReview: "Annual review",
-            perSeven: "per 7 pages",
+            annualReview: "Additional photo spreads",
+            perSeven: "(2 pages)",
             extraCopies: "Extra Copies",
             extraDiscount: "You will receive a 35% discount on each additional identical family book.",
             extraContact: "If you would like to order more than 15 copies, please contact us for a no-obligation quote.",
@@ -109,7 +109,7 @@ export default function PricingDelivery() {
             {
                 ...deliveryOptions[0],
                 title: "Standardversand",
-                description: "Gedruckte Buecher in 7-10 Werktagen. Sendungsverfolgung inklusive.",
+                description: "Gedruckte Buecher werden innerhalb von 7–10 Werktagen nach endgueltiger Freigabe geliefert. Sendungsverfolgung inklusive.",
             },
             {
                 ...deliveryOptions[1],
@@ -279,6 +279,15 @@ export default function PricingDelivery() {
                             </div>
                         </div>
                     ))}
+                </div>
+                {/* Minimum pages note */}
+                <div className="px-6 py-4 bg-[#FFF8F9] border-t border-[#f3f4f6]">
+                    <p className="text-[12px] text-[#6B7280] leading-relaxed">
+                        {language === "de"
+                            ? "Buecher koennen ab 26 Seiten gedruckt werden. Wenn du weniger Mitwirkende hast, kannst du optionale Fotoseiten hinzufuegen, um das Minimum zu erreichen."
+                            : "Books can be printed from 26 pages onwards. If you have fewer contributors, you can add optional photo pages to reach the minimum."
+                        }
+                    </p>
                 </div>
             </div>
 

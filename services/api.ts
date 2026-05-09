@@ -503,13 +503,37 @@ export async function fetchOccasions(): Promise<OccasionsResponse> {
     return result;
 }
 
+// export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
+//     if (!BASE_URL) {
+//         throw new Error("Base URL is missing.");
+//     }
+//     const token = getAuthToken();
+
+//     const response = await fetch(`/api/user/book-page-styles`, {
+//         method: "GET",
+//         headers: {
+//             "Content-Type": "application/json",
+//             ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//         },
+//     });
+
+//     const result = (await response.json()) as BookPageStylesResponse;
+
+//     if (!response.ok || !result.success) {
+//         return { success: false, message: result?.message ?? "", data: [], meta: {}, code: response.status };
+//     }
+
+//     return result;
+// }
+
+// ✅ নতুন
 export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing.");
     }
     const token = getAuthToken();
 
-    const response = await fetch(`/api/user/book-page-styles`, {
+    const response = await fetch(`${BASE_URL}/user/book-page-styles`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -526,14 +550,38 @@ export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
     return result;
 }
 
-export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
-    const token = getAuthToken();
+// export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
+//     const token = getAuthToken();
 
+//     if (!BASE_URL) {
+//         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+//     }
+
+//     const response = await fetch(`/api/user/cover-page`, {
+//         method: "GET",
+//         headers: {
+//             "Content-Type": "application/json",
+//             ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//         },
+//     });
+
+//     const result = (await response.json()) as CoverPageStylesResponse;
+
+//     if (!response.ok || !result.success) {
+//         throw new Error(result?.message || "Failed to load cover page styles");
+//     }
+
+//     return result;
+// }
+
+// ✅ নতুন
+export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
     }
+    const token = getAuthToken();
 
-    const response = await fetch(`/api/user/cover-page`, {
+    const response = await fetch(`${BASE_URL}/user/cover-page`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -914,31 +962,31 @@ export async function submitContactMessage(payload: ContactPayload): Promise<Con
     }
 
     return result;
-    }
+}
 
 export async function applyCoupon(payload: ApplyCouponPayload): Promise<AppliedCouponResponse> {
-        if (!BASE_URL) {
-            throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-        }
+    if (!BASE_URL) {
+        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+    }
 
-        const token = getAuthToken();
+    const token = getAuthToken();
 
-        const response = await fetch(`${BASE_URL}/coupons/apply`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-            body: JSON.stringify(payload),
-        });
+    const response = await fetch(`${BASE_URL}/coupons/apply`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+    });
 
-        const result = (await response.json()) as AppliedCouponResponse;
+    const result = (await response.json()) as AppliedCouponResponse;
 
-        if (!response.ok || !result.success) {
-            throw new Error(result?.message || "Failed to apply coupon");
-        }
+    if (!response.ok || !result.success) {
+        throw new Error(result?.message || "Failed to apply coupon");
+    }
 
-        return result;
+    return result;
 }
 
 // Delivery Types API

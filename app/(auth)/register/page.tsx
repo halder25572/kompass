@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useRegisterMutation } from "@/features/auth/components/hooks/services";
 import { useLanguage } from "@/hooks/useLanguage";
 import { toast } from "sonner";
@@ -11,11 +12,14 @@ import { toast } from "sonner";
 export default function RegisterPage() {
   const { language } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { mutate, isPending } = useRegisterMutation();
   const [error, setError] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const redirectTo = searchParams.get("redirect") || "/";
+  const saveCreationFlow = redirectTo !== "/";
 
   const text = language === "de"
     ? {
@@ -24,6 +28,7 @@ export default function RegisterPage() {
       headerTag: "Erstelle ein wunderschoenes Erinnerungsbuch",
       title: "Konto erstellen",
       subtitle: "Beginne in wenigen Minuten mit deinem Erinnerungsbuch",
+      saveCreationSubtitle: "Um deine Erstellung zu speichern und den Prozess abzuschliessen, musst du ein Konto erstellen.",
       fullName: "Vollstaendiger Name",
       email: "E-Mail",
       password: "Passwort",
@@ -32,6 +37,8 @@ export default function RegisterPage() {
       continueWith: "oder weiter mit",
       hasAccount: "Bereits ein Konto?",
       login: "Anmelden",
+      saveCreationHasAccount: "Already have an account?",
+      saveCreationLogin: "Log in",
     }
     : {
       leftTitle: "Create a personal gift made together.",
@@ -39,6 +46,7 @@ export default function RegisterPage() {
       headerTag: "Create Amazing Memory Book",
       title: "Create your account",
       subtitle: "Start creating memory books in minutes",
+      saveCreationSubtitle: "To save your creation and complete the process, you need to make an account.",
       fullName: "Full Name",
       email: "Email",
       password: "Password",
@@ -47,6 +55,8 @@ export default function RegisterPage() {
       continueWith: "or continue with",
       hasAccount: "Already have an account?",
       login: "Log in",
+      saveCreationHasAccount: "Already have an account?",
+      saveCreationLogin: "Log in",
     };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -60,7 +70,7 @@ export default function RegisterPage() {
           localStorage.setItem("token", response.data.token);
           localStorage.setItem("user", JSON.stringify(response.data.user));
           toast.success(response.message);
-          router.push("/");
+          router.push(redirectTo);
         },
         onError: (mutationError) => {
           toast.error(mutationError.message);
@@ -120,7 +130,7 @@ export default function RegisterPage() {
             {text.title}
           </h1>
           <p className="text-sm text-gray-500 mb-6">
-            {text.subtitle}
+            {saveCreationFlow ? text.saveCreationSubtitle : text.subtitle}
           </p>
 
           {/* Form */}
@@ -195,9 +205,9 @@ export default function RegisterPage() {
 
             {/* Login */}
             <p className="text-center text-xs text-gray-500 mt-4">
-              {text.hasAccount}{" "}
-              <Link href="/login" className="text-[#7A1E3A] font-medium">
-                {text.login}
+              {saveCreationFlow ? text.saveCreationHasAccount : text.hasAccount}{" "}
+              <Link href={saveCreationFlow ? `/login?redirect=${encodeURIComponent(redirectTo)}` : "/login"} className="text-[#7A1E3A] font-medium">
+                {saveCreationFlow ? text.saveCreationLogin : text.login}
               </Link>
             </p>
 

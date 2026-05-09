@@ -220,7 +220,7 @@ export default function LoginPage() {
             {/* Signup */}
             <p className="text-center text-xs text-gray-500 mt-4">
               {text.noAccount}{' '}
-              <Link href="/register" className="text-[#7A1E3A] font-medium">
+              <Link href={redirectTo !== "/" ? `/register?redirect=${encodeURIComponent(redirectTo)}` : "/register"} className="text-[#7A1E3A] font-medium">
                 {text.signUp}
               </Link>
             </p>

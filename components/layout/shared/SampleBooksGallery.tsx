@@ -158,7 +158,7 @@ function SampleBookPreviewModal({ book, onClose }: { book: SampleBook; onClose: 
                 href={`/create?cover=${book.id}`}
                 className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] px-6 py-3.5 text-[14px] font-bold text-white shadow-[0_10px_24px_rgba(191,0,58,0.24)] transition-opacity hover:opacity-90"
               >
-                Start With This Cover
+               Start Your Book
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
@@ -191,39 +191,39 @@ export default function SampleBooksGallery() {
     ? {
       realExamples: "Echte Beispiele aus fertigen Buechern",
       heroTitle: "Beispielbuecher, die sich echt anfuehlen.",
-      heroSubtitle: "Groessere Cover-Vorschauen ansehen, nach Anlass filtern und jedes Beispiel oeffnen, bevor du dein eigenes Buch startest.",
+      heroSubtitle: "Das sind echte, fertige Erinnerungsbuecher von Familien, Freunden und Kollegen. Blaettere durch die Seiten und sieh, wie Fotos, Nachrichten und Geschichten in einem fertigen Buch zusammenkommen. Alle Beispiele wurden mit Erlaubnis geteilt.",
       startBook: "Buch starten",
       browseGallery: "Galerie ansehen",
       filterBy: "Nach Anlass filtern",
       findSample: "Passendes Beispiel in Sekunden finden.",
-      filterHint: "Jede Karte nutzt eine groessere Darstellung, damit das Cover im Mittelpunkt steht.",
+      filterHint: "Jede Karte zeigt ein fertiges Beispielbuch und laedt dazu ein, den Inhalt zu erkunden — Seiten, Nachrichten und Fotos — statt nur eine Cover-Vorschau zu sehen.",
       showing: "Angezeigt",
       sampleBooks: "Beispielbuecher",
       for: "fuer",
       skip: "Direkt zum Buch-Editor",
       openPreview: "Vorschau oeffnen",
       ready: "Bereit zum Erstellen?",
-      readySubtitle: "Waehle ein Beispiel-Cover und starte dein eigenes Buch.",
-      readyHint: "Du kannst Anlass, Cover und Teilnehmende spaeter jederzeit anpassen.",
+      readySubtitle: "Starte dein Buch mit einem echten Beispiel.",
+      readyHint: "Du kannst dich von jedem Beispielbuch inspirieren lassen — und Thema, Cover, Inhalt und Mitwirkende spaeter noch anpassen.",
       contributors: "Mitwirkende",
     }
     : {
       realExamples: "Real examples from finished books",
       heroTitle: "Sample books that feel like the real thing.",
-      heroSubtitle: "Browse large cover previews, filter by occasion, and open each sample to see the interior before you start your own book.",
+      heroSubtitle: "These are real, completed memory books created by families, friends and colleagues. Flip through the pages to see how photos, messages and stories come together in a finished book. All examples are shared with permission.",
       startBook: "Start Your Book",
       browseGallery: "Browse the gallery",
       filterBy: "Filter by occasion",
       findSample: "Find the right sample in seconds.",
-      filterHint: "Each card uses a larger visual treatment so the book cover feels like the hero of the page, not a thumbnail.",
+      filterHint: "Each card shows a finished sample book, allowing visitors to explore the content — pages, messages and photos — instead of just a cover preview.",
       showing: "Showing",
       sampleBooks: "sample books",
       for: "for",
       skip: "Skip to book creator",
       openPreview: "Open preview",
       ready: "Ready to create?",
-      readySubtitle: "Pick a sample cover and start your own book.",
-      readyHint: "You can jump into the book creator from any example and adjust the cover, occasion, and contributors later.",
+      readySubtitle: "Start your book from a real example.",
+      readyHint: "You can start from any sample book to get inspired — and change the theme, cover, content and contributors later.",
       contributors: "contributors",
     };
 
@@ -446,7 +446,7 @@ export default function SampleBooksGallery() {
             </div>
             <Link
               href="/create"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-6 py-3.5 text-[14px] font-bold text-[#1A1A2E] transition-colors hover:bg-[#FFF0F3]"
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-8 py-4 text-[15px] font-extrabold text-[#1A1A2E] shadow-[0_8px_30px_rgba(255,255,255,0.25)] transition-all hover:bg-[#FFF0F3] hover:scale-105"
             >
               {text.startBook}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

@@ -55,7 +55,7 @@ const whyPoints = [
       </svg>
     ),
     title: "Ready in Days",
-    desc: "We handle printing and delivery so you can focus on collecting the memories that matter.",
+    desc: "We handle everything from printing to delivery, so you can focus on collecting the memories that matter.",
   },
 ];
 
@@ -341,7 +341,7 @@ export default function HomePage() {
             <p className="text-[12px] font-bold text-[#BF003A] tracking-widest uppercase mb-2.5">Real examples</p>
             <h2 className="text-[clamp(26px,4vw,42px)] font-extrabold text-[#1A1A2E] mb-3.5 tracking-tight">Sample Books</h2>
             <p className="text-[14px] text-gray-500 max-w-105 mx-auto">
-              These are real, completed memory books made by families, friends and colleagues. Flip through the pages to experience how messages, stories and photos come together in the final book. All sample books are shown with permission.
+              These are real, completed memory books created by families, friends and colleagues. Flip through the pages to see how photos, messages and stories come together in a finished book. All examples are shared with permission.
             </p>
           </div>
 
@@ -393,7 +393,7 @@ export default function HomePage() {
               Why This Gift Is Special
             </h2>
             <p className="text-[15px] text-gray-500 max-w-120 mx-auto leading-relaxed">
-              It&apos;s not just a book. It&apos;s a collection of real moments, written by the people who matter most.
+             It&apos;s not just a book. It&apos;s a collection of real moments, created together by the people who matter most.
             </p>
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
