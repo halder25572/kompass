@@ -503,6 +503,30 @@ export async function fetchOccasions(): Promise<OccasionsResponse> {
     return result;
 }
 
+export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
+    if (!BASE_URL) {
+        throw new Error("Base URL is missing.");
+    }
+    const token = getAuthToken();
+
+    const response = await fetch(`/api/user/book-page-styles`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    const result = (await response.json()) as BookPageStylesResponse;
+
+    if (!response.ok || !result.success) {
+        return { success: false, message: result?.message ?? "", data: [], meta: {}, code: response.status };
+    }
+
+    return result;
+}
+
+// New
 // export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
 //     if (!BASE_URL) {
 //         throw new Error("Base URL is missing.");
@@ -526,14 +550,14 @@ export async function fetchOccasions(): Promise<OccasionsResponse> {
 //     return result;
 // }
 
-// ✅ নতুন
-export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing.");
-    }
+export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
     const token = getAuthToken();
 
-    const response = await fetch(`${BASE_URL}/user/book-page-styles`, {
+    if (!BASE_URL) {
+        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+    }
+
+    const response = await fetch(`/api/user/cover-page`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -541,21 +565,21 @@ export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
         },
     });
 
-    const result = (await response.json()) as BookPageStylesResponse;
+    const result = (await response.json()) as CoverPageStylesResponse;
 
     if (!response.ok || !result.success) {
-        return { success: false, message: result?.message ?? "", data: [], meta: {}, code: response.status };
+        throw new Error(result?.message || "Failed to load cover page styles");
     }
 
     return result;
 }
 
+// New
 // export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
-//     const token = getAuthToken();
-
 //     if (!BASE_URL) {
 //         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
 //     }
+//     const token = getAuthToken();
 
 //     const response = await fetch(`/api/user/cover-page`, {
 //         method: "GET",
@@ -574,34 +598,11 @@ export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
 //     return result;
 // }
 
-// ✅ নতুন
-export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-    }
-    const token = getAuthToken();
-
-    const response = await fetch(`${BASE_URL}/user/cover-page`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
-
-    const result = (await response.json()) as CoverPageStylesResponse;
-
-    if (!response.ok || !result.success) {
-        throw new Error(result?.message || "Failed to load cover page styles");
-    }
-
-    return result;
-}
-
+// New
 export async function fetchBooks(): Promise<BooksResponse> {
     const token = getAuthToken();
 
-    const response = await fetch(`/api/user/books`, {
+    const response = await fetch(`${BASE_URL}/user/books`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -636,7 +637,7 @@ export async function createBookUser(payload: CreateBookPayload): Promise<Create
         throw new Error("Authentication token is missing. Please log in again.");
     }
 
-    const response = await fetch(`/api/user/books`, {
+    const response = await fetch(`${BASE_URL}/user/books`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -673,7 +674,7 @@ export async function updateBookUser(
     }
 
     const token = getAuthToken();
-    const response = await fetch(`/api/user/books/${bookId}`, {
+    const response = await fetch(`${BASE_URL}/user/books/${bookId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -697,7 +698,7 @@ export async function sendBookInviteUser(bookId: string | number): Promise<SendB
     }
 
     const token = getAuthToken();
-    const response = await fetch(`/api/user/books/${bookId}/invite`, {
+    const response = await fetch(`${BASE_URL}/user/books/${bookId}/invite`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -790,7 +791,7 @@ export async function checkInContributor(code: string): Promise<CheckInResponse>
     }
 
     const token = getAuthToken();
-    const response = await fetch(`/api/contribute/check-in/${code}`, {
+    const response = await fetch(`${BASE_URL}/contribute/check-in/${code}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -813,7 +814,7 @@ export async function fetchInviteDetails(code: string): Promise<GetInviteRespons
     }
 
     const token = getAuthToken();
-    const response = await fetch(`/api/invite/${code}`, {
+    const response = await fetch(`${BASE_URL}/invite/${code}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -839,7 +840,7 @@ export async function submitContribution(
     }
 
     const token = getAuthToken();
-    const response = await fetch(`/api/contribute/submit/${inviterId}`, {
+    const response = await fetch(`${BASE_URL}/api/contribute/submit/${inviterId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

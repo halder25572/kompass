@@ -209,7 +209,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
       <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
         <Link href="/">
           <div className="flex items-center gap-2">
-            <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+            <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
             <span className="font-semibold text-lg">Mein HerzGeschenk</span>
           </div>
         </Link>

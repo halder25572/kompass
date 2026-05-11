@@ -45,8 +45,14 @@ export function useAuth() {
 
   const logout = () => {
     setLocalUser(null);
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    try {
+      localStorage.removeItem('user');
+      localStorage.removeItem('token');
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('accessToken');
+      window.dispatchEvent(new Event('auth-token-updated'));
+    } catch {}
+
     if (session) signOut({ callbackUrl: '/login' });
   };
 

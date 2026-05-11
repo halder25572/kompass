@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
 
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+            <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
             <span className="font-semibold text-lg">Mein HerzGeschenk</span>
           </div>
 
@@ -100,7 +100,7 @@ export default function ResetPasswordPage() {
 
           {/* Logo */}
           <div className="flex justify-center items-center gap-2 mb-4">
-            <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+            <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
             <span className="font-semibold text-lg text-gray-900">
               Mein HerzGeschenk
             </span>

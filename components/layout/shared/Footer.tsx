@@ -30,7 +30,7 @@ export default function Footer() {
                 <div className="max-w-sm">
                     <Link href="/">
                         <div className="flex items-center gap-2 mb-2">
-                            <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+                            <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
                             <span className="text-sm font-semibold text-[#1A1A2E]">
                                 Mein HerzGeschenk
                             </span>

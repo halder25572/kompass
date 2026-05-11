@@ -93,7 +93,7 @@
 //         <header className="shrink-0 h-13 flex items-center justify-between gap-2 px-5 bg-transparent mb-10 mt-4">
 //           <Link href="/">
 //             <div className="flex items-center gap-2">
-//               <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+//               <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
 //               <span className="font-semibold text-lg text-white">Mein HerzGeschenk</span>
 //             </div>
 //           </Link>
@@ -633,7 +633,7 @@ export default function BookEditor() {
         <header className="shrink-0 h-13 flex items-center justify-between gap-2 px-5 bg-transparent mb-6 mt-4">
           <Link href="/">
             <div className="flex items-center gap-2">
-              <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+              <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
               <span className="font-semibold text-lg text-white">Mein HerzGeschenk</span>
             </div>
           </Link>

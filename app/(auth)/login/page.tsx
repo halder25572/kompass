@@ -116,7 +116,7 @@ export default function LoginPage() {
 
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <Image src="/images/logo.png" width={28} height={28} alt="logo" />
+            <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
             <span className="font-semibold text-lg">Mein HerzGeschenk</span>
           </div>
 
