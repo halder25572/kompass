@@ -722,10 +722,15 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
     // Fallback static templates when API returns empty (e.g., anonymous users)
     const fallbackTemplates: StyleCard[] = [
         { id: 1001, name: "Warm & Nostalgic", description: "Amber hues, soft grain textures and vintage-inspired layouts.", image: "/icon/1.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 1002, name: "Modern Minimal", description: "Crisp white space, strong typography and restrained accents.", image: "/icon/2.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 1003, name: "Floral Romance", description: "Delicate flower motifs and blush palettes for tender moments.", image: "/icon/3.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 1004, name: "Celestial Dream", description: "Midnight gradients, golden constellations and sense of wonder.", image: "/icon/4.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 1005, name: "Tropical Escape", description: "Lush leaves, vivid colors and energy that captures celebrations.", image: "/icon/5.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 1006, name: "Elegant Marble", description: "Sophisticated white marble veining paired with gold accents.", image: "/icon/6.jpg", occasionName: "General", subOccasionName: "" },
     ];
 
@@ -795,9 +800,13 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
     const coversFromApi = coverPageStylesResponse?.data?.map(mapStyleCard) ?? [];
     const fallbackCovers: StyleCard[] = [
         { id: 2001, name: "Solid Color", description: "A bold, single-color cover that puts your title front and center.", image: "/icon/11.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2002, name: "Soft Pattern", description: "Delicate repeating patterns add warmth and personality.", image: "/icon/12.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2003, name: "Full Photo", description: "Let a single stunning photograph fill the entire cover.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2004, name: "Split / Duo-Tone", description: "Two contrasting tones divided across the cover for editorial look.", image: "/icon/14.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2005, name: "Framed Photo", description: "Your photo set inside an elegant frame — classic and polished.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
     ];
 
@@ -858,11 +867,16 @@ function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onB
     const previewRef = useRef<HTMLDivElement>(null);
     const { data: coverPageStylesResponse, isLoading } = useCoverPageStylesQuery();
     const coversFromApi = coverPageStylesResponse?.data?.map(mapStyleCard) ?? [];
+
     const fallbackCovers: StyleCard[] = [
         { id: 2001, name: "Solid Color", description: "A bold, single-color cover that puts your title front and center.", image: "/icon/11.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2002, name: "Soft Pattern", description: "Delicate repeating patterns add warmth and personality.", image: "/icon/12.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2003, name: "Full Photo", description: "Let a single stunning photograph fill the entire cover.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2004, name: "Split / Duo-Tone", description: "Two contrasting tones divided across the cover for editorial look.", image: "/icon/14.jpg", occasionName: "General", subOccasionName: "" },
+
         { id: 2005, name: "Framed Photo", description: "Your photo set inside an elegant frame — classic and polished.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
     ];
 
