@@ -12,7 +12,7 @@ import gsap from "gsap";
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor, closestCenter } from "@dnd-kit/core";
 import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
+import { useBookDetailsQuery, useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
 
 
@@ -169,6 +169,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   const [showPreview, setShowPreview] = useState(false);
   const [participants, setParticipants] = useState(initialParticipants);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const { data: bookDetails } = useBookDetailsQuery(bookId);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -176,6 +177,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   );
 
   const updateMutation = useUpdateBookMutation(bookId);
+  const inviteLink = bookDetails?.data.book_details.invite_link ?? "";
 
   const handleDragStart = ({ active }: any) => setActiveId(active.id as string);
   const handleDragEnd = ({ active, over }: any) => {
@@ -357,12 +359,19 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             <div className="flex items-center border rounded-lg overflow-hidden mb-3">
               <input
                 className="flex-1 p-2 text-xs outline-none"
-                value="https://preview-keepsake..."
+                  value={inviteLink || "Invite link will appear here"}
                 readOnly
               />
               <button
+                  type="button"
+                  disabled={!inviteLink}
+                  onClick={async () => {
+                    if (!inviteLink || typeof navigator === "undefined") return;
+                    await navigator.clipboard.writeText(inviteLink);
+                    toast.success("Invite link copied");
+                  }}
                 onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                className="p-2 bg-linear-to-r from-[#BF003A] to-[#59001C] text-white"
+                  className="p-2 bg-linear-to-r from-[#BF003A] to-[#59001C] text-white disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Copy size={14} />
               </button>

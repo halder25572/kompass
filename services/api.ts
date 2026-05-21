@@ -642,7 +642,7 @@ export async function createBookUser(payload: CreateBookPayload): Promise<Create
         throw new Error("Authentication token is missing. Please log in again.");
     }
 
-    const response = await fetch(`${BASE_URL}/user/books`, {
+    const response = await fetch(`/api/user/books`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -679,7 +679,7 @@ export async function updateBookUser(
     }
 
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/user/books/${bookId}`, {
+    const response = await fetch(`/api/user/books/${bookId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -703,7 +703,7 @@ export async function inviteByEmail(bookId: string | number, email: string): Pro
     if (!email?.trim()) throw new Error("Email is required.");
 
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/user/books/${bookId}/invite`, {
+    const response = await fetch(`/api/user/books/${bookId}/invite`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

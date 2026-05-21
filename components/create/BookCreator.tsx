@@ -5,7 +5,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { JSX } from "react/jsx-runtime";
@@ -1114,6 +1114,7 @@ function Step7({
     const [emailSubject, setEmailSubject] = useState("You're invited to contribute to a memory book! 📖");
     const [emailBody, setEmailBody] = useState(`Hi [Name],\n\nYou've been invited to contribute to a special memory book.\n\nClick the link below to add your message, photos, and memories:\n[Invite Link]\n\nThis won't take long and will mean the world to the recipient.\n\nThank you so much!\n`);
     const [friends, setFriends] = useState<Friend[]>([createFriend()]);
+    const [showHelpText, setShowHelpText] = useState(false);
 
     const headingRef = useRef<HTMLDivElement>(null);
     const emailSectionRef = useRef<HTMLDivElement>(null);
@@ -1193,12 +1194,24 @@ function Step7({
                             />
                             <button
                                 type="button"
-                                onClick={onLoginRequired}
+                                onClick={() => {
+                                    if (!isAuthenticated) {
+                                        onLoginRequired();
+                                        return;
+                                    }
+
+                                    setShowHelpText((current) => !current);
+                                }}
                                 className="inline-flex items-center justify-center rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 text-[13px] font-semibold text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
                             >
                                 {!isAuthenticated ? "Log in" : "Need help?"}
                             </button>
                         </div>
+                        {isAuthenticated && showHelpText && (
+                            <p className="mt-3 rounded-xl border border-[#f3d4db] bg-[#fff8f9] px-4 py-3 text-[12px] leading-5 text-[#6b7280]">
+                                Copy the invite link and share it with contributors. Anyone with the link can open the book invitation page.
+                            </p>
+                        )}
                     </div>
                 </div>
 
@@ -1343,6 +1356,8 @@ export default function BookCreator() {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const { isAuthenticated, isLoading } = useAuth();
+    const { data: bookPageStylesResponse } = useBookPageStylesQuery();
+    const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
     const [step, setStep] = useState(1);
     const [showSuccess, setShowSuccess] = useState(false);
     const [selectedSubTab, setSelectedSubTab] = useState("Birthday");
@@ -1363,6 +1378,8 @@ export default function BookCreator() {
         return query ? `${pathname}?${query}` : pathname;
     })();
     const loginRedirectHref = `/login?redirect=${encodeURIComponent(inviteStepQuery)}`;
+    const availableThemeIds = useMemo(() => bookPageStylesResponse?.data?.map((style) => style.id) ?? [], [bookPageStylesResponse]);
+    const availableCoverIds = useMemo(() => coverPageStylesResponse?.data?.map((style) => style.id) ?? [], [coverPageStylesResponse]);
 
     const persistWizardState = () => {
         if (typeof window === "undefined") return;
@@ -1385,32 +1402,60 @@ export default function BookCreator() {
 
         setIsGeneratingInviteLink(true);
         try {
+            const resolvedThemeId = availableThemeIds.includes(selectedThemeId) ? selectedThemeId : availableThemeIds[0] ?? null;
+            const resolvedCoverId = availableCoverIds.includes(selectedCoverId) ? selectedCoverId : availableCoverIds[0] ?? null;
+
+            if (resolvedThemeId !== selectedThemeId) {
+                setSelectedThemeId(resolvedThemeId ?? 1);
+            }
+
+            if (resolvedCoverId !== selectedCoverId) {
+                setSelectedCoverId(resolvedCoverId ?? 1);
+            }
+
             const result = await createBookMutation.mutateAsync({
                 book_title: bookDraft.bookTitle,
                 book_subtitle: bookDraft.bookSubtitle,
                 recipient_name: bookDraft.recipientName,
                 occasion_id: bookDraft.occasionId || null,
                 sub_occasion_id: bookDraft.subOccasionId || null,
-                book_page_style_id: selectedThemeId || null,
-                cover_page_style_id: selectedCoverId || null,
+                book_page_style_id: resolvedThemeId,
+                cover_page_style_id: resolvedCoverId,
             });
 
-            await updateBookUser(result.data.id, {
-                book_title: bookDraft.bookTitle,
-                book_subtitle: bookDraft.bookSubtitle || null,
-                recipient_name: bookDraft.recipientName,
-                occasion_id: bookDraft.occasionId || null,
-                sub_occasion_id: bookDraft.subOccasionId || null,
-                cover_page_style_id: selectedCoverId || null,
-                book_page_style_id: selectedThemeId || null,
-            });
+            const inviteLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
 
-            setCreatedInviteLink(result.data.invite_link);
-            return result.data.invite_link;
+            if (!inviteLink) {
+                throw new Error("Invite link missing from create book response.");
+            }
+
+            if (result.data?.id !== undefined && result.data?.id !== null) {
+                await updateBookUser(result.data.id, {
+                    book_title: bookDraft.bookTitle,
+                    book_subtitle: bookDraft.bookSubtitle || null,
+                    recipient_name: bookDraft.recipientName,
+                    occasion_id: bookDraft.occasionId || null,
+                    sub_occasion_id: bookDraft.subOccasionId || null,
+                    cover_page_style_id: resolvedCoverId,
+                    book_page_style_id: resolvedThemeId,
+                });
+            }
+
+            setCreatedInviteLink(inviteLink);
+            return inviteLink;
         } finally {
             setIsGeneratingInviteLink(false);
         }
-    }, [bookDraft, createdInviteLink, createBookMutation, isGeneratingInviteLink, selectedCoverId, selectedThemeId]);
+    }, [
+        availableCoverIds,
+        availableThemeIds,
+        bookDraft,
+        createdInviteLink,
+        createBookMutation,
+        isGeneratingInviteLink,
+        selectedCoverId,
+        selectedThemeId,
+    ]);
 
     const stepFromQuery = (() => {
         switch (urlStep) {
