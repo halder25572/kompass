@@ -161,6 +161,9 @@ export default function LoginPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
+                autoComplete="email"
+                spellCheck={false}
+                suppressHydrationWarning
                 required
               />
             </div>

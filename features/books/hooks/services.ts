@@ -3,7 +3,6 @@ import {
 	createBookUser,
 	fetchBooks,
 	fetchBookDetails,
-	sendBookInviteUser,
 	updateBookUser,
 	BooksResponse,
 	BookDetailResponse,
@@ -12,6 +11,7 @@ import {
 	SendBookInviteResponse,
 	UpdateBookPayload,
 	UpdateBookResponse,
+	inviteByEmail,
 } from "@/services/api";
 
 export function useBooksQuery() {
@@ -28,7 +28,7 @@ export function useBookDetailsQuery(bookId: string | number | undefined) {
 		queryFn: () => fetchBookDetails(bookId as string | number),
 		enabled: Boolean(bookId),
 		retry: false,
-	});
+	});	
 }
 
 export function useCreateBookMutation() {
@@ -55,13 +55,13 @@ export function useUpdateBookMutation(bookId: string | number | undefined) {
 }
 
 export function useSendBookInviteMutation(bookId: string | number | undefined) {
-	const queryClient = useQueryClient();
+    const queryClient = useQueryClient();
 
-	return useMutation<SendBookInviteResponse, Error, void>({
-		mutationFn: () => sendBookInviteUser(bookId as string | number),
-		onSuccess: async () => {
-			await queryClient.invalidateQueries({ queryKey: ["books"] });
-			await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
-		},
-	});
+    return useMutation<SendBookInviteResponse, Error, string>({
+        mutationFn: (email: string) => inviteByEmail(bookId as string | number, email),
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["books"] });
+            await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
+        },
+    });
 }

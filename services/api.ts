@@ -1,4 +1,5 @@
-﻿import {
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+import {
     RegisterPayload,
     LoginPayload,
     GoogleLoginPayload,
@@ -33,7 +34,10 @@
     CheckInResponse,
     GetInviteResponse,
     SubmitContributionPayload,
+    ContributionsListResponse,
+    ContributionDetailResponse,
     SubmitContributionResponse,
+    
     LegalInformationResponse,
     PrivacyPoliciesResponse,
     TermsConditionsResponse,
@@ -46,6 +50,7 @@
     OrderPreviewPayload,
     OrderPreviewResponse,
 } from "@/types/api";
+// ContributionsResponse type remains in types for other modules; not imported here.
 
 // Re-export types for backward compatibility
 export type {
@@ -692,10 +697,10 @@ export async function updateBookUser(
     return result;
 }
 
-export async function sendBookInviteUser(bookId: string | number): Promise<SendBookInviteResponse> {
-    if (!bookId && bookId !== 0) {
-        throw new Error("Book ID is required.");
-    }
+// invite by email
+export async function inviteByEmail(bookId: string | number, email: string): Promise<SendBookInviteResponse> {
+    if (!bookId && bookId !== 0) throw new Error("Book ID is required.");
+    if (!email?.trim()) throw new Error("Email is required.");
 
     const token = getAuthToken();
     const response = await fetch(`${BASE_URL}/user/books/${bookId}/invite`, {
@@ -704,71 +709,22 @@ export async function sendBookInviteUser(bookId: string | number): Promise<SendB
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        body: JSON.stringify({ email: email.trim() }),
     });
 
-    const responseText = await response.text();
-    let result: SendBookInviteResponse;
+    const result = await safeParseJson<SendBookInviteResponse>(response);
 
-    if (responseText) {
-        try {
-            result = JSON.parse(responseText) as SendBookInviteResponse;
-        } catch {
-            result = {
-                success: response.ok,
-                message: response.ok ? responseText : "Failed to send invitation",
-                data: {
-                    book_id: Number(bookId),
-                    invite_link_id: 0,
-                    name: "",
-                    email: "",
-                    status: 0,
-                    updated_at: "",
-                    created_at: "",
-                    id: 0,
-                    full_image_urls: [],
-                },
-                meta: {},
-                code: response.status,
-            };
-        }
-    } else {
-        result = {
-            success: response.ok,
-            message: response.ok ? "Invitation sent successfully" : "Failed to send invitation",
-            data: {
-                book_id: Number(bookId),
-                invite_link_id: 0,
-                name: "",
-                email: "",
-                status: 0,
-                updated_at: "",
-                created_at: "",
-                id: 0,
-                full_image_urls: [],
-            },
-            meta: {},
-            code: response.status,
-        };
-    }
-
-    if (!response.ok || !result.success) {
-        throw new Error(result?.message || "Failed to send invitation");
-    }
-
-    return result;
+    return result ?? { success: response.ok, message: "", data: null, meta: {}, code: response.status };
 }
 
+// Book Details API (used in book details page, and also to get book info before final PDF generation)
 export async function fetchBookDetails(bookId: string | number): Promise<BookDetailResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-    }
-
     if (!bookId && bookId !== 0) {
         throw new Error("Book ID is required.");
     }
 
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/user/books/${bookId}`, {
+    const response = await fetch(`/api/user/books/${bookId}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -785,10 +741,9 @@ export async function fetchBookDetails(bookId: string | number): Promise<BookDet
     return result;
 }
 
-export async function checkInContributor(code: string): Promise<CheckInResponse> {
-    if (!code) {
-        throw new Error("Check-in code is required.");
-    }
+// Join invite (non-throwing) — returns backend response directly so UI can show message
+export async function joinInviteByCode(code: string): Promise<CheckInResponse> {
+    if (!code) throw new Error("Check-in code is required.");
 
     const token = getAuthToken();
     const response = await fetch(`${BASE_URL}/contribute/check-in/${code}`, {
@@ -799,15 +754,14 @@ export async function checkInContributor(code: string): Promise<CheckInResponse>
         },
     });
 
-    const result = (await response.json()) as CheckInResponse;
+    const result = await safeParseJson<CheckInResponse>(response);
 
-    if (!response.ok || !result.success) {
-        throw new Error(result?.message || "Check-in failed");
-    }
+    if (!result) return { success: response.ok, message: "", data: null, meta: {}, code: response.status };
 
     return result;
 }
 
+// Fetch invite details by code (used in contribution page to show invite info before joining)
 export async function fetchInviteDetails(code: string): Promise<GetInviteResponse> {
     if (!code) {
         throw new Error("Invite code is required.");
@@ -817,7 +771,7 @@ export async function fetchInviteDetails(code: string): Promise<GetInviteRespons
     const response = await fetch(`${BASE_URL}/invite/${code}`, {
         method: "GET",
         headers: {
-            "Content-Type": "application/json",
+            "Accept": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     });
@@ -831,6 +785,7 @@ export async function fetchInviteDetails(code: string): Promise<GetInviteRespons
     return result;
 }
 
+// Submit contribution (used in contribution page) - throws on failure so UI can show error message
 export async function submitContribution(
     inviterId: string | number,
     payload: SubmitContributionPayload
@@ -840,10 +795,11 @@ export async function submitContribution(
     }
 
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/api/contribute/submit/${inviterId}`, {
+    const response = await fetch(`${BASE_URL}/contribute/submit/${inviterId}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            "Accept": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
         body: JSON.stringify(payload),
@@ -880,6 +836,7 @@ export async function fetchLegalInformation(): Promise<LegalInformationResponse>
     return result;
 }
 
+// Privacy Policies API
 export async function fetchPrivacyPolicies(): Promise<PrivacyPoliciesResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -901,6 +858,7 @@ export async function fetchPrivacyPolicies(): Promise<PrivacyPoliciesResponse> {
     return result;
 }
 
+// Terms & Conditions API
 export async function fetchTermsConditions(): Promise<TermsConditionsResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -922,6 +880,7 @@ export async function fetchTermsConditions(): Promise<TermsConditionsResponse> {
     return result;
 }
 
+// FAQs API
 export async function fetchFaqs(): Promise<FaqsResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -943,6 +902,7 @@ export async function fetchFaqs(): Promise<FaqsResponse> {
     return result;
 }
 
+// Contact API
 export async function submitContactMessage(payload: ContactPayload): Promise<ContactResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -965,6 +925,7 @@ export async function submitContactMessage(payload: ContactPayload): Promise<Con
     return result;
 }
 
+// Apply Coupon API (used in order preview page) - throws on failure so UI can show error message
 export async function applyCoupon(payload: ApplyCouponPayload): Promise<AppliedCouponResponse> {
     if (!BASE_URL) {
         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
@@ -1036,4 +997,181 @@ export async function fetchOrderPreview(payload: OrderPreviewPayload): Promise<O
     }
 
     return result;
+}
+
+// Create a Stripe PaymentIntent (server should return clientSecret and order id)
+export async function createStripePaymentIntent(payload: { amount: number; currency?: string; metadata?: Record<string, any>; }): Promise<{ clientSecret?: string; orderId?: number | string; order_id?: number | string; }> {
+    if (!BASE_URL) throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+
+    const token = getAuthToken();
+    const response = await fetch(`${BASE_URL}/payments/stripe/create-intent`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const text = await response.text();
+    if (!response.ok) {
+        let parsed: any = null;
+        try { parsed = text ? JSON.parse(text) : null; } catch {}
+        throw new Error(parsed?.message || `Server error (HTTP ${response.status}) creating payment intent`);
+    }
+
+    try {
+        return text ? JSON.parse(text) : {};
+    } catch {
+        return {};
+    }
+}
+
+// Update order status — backend should support updating order by id
+export async function updateOrderStatus(orderId: string | number, payload: { status: string; [k: string]: any }): Promise<any> {
+    if (!BASE_URL) throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+    if (!orderId && orderId !== 0) throw new Error("Order ID is required.");
+
+    const token = getAuthToken();
+    const response = await fetch(`${BASE_URL}/user/orders/${orderId}`, {
+        method: "PATCH",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+    });
+
+    const result = await safeParseJson<any>(response);
+    if (!response.ok) {
+        throw new Error(result?.message || `Failed to update order (HTTP ${response.status})`);
+    }
+
+    return result;
+}
+
+// Contributions APIs
+export async function fetchContributions(bookId: string | number): Promise<ContributionsListResponse> {
+    if (!BASE_URL) {
+        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
+    }
+
+    if (!bookId && bookId !== 0) {
+        throw new Error("Book ID is required.");
+    }
+
+    const token = getAuthToken();
+    const response = await fetch(`${BASE_URL}/user/books/${bookId}/contributions`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    const result = await safeParseJson<ContributionsListResponse>(response);
+
+    if (!response.ok) {
+        throw new Error(result ? getApiErrorMessage(result, result.message || `Server error (HTTP ${response.status}).`) : `Server error (HTTP ${response.status}).`);
+    }
+
+    if (!result) {
+        return {
+            success: true,
+            message: "",
+            data: {
+                book_id: Number(bookId),
+                book_title: "",
+                statistics: { total: 0, invited: 0, pending: 0, submitted: 0, progress: "0%" },
+                contributions: [],
+            },
+            meta: {},
+            code: 200,
+        };
+    }
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to load contributions"));
+    }
+
+    return result;
+}
+
+// Contribution details API (used in contribution details page) - throws on failure so UI can show error message
+export async function fetchContribution(contributionId: string | number): Promise<ContributionDetailResponse> {
+    if (!contributionId && contributionId !== 0) {
+        throw new Error("Contribution ID is required.");
+    }
+
+    const token = getAuthToken();
+    const response = await fetch(`${BASE_URL}/user/books/contribution/${contributionId}`, {
+        method: "GET",
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    const result = (await response.json()) as ContributionDetailResponse;
+
+    if (!response.ok || !result.success) {
+        throw new Error(result?.message || "Failed to load contribution details");
+    }
+
+    return result;
+}
+
+// upload final pdf API
+export async function uploadFinalPdf(bookId: string | number, file: Blob): Promise<{ success: boolean; message?: string; url?: string; code?: number; data?: any }> {
+    if (!bookId && bookId !== 0) {
+        throw new Error("Book ID is required.");
+    }
+
+    const token = getAuthToken();
+    if (!token) {
+        throw new Error("Authentication token is missing. Please log in again.");
+    }
+
+    const formData = new FormData();
+    formData.append("pdf_file", file, "final-book.pdf");
+
+    // Use the existing same-origin Next.js proxy so the browser does not hit CORS/preflight issues.
+    const proxyUrl = `/api/user/books/${bookId}/final-pdf`;
+    console.log("📤 uploadFinalPdf: Sending to", proxyUrl);
+
+    const response = await fetch(proxyUrl, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const text = await response.text();
+    if (!text) {
+        if (!response.ok) throw new Error("Upload failed");
+        // Backend returned empty response - assume success with no message
+        return { success: true, message: "", url: "", data: null, code: response.status };
+    }
+
+    let result: any;
+    try {
+        result = JSON.parse(text);
+    } catch {
+        // If backend returns plain URL or HTML
+        if (response.ok) {
+            return { success: true, message: text, url: text, data: null, code: response.status };
+        }
+        throw new Error(`Upload failed: ${text || `HTTP ${response.status}`}`);
+    }
+
+    if (!response.ok) {
+        throw new Error(result?.message || "Upload failed");
+    }
+
+    // Prefer backend's final_pdf_path when present
+    const finalPdfPath = result?.data?.final_pdf_path ?? result?.data?.url ?? result?.url ?? result?.path ?? "";
+
+    return { success: result.success ?? true, message: result.message, url: finalPdfPath, data: result?.data ?? result, code: result?.code ?? response.status };
 }

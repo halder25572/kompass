@@ -4,6 +4,11 @@ import { useRef, useEffect } from 'react';
 import { Image as KonvaImage, Transformer } from 'react-konva';
 import Konva from 'konva';
 
+function getProxiedImageSrc(src: string) {
+  if (!src.startsWith('http')) return src;
+  return `/api/image-proxy?url=${encodeURIComponent(src)}`;
+}
+
 interface ImageNodeProps {
   id: string;
   src: string;
@@ -28,8 +33,7 @@ export default function ImageNode({
 
   useEffect(() => {
     const img = new window.Image();
-    img.src = src;
-    img.crossOrigin = 'anonymous';
+    img.src = getProxiedImageSrc(src);
     img.onload = () => {
       imgElement.current = img;
       imageRef.current?.getLayer()?.batchDraw();

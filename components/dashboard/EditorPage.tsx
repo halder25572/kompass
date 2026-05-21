@@ -2,6 +2,10 @@
 
 import BookEditor from '@/components/editor/BookEditor';
 
-export default function PageEditor() {
-    return <BookEditor />;
+type EditorPageProps = {
+    bookId?: string;
+};
+
+export default function PageEditor({ bookId }: EditorPageProps) {
+    return <BookEditor bookId={bookId} />;
 }

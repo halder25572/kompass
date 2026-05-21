@@ -324,8 +324,10 @@ export interface CreateBookPayload {
     book_title: string;
     book_subtitle: string;
     recipient_name: string;
-    occasion: string | null;
-    sub_occasion: string | null;
+    occasion_id: number | null;
+    sub_occasion_id: number | null;
+    book_page_style_id: number | null;
+    cover_page_style_id: number | null;
 }
 
 export interface CreateBookResponse {
@@ -349,9 +351,14 @@ export interface UpdateBookPayload {
     book_title: string;
     book_subtitle: string | null;
     recipient_name: string;
-    occasion: string | null;
-    sub_occasion: string | null;
+    occasion?: string | null;
+    sub_occasion?: string | null;
+    occasion_id?: number | null;
+    sub_occasion_id?: number | null;
+    book_page_style_id?: number | null;
+    cover_page_style_id?: number | null;
     questions?: string[] | null;
+    final_pdf_path?: string | null;
 }
 
 export interface UpdateBookResponse {
@@ -386,7 +393,7 @@ export interface SendBookInviteResponse {
         created_at: string;
         id: number;
         full_image_urls: string[];
-    };
+    } | null;
     meta: Record<string, unknown>;
     code: number;
 }
@@ -404,6 +411,8 @@ export interface BookDetails {
     recipient_name: string;
     occasion: string | null;
     sub_occasion: string | null;
+    book_page_style_id: number | null;
+    cover_page_style_id: number | null;
     cover_style: string | null;
     page_style: string | null;
     questions: string[];
@@ -430,7 +439,7 @@ export interface CheckInResponse {
         inviter_id: string;
         status: string;
         is_already_submitted: boolean;
-    };
+    } | null;
     meta: Record<string, unknown>;
     code: number;
 }
@@ -473,6 +482,60 @@ export interface SubmitContributionResponse {
         images: string[];
         status: string;
     };
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+export interface ContributionDetailResponse {
+    success: boolean;
+    message: string;
+    data: {
+        id: number;
+        name: string;
+        email: string;
+        answers: string[];
+        images: string[];
+        status: string;
+        submitted_at?: string;
+    } | null;
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+// Contribution list (from backend)
+export interface Contribution {
+    id: number;
+    name: string;
+    email: string;
+    answers: string[];
+    images: string[];
+    participant_number?: number; // optional explicit participant slot (1-based)
+    created_at?: string;
+}
+
+export interface ContributionsResponse {
+    success: boolean;
+    message: string;
+    data: Contribution[];
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+export interface ContributionsListResponse {
+    success: boolean;
+    message: string;
+    data: {
+        book_id: number;
+        book_title: string;
+        statistics: {
+            total: number;
+            invited: number;
+            pending: number;
+            submitted: number;
+            progress: string;
+        };
+        contributions: Contribution[];
+    } | null;
     meta: Record<string, unknown>;
     code: number;
 }

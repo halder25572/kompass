@@ -1,9 +1,9 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { checkInContributor, fetchInviteDetails, submitContribution } from "@/services/api";
+import { joinInviteByCode, fetchInviteDetails, submitContribution } from "@/services/api";
 
 export function useCheckInMutation() {
     return useMutation({
-        mutationFn: (code: string) => checkInContributor(code),
+        mutationFn: (code: string) => joinInviteByCode(code),
         onError: (error: Error) => {
             console.error("Check-in failed:", error.message);
         },

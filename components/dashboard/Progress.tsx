@@ -1,24 +1,27 @@
 "use client";
 
-import { Copy, Plus, Trash2, ChevronRight } from "lucide-react";
+import { Plus, ChevronRight, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
+import { useSendBookInviteMutation } from "@/features/books/hooks/services";
+import { toast } from "sonner";
+
 
 const participants = [
-  { id: "sarah-m",   name: "Sarah M.",   initials: "SM", status: "Submitted" },
-  { id: "james-k",   name: "James K.",   initials: "JK", status: "Submitted" },
-  { id: "emily-r",   name: "Emily R.",   initials: "ER", status: "Pending"   },
-  { id: "michael-b", name: "Michael B.", initials: "MB", status: "Pending"   },
-  { id: "lisa-t",    name: "Lisa T.",    initials: "LT", status: "Invited"   },
-  { id: "david-w",   name: "David W.",   initials: "DW", status: "Invited"   },
+  { id: "sarah-m", name: "Sarah M.", initials: "SM", status: "Submitted" },
+  { id: "james-k", name: "James K.", initials: "JK", status: "Submitted" },
+  { id: "emily-r", name: "Emily R.", initials: "ER", status: "Pending" },
+  { id: "michael-b", name: "Michael B.", initials: "MB", status: "Pending" },
+  { id: "lisa-t", name: "Lisa T.", initials: "LT", status: "Invited" },
+  { id: "david-w", name: "David W.", initials: "DW", status: "Invited" },
 ];
 
 const statusStyle = {
   Submitted: "bg-green-500 text-white",
-  Pending:   "bg-purple-500 text-white",
-  Invited:   "bg-gray-200 text-gray-600",
+  Pending: "bg-purple-500 text-white",
+  Invited: "bg-gray-200 text-gray-600",
 };
 
 const previewPages = [
@@ -39,7 +42,7 @@ const previewPages = [
   },
 ];
 
-function PreviewModal({ onClose }: { onClose: () => void }) {
+function PreviewModal({ onClose, bookId }: { onClose: () => void; bookId?: string }) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -63,7 +66,7 @@ function PreviewModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-start justify-between gap-4 border-b border-[#f1e7ea] px-5 py-4 sm:px-6">
           <div>
             <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#BF003A]">Book Preview</p>
-            <h2 className="mt-1 text-[20px] font-extrabold text-[#1a1a2e]">Jack's Birthday Book</h2>
+            <h2 className="mt-1 text-[20px] font-extrabold text-[#1a1a2e]">Jack&apos;s Birthday Book</h2>
           </div>
           <button
             onClick={handleClose}
@@ -85,7 +88,7 @@ function PreviewModal({ onClose }: { onClose: () => void }) {
                 <div className="absolute inset-0 bg-linear-to-t from-black/35 via-transparent to-transparent" />
                 <div className="absolute inset-x-3 bottom-3 rounded-2xl bg-black/28 p-3 text-white backdrop-blur-md">
                   <p className="text-[10px] uppercase tracking-[0.18em] text-white/70">Front cover</p>
-                  <p className="mt-1 text-[15px] font-bold leading-tight">Emma's 30th Birthday</p>
+                  <p className="mt-1 text-[15px] font-bold leading-tight">Emma&apos;s 30th Birthday</p>
                 </div>
               </div>
 
@@ -132,7 +135,7 @@ function PreviewModal({ onClose }: { onClose: () => void }) {
                   Close
                 </button>
                 <Link
-                  href="/dashboard/editor-book"
+                  href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
                   className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] px-5 py-3 text-[13px] font-bold text-white transition-opacity hover:opacity-90"
                 >
                   Review in Editor
@@ -149,35 +152,35 @@ function PreviewModal({ onClose }: { onClose: () => void }) {
 
 export default function ProgressBar({ bookId }: { bookId: string }) {
   /* ── Refs ── */
-  const headerRef      = useRef<HTMLDivElement>(null);
-  const progressRef    = useRef<HTMLDivElement>(null);
+  const headerRef = useRef<HTMLDivElement>(null);
+  const progressRef = useRef<HTMLDivElement>(null);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  const statsRef       = useRef<HTMLDivElement>(null);
+  const statsRef = useRef<HTMLDivElement>(null);
   const participantRef = useRef<HTMLDivElement>(null);
-  const settingsRef    = useRef<HTMLDivElement>(null);
-  const inviteRef      = useRef<HTMLDivElement>(null);
+  const settingsRef = useRef<HTMLDivElement>(null);
+  const inviteRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     /* initial states */
-    gsap.set(headerRef.current?.children ?? [],      { opacity: 0, y: 18 });
-    gsap.set(progressRef.current,                    { opacity: 0, y: 24 });
-    gsap.set(participantRef.current,                 { opacity: 0, y: 24 });
-    gsap.set(settingsRef.current,                    { opacity: 0, x: 20 });
-    gsap.set(inviteRef.current,                      { opacity: 0, x: 20 });
-    gsap.set(progressBarRef.current,                 { scaleX: 0, transformOrigin: "left center" });
-    gsap.set(statsRef.current?.children ?? [],       { opacity: 0, y: 12 });
+    gsap.set(headerRef.current?.children ?? [], { opacity: 0, y: 18 });
+    gsap.set(progressRef.current, { opacity: 0, y: 24 });
+    gsap.set(participantRef.current, { opacity: 0, y: 24 });
+    gsap.set(settingsRef.current, { opacity: 0, x: 20 });
+    gsap.set(inviteRef.current, { opacity: 0, x: 20 });
+    gsap.set(progressBarRef.current, { scaleX: 0, transformOrigin: "left center" });
+    gsap.set(statsRef.current?.children ?? [], { opacity: 0, y: 12 });
 
     /* entrance timeline */
-    tl.to(headerRef.current?.children ?? [],   { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 })
-      .to(progressRef.current,                 { opacity: 1, y: 0, duration: 0.5 },            "-=0.2")
-      .to(progressBarRef.current,              { scaleX: 1,  duration: 0.9, ease: "power2.out" }, "-=0.1")
-      .to(statsRef.current?.children ?? [],    { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 }, "-=0.4")
-      .to(participantRef.current,              { opacity: 1, y: 0, duration: 0.5 },            "-=0.2")
-      .to(settingsRef.current,                 { opacity: 1, x: 0, duration: 0.5 },            "-=0.45")
-      .to(inviteRef.current,                   { opacity: 1, x: 0, duration: 0.5 },            "-=0.3");
+    tl.to(headerRef.current?.children ?? [], { opacity: 1, y: 0, duration: 0.5, stagger: 0.12 })
+      .to(progressRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2")
+      .to(progressBarRef.current, { scaleX: 1, duration: 0.9, ease: "power2.out" }, "-=0.1")
+      .to(statsRef.current?.children ?? [], { opacity: 1, y: 0, duration: 0.4, stagger: 0.1 }, "-=0.4")
+      .to(participantRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.2")
+      .to(settingsRef.current, { opacity: 1, x: 0, duration: 0.5 }, "-=0.45")
+      .to(inviteRef.current, { opacity: 1, x: 0, duration: 0.5 }, "-=0.3");
 
     /* participant rows stagger */
     const rows = participantRef.current?.querySelectorAll<HTMLElement>(".participant-row");
@@ -252,8 +255,8 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
 
             <div ref={statsRef} className="grid grid-cols-3 text-center">
               <Stat number="6" label="Submitted" />
-              <Stat number="2" label="Pending"   />
-              <Stat number="1" label="Invited"   />
+              <Stat number="2" label="Pending" />
+              <Stat number="1" label="Invited" />
             </div>
           </div>
 
@@ -297,7 +300,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-medium">Book Settings</h2>
               <Link
-                href="/dashboard/editor-book"
+                href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
                 onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
                 className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] text-white"
               >
@@ -306,10 +309,10 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             </div>
 
             <div className="space-y-3 text-sm">
-              <Row label="Recipient Name" value="Jack"         />
-              <Row label="Occasion"       value="Birthday"     />
-              <Row label="Deadline"       value="Mar 20, 2026" />
-              <Row label="Contributors"   value="15"           />
+              <Row label="Recipient Name" value="Jack" />
+              <Row label="Occasion" value="Birthday" />
+              <Row label="Deadline" value="Mar 20, 2026" />
+              <Row label="Contributors" value="15" />
             </div>
           </div>
 
@@ -332,41 +335,12 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
               </button>
             </div>
 
-            {/* EMAIL INPUTS */}
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center border rounded-lg overflow-hidden">
-                <input className="flex-1 p-2 text-xs outline-none" placeholder="email@example.com" />
-                <button
-                  onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                  className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
-                >
-                  <Plus size={14} />
-                </button>
-              </div>
-
-              <div className="flex items-center border rounded-lg overflow-hidden">
-                <input className="flex-1 p-2 text-xs outline-none" placeholder="email@example.com" />
-                <button
-                  onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                  className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
-                >
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-
-            <button
-              onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-              className="w-full cursor-pointer bg-linear-to-r from-[#BF003A] to-[#59001C] text-white py-2 rounded-lg text-sm"
-            >
-              Send Invites
-            </button>
+            <InviteContributors bookId={bookId} />
           </div>
-
         </div>
       </div>
 
-      {showPreview && <PreviewModal onClose={() => setShowPreview(false)} />}
+      {showPreview && <PreviewModal onClose={() => setShowPreview(false)} bookId={bookId} />}
     </div>
   );
 }
@@ -387,6 +361,55 @@ function Stat({ number, label }: { number: string; label: string }) {
     <div>
       <p className="text-lg font-semibold">{number}</p>
       <p className="text-xs text-gray-500">{label}</p>
+    </div>
+  );
+}
+
+function InviteContributors({ bookId }: { bookId: string }) {
+  const [email, setEmail] = useState("");
+  const inviteMutation = useSendBookInviteMutation(bookId);
+
+  const handleSend = async () => {
+    if (!email.trim()) {
+      toast.error("Please enter an email address");
+      return;
+    }
+    try {
+      const response = await inviteMutation.mutateAsync(email);
+      toast.success(response.message || "Invitation sent successfully");
+      setEmail("");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Failed to send invitation";
+      toast.error(message);
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center border rounded-lg overflow-hidden">
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="flex-1 p-2 text-xs outline-none"
+          placeholder="email@example.com"
+        />
+        <button
+          onClick={() => void handleSend()}
+          disabled={inviteMutation.isPending}
+          className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
+        >
+          <Plus size={14} />
+        </button>
+      </div>
+
+      <button
+        onClick={() => void handleSend()}
+        disabled={inviteMutation.isPending || !email.trim()}
+        className="w-full cursor-pointer bg-linear-to-r from-[#BF003A] to-[#59001C] text-white py-2 rounded-lg text-sm disabled:opacity-60"
+      >
+        {inviteMutation.isPending ? "Sending..." : "Send Invites"}
+      </button>
     </div>
   );
 }

@@ -290,7 +290,7 @@ export default function CheckoutPayment() {
 
             {showPayment && (
                 <Suspense fallback={<div className="fixed inset-0 z-50 bg-black/45" />}>
-                    <PaymentModal onClose={() => setShowPayment(false)} />
+                    <PaymentModal amount={total} onClose={() => setShowPayment(false)} />
                 </Suspense>
             )}
             <style>{`

@@ -1,16 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 "use client";
 
-import { memo, useRef, useEffect } from "react";
+import { memo, useRef, useEffect, useState, lazy, Suspense } from "react";
 
 interface PaymentModalProps {
     onClose: () => void;
+    amount?: number;
 }
 
 const PAYMENT_METHODS = [
     {
         id: "stripe" as const,
-        label: "Stripe",
+        label: "Credit / Debit Card",
         sub: "Secure checkout via Stripe",
         bg: "#635BFF",
         letter: "S",
@@ -22,18 +23,15 @@ const PAYMENT_METHODS = [
         bg: "#003087",
         letter: "P",
     },
-    {
-        id: "card" as const,
-        label: "Credit / Debit Card",
-        sub: "Visa, Mastercard, Amex",
-        bg: "#1A1F71",
-        letter: "VISA",
-    },
 ] as const;
 
-export const PaymentModal = memo(function PaymentModal({ onClose }: PaymentModalProps) {
+const StripeForm = lazy(() => import("./StripeForm").then((m) => ({ default: m.StripeForm })));
+
+export const PaymentModal = memo(function PaymentModal({ onClose, amount }: PaymentModalProps & { amount?: number }) {
     const overlayRef = useRef<HTMLDivElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
+    const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+    const [showStripe, setShowStripe] = useState(false);
 
     useEffect(() => {
         const overlay = overlayRef.current;
@@ -107,35 +105,65 @@ export const PaymentModal = memo(function PaymentModal({ onClose }: PaymentModal
                 <div className="px-5 py-4 flex flex-col gap-2.5">
                     <p className="text-[12px] font-semibold text-gray-500 mb-1">Payment Method</p>
 
-                    {PAYMENT_METHODS.map((method) => (
-                        <label
-                            key={method.id}
-                            className="flex items-center gap-3 px-3.5 py-3 rounded-xl border cursor-pointer hover:border-gray-300 transition-colors"
-                        >
-                            <div className="w-4 h-4 rounded-full border-2 border-gray-300 shrink-0" />
-                            <div
-                                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-extrabold text-[10px]"
-                                style={{ background: method.bg }}
+                    {!showStripe ? (
+                        PAYMENT_METHODS.map((method) => (
+                            <label
+                                key={method.id}
+                                className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border cursor-pointer hover:border-gray-300 transition-colors ${selectedMethod === method.id ? 'border-[#BF003A] bg-[#FFF8F9]' : ''}`}
+                                onClick={() => setSelectedMethod(method.id)}
                             >
-                                {method.letter}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-semibold text-[#1A1A2E]">{method.label}</p>
-                                <p className="text-[11px] text-gray-400">{method.sub}</p>
-                            </div>
-                            <input type="radio" name="payment" value={method.id} className="sr-only" />
-                        </label>
-                    ))}
+                                <div className={`w-4 h-4 rounded-full border-2 ${selectedMethod === method.id ? 'border-[#BF003A]' : 'border-gray-300'} shrink-0`} />
+                                <div
+                                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 text-white font-extrabold text-[10px]"
+                                    style={{ background: method.bg }}
+                                >
+                                    {method.letter}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-[13px] font-semibold text-[#1A1A2E]">{method.label}</p>
+                                    <p className="text-[11px] text-gray-400">{method.sub}</p>
+                                </div>
+                                <input type="radio" name="payment" value={method.id} className="sr-only" checked={selectedMethod === method.id} readOnly />
+                            </label>
+                        ))
+                    ) : (
+                        <Suspense fallback={<div className="py-6">Loading payment form…</div>}>
+                            <StripeForm amount={amount ?? 0} onSuccess={() => onClose()} onCancel={() => setShowStripe(false)} />
+                        </Suspense>
+                    )}
                 </div>
 
                 {/* CTA */}
                 <div className="px-5 pb-5">
-                    <button
-                        className="w-full cursor-pointer py-3.5 rounded-xl text-white text-[14px] font-bold hover:opacity-90 active:scale-95 transition-all"
-                        style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
-                    >
-                        Continue
-                    </button>
+                    <div>
+                        {!showStripe ? (
+                            <button
+                                onClick={() => {
+                                    if (selectedMethod === 'stripe') {
+                                        setShowStripe(true);
+                                    } else if (selectedMethod === 'paypal') {
+                                        // Will implement PayPal next
+                                        window.alert('PayPal flow will open (coming next)');
+                                    } else {
+                                        window.alert('Please select a payment method');
+                                    }
+                                }}
+                                className="w-full cursor-pointer py-3.5 rounded-xl text-white text-[14px] font-bold hover:opacity-90 active:scale-95 transition-all"
+                                style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
+                            >
+                                Continue
+                            </button>
+                        ) : (
+                            <div className="py-2">
+                                <button
+                                    onClick={() => setShowStripe(false)}
+                                    className="w-full py-3.5 rounded-xl border font-semibold text-[14px]"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+                    </div>
                     <div className="flex items-center justify-center gap-1.5 mt-3">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">
                             <rect x="3" y="11" width="18" height="11" rx="2" />

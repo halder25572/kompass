@@ -15,6 +15,7 @@ import { useOccasionsQuery } from "@/features/occasions/hooks/services";
 import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/services";
 import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
 import { useCreateBookMutation } from "@/features/books/hooks/services";
+import { updateBookUser } from "@/services/api";
 import {
     DndContext,
     KeyboardSensor,
@@ -460,6 +461,8 @@ type BookDraft = {
     recipientName: string;
     occasion: string;
     subTab: string;
+    occasionId: number | null;
+    subOccasionId: number | null;
 };
 
 function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
@@ -467,7 +470,9 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
     const [bookSubtitle, setBookSubtitle] = useState("");
     const [recipientName, setRecipientName] = useState("");
     const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
+    const [selectedOccasionId, setSelectedOccasionId] = useState<number | null>(null);
     const [selectedSubTab, setSelectedSubTab] = useState("");
+    const [selectedSubOccasionId, setSelectedSubOccasionId] = useState<number | null>(null);
     const [isOccasionModalOpen, setIsOccasionModalOpen] = useState(false);
 
     const headingRef = useRef<HTMLDivElement>(null);
@@ -502,17 +507,23 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
         }
     }, [isOccasionModalOpen]);
 
-    const selectedOccasionLabel = occasions.find(occ => occ.name === selectedOccasion)?.name ?? "";
-    const selectedItems = selectedOccasion ? (occasions.find(occ => occ.name === selectedOccasion)?.sub_occasions ?? []) : [];
+    const selectedOccasionRecord = occasions.find((occ) => occ.name === selectedOccasion) ?? null;
+    const selectedOccasionLabel = selectedOccasionRecord?.name ?? "";
+    const selectedItems = selectedOccasionRecord?.sub_occasions ?? [];
 
     const handleOccasionChange = (occasionId: string) => {
+        const selectedOcc = occasions.find((o) => o.name === occasionId) ?? null;
         setSelectedOccasion(occasionId);
+        setSelectedOccasionId(selectedOcc?.id ?? null);
         setSelectedSubTab("");
+        setSelectedSubOccasionId(null);
         setIsOccasionModalOpen(true);
     };
 
-    const handleSubTabSelect = (subTab: string) => {
+    const handleSubTabSelect = (subTab: string, subOccasionId: number) => {
+        const selectedSub = selectedItems.find((s) => s.name === subTab) ?? null;
         setSelectedSubTab(subTab);
+        setSelectedSubOccasionId(selectedSub?.id ?? subOccasionId);
         setIsOccasionModalOpen(false);
     };
 
@@ -596,7 +607,7 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
                                 {selectedItems.map((tab) => {
                                     const isSelected = selectedSubTab === tab.name;
                                     return (
-                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
+                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name, tab.id)}
                                             className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
                                             <div className="flex items-center justify-between gap-3">
                                                 <span className="text-[14px] font-semibold">{tab.name}</span>
@@ -621,7 +632,15 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
             <BottomNav
                 showBack={true}
                 onBack={undefined}
-                onNext={() => selectedSubTab && onNext({ bookTitle, bookSubtitle, recipientName, occasion: selectedOccasion ?? "", subTab: selectedSubTab })}
+                onNext={() => selectedSubTab && onNext({
+                    bookTitle,
+                    bookSubtitle,
+                    recipientName,
+                    occasion: selectedOccasion ?? "",
+                    subTab: selectedSubTab,
+                    occasionId: selectedOccasionId,
+                    subOccasionId: selectedSubOccasionId,
+                })}
                 nextDisabled={!selectedSubTab}
                 nextLabel="Continue"
             />
@@ -712,7 +731,7 @@ function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => v
 }
 
 // ── Step 3: Choose Theme ──────────────────────────────────
-function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
+function Step3({ onNext, onBack }: { onNext: (themeId: number) => void; onBack: () => void }) {
     const [selected, setSelected] = useState<number | null>(null);
     const headingRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
@@ -786,7 +805,7 @@ function Step3({ onNext, onBack }: { onNext: () => void; onBack: () => void }) {
                     {error && <div className="col-span-2 sm:col-span-3 text-center text-[12px] text-red-500">Error: {error.message}</div>}
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Choose A Cover" />
+            <BottomNav onBack={onBack} onNext={() => onNext(selected ?? 0)} nextLabel="Choose A Cover" />
         </>
     );
 }
@@ -1219,6 +1238,7 @@ export default function BookCreator() {
     const [step, setStep] = useState(1);
     const [showSuccess, setShowSuccess] = useState(false);
     const [selectedSubTab, setSelectedSubTab] = useState("Birthday");
+    const [selectedThemeId, setSelectedThemeId] = useState<number>(1);
     const [selectedCoverId, setSelectedCoverId] = useState(1);
     const [bookDraft, setBookDraft] = useState<BookDraft | null>(null);
     const createBookMutation = useCreateBookMutation();
@@ -1266,7 +1286,7 @@ export default function BookCreator() {
         <div className="flex flex-col min-h-screen">
             <TopBar step={step} />
             {step === 1 && <Step1 onNext={({ subTab, ...draft }) => { setSelectedSubTab(subTab); setBookDraft({ subTab, ...draft }); setStep(2); }} />}
-            {step === 2 && <Step3 onNext={() => setStep(3)} onBack={() => setStep(1)} />}
+            {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} />}
             {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} initialCoverId={urlCoverId} />}
             {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={selectedSubTab} />}
             {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} />}
@@ -1291,12 +1311,34 @@ export default function BookCreator() {
                         if (!bookDraft) { toast.error("Book details are missing"); return; }
                         if (!bookDraft.bookTitle?.trim()) { toast.error("Book title is required."); return; }
                         try {
+                            console.log("Creating book with payload:", {
+                                book_title: bookDraft.bookTitle,
+                                book_subtitle: bookDraft.bookSubtitle,
+                                recipient_name: bookDraft.recipientName,
+                                occasion_id: bookDraft.occasionId,
+                                sub_occasion_id: bookDraft.subOccasionId,
+                            });
+                            console.log("bookDraft:", bookDraft);
                             const result = await createBookMutation.mutateAsync({
                                 book_title: bookDraft.bookTitle,
                                 book_subtitle: bookDraft.bookSubtitle,
                                 recipient_name: bookDraft.recipientName,
-                                occasion: bookDraft.occasion || null,
-                                sub_occasion: bookDraft.subTab || null,
+                                occasion_id: bookDraft.occasionId || null,
+                                sub_occasion_id: bookDraft.subOccasionId || null,
+                                book_page_style_id: selectedThemeId || null,
+                                cover_page_style_id: selectedCoverId || null,
+                            });
+                            console.log("Created book result:", result);
+                            console.log("Saved occasion:", result?.data?.occasion);
+                            console.log("Saved sub_occasion:", result?.data?.sub_occasion);
+                            await updateBookUser(result.data.id, {
+                                book_title: bookDraft.bookTitle,
+                                book_subtitle: bookDraft.bookSubtitle || null,
+                                recipient_name: bookDraft.recipientName,
+                                occasion_id: bookDraft.occasionId || null,
+                                sub_occasion_id: bookDraft.subOccasionId || null,
+                                cover_page_style_id: selectedCoverId || null,
+                                book_page_style_id: selectedThemeId || null,
                             });
                             if (typeof window !== "undefined") window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
                             toast.success(result.message || "Book created successfully!");

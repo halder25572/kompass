@@ -19,7 +19,12 @@ export default function ProfileSection() {
     const [avatarFile, setAvatarFile] = useState<File | undefined>(undefined);
     const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
     const [formError, setFormError] = useState("");
+    const [mounted, setMounted] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (user) {
@@ -132,7 +137,7 @@ export default function ProfileSection() {
                         {/* Avatar */}
                         <div className="flex justify-center mb-4">
                             <div className="w-20 h-20 rounded-full border border-gray-300 overflow-hidden bg-white flex items-center justify-center text-gray-500">
-                                {isLoading ? (
+                                {mounted && isLoading ? (
                                     <span className="text-sm">...</span>
                                 ) : avatarPreview ? (
                                     <Image
@@ -169,7 +174,7 @@ export default function ProfileSection() {
 
                         {/* Title */}
                         <h1 className="text-lg font-semibold text-gray-800 mb-6">
-                            {isLoading ? "Loading Profile..." : "Update Your Profile"}
+                            {mounted && isLoading ? "Loading Profile..." : "Update Your Profile"}
                         </h1>
 
                         {error ? (
