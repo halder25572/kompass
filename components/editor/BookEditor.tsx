@@ -191,7 +191,6 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   }, [selectedElementId, currentPage, undo, redo, duplicateElement, deleteElement, bringForward, sendBackward]);
 
   useEffect(() => {
-    console.log("BookEditor bookId:", bookId);
     if (!bookId) return;
 
     if (!hasHydratedPagesRef.current) {
@@ -245,9 +244,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
     const loadBookStyles = async () => {
       try {
-        console.log("Starting loadBookStyles for bookId:", bookId);
-
-        const bookDetailsResponse = await fetchBookDetails(bookId);
+      const bookDetailsResponse = await fetchBookDetails(bookId);
 
         const book = bookDetailsResponse.data.book_details as {
           cover_style?: { id?: number | null; name?: string; image?: string[] } | null;
@@ -259,16 +256,11 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
         const coverImageUrl = book.cover_style?.image?.[0] ?? null;
         const pageImageUrl = book.page_style?.image?.[0] ?? null;
 
-        console.log("bookDetails:", book);
-        console.log("cover_style:", book.cover_style);
-        console.log("page_style:", book.page_style);
-        console.log("Applying cover image:", coverImageUrl);
-        console.log("Applying page image:", pageImageUrl);
+        
 
         if (!isActive) return;
 
-        console.log("coverImageUrl before setPageBackground:", coverImageUrl);
-        console.log("pageImageUrl before setPageBackground:", pageImageUrl);
+        
 
         useBookStore.setState({
           bookTitle: book.book_title ?? "",
@@ -514,7 +506,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                     <SectionLabel>Solid Colors</SectionLabel>
                     <div className="grid grid-cols-6 gap-1.5">
                       {BG_SOLID.map((color, i) => (
-                        <button key={i} type="button" onClick={() => { console.log("setPageBackground called from: Background Solid (left panel)", { page: currentPage, value: color }); setPageBackground(currentPage, color); }}
+                        <button key={i} type="button" onClick={() => setPageBackground(currentPage, color)}
                           className="aspect-square rounded-lg border-2 transition-all cursor-pointer hover:scale-110"
                           style={{
                             background: color,
@@ -532,7 +524,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                         return (
                           <button key={s.id}
                             type="button"
-                            onClick={() => { console.log("setPageBackground called from: Theme Preset", { page: currentPage, styleId: s.id }); setPageBackground(currentPage, bg, s.id); }}
+                            onClick={() => setPageBackground(currentPage, bg, s.id)}
                             className="aspect-square rounded-lg border-2 transition-all cursor-pointer overflow-hidden"
                             style={{ background: bg, borderColor: page?.background === bg ? "#b5192c" : "rgba(0,0,0,0.1)" }}
                           />
@@ -544,7 +536,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                     <SectionLabel>Gradients</SectionLabel>
                     <div className="grid grid-cols-2 gap-1.5">
                       {BG_GRADIENTS.map((g, i) => (
-                        <button key={i} type="button" onClick={() => { console.log("setPageBackground called from: Background Gradient (left panel)", { page: currentPage, value: g.value }); setPageBackground(currentPage, g.value); }}
+                        <button key={i} type="button" onClick={() => setPageBackground(currentPage, g.value)}
                           className="h-10 rounded-lg border-2 transition-all cursor-pointer hover:scale-105 flex items-end px-2 pb-1"
                           style={{ background: g.value, borderColor: page?.background === g.value ? "#b5192c" : "transparent" }}>
                           <span className="text-[9px] font-bold text-white drop-shadow">{g.label}</span>
@@ -564,7 +556,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                       <input
                         type="color"
                         value={page?.background?.startsWith("#") ? page.background : "#ffffff"}
-                        onChange={e => { console.log("setPageBackground called from: Background Custom Color (left panel)", { page: currentPage, value: e.target.value }); setPageBackground(currentPage, e.target.value); }}
+                        onChange={e => setPageBackground(currentPage, e.target.value)}
                         className="w-8 h-8 rounded cursor-pointer border-0 p-0"
                       />
                     </label>

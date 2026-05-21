@@ -3,7 +3,6 @@ import TemplatesSection from "@/components/sections/BeautifulBook";
 import ContactSection from "@/components/sections/ContactSection";
 import HowItWorksSummary from "@/components/sections/HowItWorksSummary";
 import ReadytoCreate from "@/components/sections/ReadytoCreate";
-// import TestimonialsSection from "@/components/sections/Testimonial";
 
 
 export default function Home() {
@@ -12,7 +11,6 @@ export default function Home() {
       <HeroSection/>
       <TemplatesSection/>
       <HowItWorksSummary/>
-      {/* <TestimonialsSection/> */}
       <ReadytoCreate/>
       <ContactSection/>
     </section>

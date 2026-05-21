@@ -9,7 +9,7 @@ import { useLanguage } from "@/hooks/useLanguage";
 const templates = [
     { id: 1, title: "Classic Neutral", description: "Refined design with typography and warm tones.", image: "/images/t1.jpg", popular: true },
     { id: 2, title: "Elegant Floral", description: "Soft gradients and photo-friendly layout.", image: "/images/t2.jpg", popular: true },
-    { id: 3, title: "Modern Minimal", description: "Clean and simple design for any occasion.", image: "/images/t3.jpg", popular: false },
+    { id: 3, title: "Modern Minimal", description: "Clean lines, soft colors and timeless simplicity.", image: "/images/t3.jpg", popular: false },
     { id: 4, title: "Soft Playful", description: "Colorful and vibrant layout for all uses.", image: "/images/t4.jpg", popular: true },
     { id: 5, title: "Bold Professional", description: "Fresh and aesthetic layout with natural tones.", image: "/images/t5.jpg", popular: false },
 ];

@@ -492,7 +492,7 @@ export default function ThemesAndCoversPage() {
               key={item.id}
               item={item}
               btnLabel={btnLabel}
-              onAction={activeTab === "themes" ? () => setActivePreview(item) : undefined}
+              onAction={() => setActivePreview(item)}
             />
           ))}
         </div>

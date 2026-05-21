@@ -215,6 +215,7 @@ export async function exportBookToPDF(
   width: number,
   height: number
 ): Promise<void> {
+  // Orientation: landscape if width > height
   const orientation = width > height ? "landscape" : "portrait";
 
   const pdf = new jsPDF({
@@ -228,15 +229,14 @@ export async function exportBookToPDF(
     const page = pages[i];
     if (i > 0) pdf.addPage([width, height], orientation);
 
-    // ── 1. Offscreen canvas তৈরি ──
+    // ── 1. Create an offscreen canvas ──
     const offscreen = document.createElement("canvas");
     offscreen.width = width;
     offscreen.height = height;
     const ctx = offscreen.getContext("2d")!;
 
-    // ── 2. Background আঁকা ──
+    // Fill background white first (fixes transparent background bug)
     const bg = page.background ?? "#ffffff";
-    // সর্বদা আগে সাদা fill করো (transparent bug fix)
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, width, height);
 
@@ -255,20 +255,19 @@ export async function exportBookToPDF(
       ctx.fillRect(0, 0, width, height);
     }
 
-    // ── 3. Elements আঁকা (zIndex order অনুযায়ী) ──
+    // ── 2. Draw each element (zIndex order) ──
     const sorted = [...page.elements].sort((a, b) => a.zIndex - b.zIndex);
 
     for (const el of sorted) {
       ctx.save();
       ctx.globalAlpha = el.opacity ?? 1;
 
-      // ── Image ──
+      // Image
       if (el.type === "image" && el.src) {
         try {
           const img = await loadImage(el.src);
           const drawW = el.width ?? img.naturalWidth;
           const drawH = el.height ?? img.naturalHeight;
-          // Rotation center = element center
           const cx = el.x + drawW / 2;
           const cy = el.y + drawH / 2;
           ctx.translate(cx, cy);
@@ -279,7 +278,7 @@ export async function exportBookToPDF(
         }
       }
 
-      // ── Freehand Line / Drawing ──
+      // Freehand Line / Drawing
       if (el.type === "line" && el.points && el.points.length >= 4) {
         ctx.beginPath();
         ctx.strokeStyle = el.stroke ?? "#000000";
@@ -293,7 +292,7 @@ export async function exportBookToPDF(
         ctx.stroke();
       }
 
-      // ── Shape ──
+      // Shape
       if (el.type === "shape") {
         const drawW = el.width ?? 100;
         const drawH = el.height ?? 100;
@@ -304,7 +303,7 @@ export async function exportBookToPDF(
 
         ctx.strokeStyle = el.stroke ?? "transparent";
         ctx.lineWidth = el.strokeWidth ?? 1;
-        // shape এর fill ও stroke আলাদা — shapeFill বা fill যেটা আছে নাও
+        // Shape's fill and stroke are separate — prefer `shapeFill`, otherwise use `fill` if present
         const fillColor = el.shapeFill ?? el.fill ?? "transparent";
         ctx.fillStyle = fillColor;
 
@@ -321,7 +320,7 @@ export async function exportBookToPDF(
         }
       }
 
-      // ── Text (Emoji সহ) ──
+      // Text (including Emoji)
       if (el.type === "text" && el.text) {
         let txt = el.text;
         if (el.textTransform === "uppercase") txt = txt.toUpperCase();
@@ -353,11 +352,10 @@ export async function exportBookToPDF(
         ctx.translate(cx, cy);
         ctx.rotate(((el.rotation ?? 0) * Math.PI) / 180);
 
-        // textAlign অনুযায়ী x offset
+        // x offset according to textAlign
         let textX = 0;
         if (align === "left") textX = -elWidth / 2;
         else if (align === "right") textX = elWidth / 2;
-        // "center" → 0 (translate এ center এ আছি)
 
         const lines = txt.split("\n");
         lines.forEach((line, li) => {
@@ -384,7 +382,7 @@ export async function exportBookToPDF(
             ctx.beginPath();
             ctx.strokeStyle = el.fill ?? "#000000";
             ctx.lineWidth = Math.max(1, fontSize * 0.05);
-            ctx.shadowColor = "transparent"; // decoration এ shadow না
+            ctx.shadowColor = "transparent"; // no shadow for decorations
             ctx.moveTo(x0, lineY);
             ctx.lineTo(x0 + mw, lineY);
             ctx.stroke();
@@ -395,8 +393,7 @@ export async function exportBookToPDF(
       ctx.restore();
     }
 
-    // ── 4. Canvas → PDF ──
-    // PNG ব্যবহার করো (transparent areas নষ্ট হবে না, gradient সঠিক থাকবে)
+    // ── 3. Add canvas to PDF ──
     const imgData = offscreen.toDataURL("image/png");
     pdf.addImage(imgData, "PNG", 0, 0, width, height);
   }
@@ -668,7 +665,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 }
 
 // ── Gradient parser (robust) ──────────────────────────────────────────────
-// "linear-gradient(135deg, #ff6b6b, #feca57 50%, #ff9ff3)" ধরনের string handle করে
+// Handles strings like "linear-gradient(135deg, #ff6b6b, #feca57 50%, #ff9ff3)"
 function parseGradientForCanvas(
   ctx: CanvasRenderingContext2D,
   gradientStr: string,
@@ -679,7 +676,7 @@ function parseGradientForCanvas(
   const linearMatch = gradientStr.match(/linear-gradient\(([\s\S]+)\)/);
   if (linearMatch) {
     const inner = linearMatch[1].trim();
-    // angle আলাদা করো
+    // Extract/parse the angle
     let angle = 180; // default: top to bottom
     let colorString = inner;
 
@@ -688,7 +685,7 @@ function parseGradientForCanvas(
       angle = parseFloat(angleMatch[1]);
       colorString = inner.slice(angleMatch[0].length).replace(/^,\s*/, "");
     } else if (inner.startsWith("to ")) {
-      // "to right", "to bottom left" ইত্যাদি
+      // Handle directions like "to right", "to bottom left"
       const dirMatch = inner.match(/^(to\s+[\w\s]+?),/);
       if (dirMatch) {
         angle = directionToAngle(dirMatch[1].trim());
@@ -696,7 +693,7 @@ function parseGradientForCanvas(
       }
     }
 
-    // Color stops parse করো (commas যে color এর মাঝে নেই সেগুলো দিয়ে split)
+    // Parse color stops (split on commas that are not inside parentheses)
     const stops = splitColorStops(colorString);
     if (stops.length < 2) return null;
 
@@ -711,10 +708,10 @@ function parseGradientForCanvas(
 
     stops.forEach((stop, i) => {
       const parts = stop.trim().split(/\s+/);
-      const color = parts[0].replace(/[()]/g, ""); // trailing ) বা ( সরাও
+      const color = parts[0].replace(/[()]/g, ""); // remove trailing '(' or ')'
       let position = i / (stops.length - 1);
       if (parts[1]) {
-        // "50%" ধরনের explicit position
+        // Explicit positions like "50%"
         const pct = parseFloat(parts[1]);
         if (!isNaN(pct)) position = pct / 100;
       }

@@ -33,7 +33,7 @@ const templates: Template[] = [
   {
     id: 3,
     title: "Modern Minimal",
-    description: "Clean lines and generous whitespace for impact.",
+    description: "Clean lines, soft colors and timeless simplicity.",
     image: "/3.jpg",
   },
   {

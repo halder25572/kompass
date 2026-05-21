@@ -613,7 +613,7 @@ export default function SampleBooksPage() {
     setActiveSub(occ.subs[0]);
   };
 
-  // ── START BOOK: store এ save করে editor এ যাও ──
+  // ── START BOOK: save to store then navigate to editor ──
   const handleStart = () => {
     setOccasion(activeOccasion.id, activeSub);
     router.push("/create");
@@ -738,7 +738,7 @@ export default function SampleBooksPage() {
                 </div>
               </div>
 
-              {/* CTA — Link এর বদলে button যাতে store এ save করা যায় */}
+              {/* CTA — use a button instead of a Link so it can save to the store */}
               <div className="px-6 pb-6">
                 <button
                   onClick={handleStart}

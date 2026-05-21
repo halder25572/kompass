@@ -1,15 +1,22 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import { Plus, ChevronRight, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
-import { useSendBookInviteMutation } from "@/features/books/hooks/services";
+import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor, closestCenter } from "@dnd-kit/core";
+import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
 
 
-const participants = [
+const initialParticipants = [
   { id: "sarah-m", name: "Sarah M.", initials: "SM", status: "Submitted" },
   { id: "james-k", name: "James K.", initials: "JK", status: "Submitted" },
   { id: "emily-r", name: "Emily R.", initials: "ER", status: "Pending" },
@@ -70,7 +77,7 @@ function PreviewModal({ onClose, bookId }: { onClose: () => void; bookId?: strin
           </div>
           <button
             onClick={handleClose}
-            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e5e7eb] text-[#6b7280] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e5e7eb] text-[#6b7280] transition-colors hover:border-[#BF003A] hover:text-[#BF003A] cursor-pointer"
             aria-label="Close preview"
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -130,7 +137,7 @@ function PreviewModal({ onClose, bookId }: { onClose: () => void; bookId?: strin
               <div className="mt-5 flex flex-col sm:flex-row gap-3">
                 <button
                   onClick={handleClose}
-                  className="inline-flex flex-1 items-center justify-center rounded-full border border-[#e5e7eb] px-5 py-3 text-[13px] font-semibold text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
+                  className="inline-flex flex-1 items-center justify-center rounded-full border border-[#e5e7eb] px-5 py-3 text-[13px] font-semibold cursor-pointer text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
                 >
                   Close
                 </button>
@@ -160,6 +167,46 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   const settingsRef = useRef<HTMLDivElement>(null);
   const inviteRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [participants, setParticipants] = useState(initialParticipants);
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const updateMutation = useUpdateBookMutation(bookId);
+
+  const handleDragStart = ({ active }: any) => setActiveId(active.id as string);
+  const handleDragEnd = ({ active, over }: any) => {
+    setActiveId(null);
+    if (!over || active.id === over.id) return;
+    const prev = participants;
+    const oldIndex = prev.findIndex((p) => p.id === active.id);
+    const newIndex = prev.findIndex((p) => p.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const next = arrayMove(prev, oldIndex, newIndex);
+
+    // Optimistically update UI
+    setParticipants(next);
+
+    // Persist order to server
+    try {
+      // payload: send ordering info (backend may expect different key — cast to any)
+      const payload: any = { participant_order: next.map((p, i) => ({ participant_id: p.id, participant_number: i + 1 })) };
+      updateMutation.mutateAsync(payload).then(() => {
+        toast.success("Participant order saved");
+      }).catch((err) => {
+        console.error("Failed to persist participant order:", err);
+        setParticipants(prev);
+        toast.error(err instanceof Error ? err.message : "Failed to save order");
+      });
+    } catch (err) {
+      console.error(err);
+      setParticipants(prev);
+      toast.error("Failed to save participant order");
+    }
+  };
 
   useEffect(() => {
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -265,29 +312,15 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             <h2 className="text-sm font-medium mb-4">Participants</h2>
 
             <div className="space-y-3">
-              {participants.map((p) => (
-                <Link
-                  key={p.id}
-                  href={`/dashboard/${bookId}/participant/${p.id}`}
-                  onMouseEnter={onParticipantEnter}
-                  onMouseLeave={onParticipantLeave}
-                  className="participant-row flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">
-                      {p.initials}
-                    </div>
-                    <span className="text-sm">{p.name}</span>
+              <DndContext sensors={sensors} collisionDetection={(closestCenter as any)} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
+                <SortableContext items={participants.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                  <div className="flex flex-col gap-1">
+                    {participants.map((p) => (
+                      <SortableParticipantRow key={p.id} p={p} bookId={bookId} />
+                    ))}
                   </div>
-
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs px-3 py-1 rounded-full ${statusStyle[p.status as keyof typeof statusStyle]}`}>
-                      {p.status}
-                    </span>
-                    <ChevronRight size={16} className="text-gray-400" />
-                  </div>
-                </Link>
-              ))}
+                </SortableContext>
+              </DndContext>
             </div>
           </div>
         </div>
@@ -365,9 +398,50 @@ function Stat({ number, label }: { number: string; label: string }) {
   );
 }
 
+function DragHandleIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="4" cy="3" r="1" fill="currentColor" />
+      <circle cx="8" cy="3" r="1" fill="currentColor" />
+      <circle cx="12" cy="3" r="1" fill="currentColor" />
+      <circle cx="4" cy="8" r="1" fill="currentColor" />
+      <circle cx="8" cy="8" r="1" fill="currentColor" />
+      <circle cx="12" cy="8" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function SortableParticipantRow({ p, bookId }: { p: any; bookId: string }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: p.id });
+  const style: any = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : undefined, position: isDragging ? ("relative" as const) : undefined };
+  const router = useRouter();
+
+  return (
+    <div ref={setNodeRef} style={style} className="participant-row flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/dashboard/${bookId}/participant/${p.id}`)}>
+      <div className="flex items-center gap-3">
+        <button type="button" {...attributes} {...listeners} className="mb-px h-9 w-9 shrink-0 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] flex items-center justify-center">
+          <DragHandleIcon />
+        </button>
+        <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">{p.initials}</div>
+        <span className="text-sm">{p.name}</span>
+      </div>
+
+      <div className="flex items-center gap-3">
+        <span className={`text-xs px-3 py-1 rounded-full ${statusStyle[p.status as keyof typeof statusStyle]}`}>{p.status}</span>
+        <ChevronRight size={16} className="text-gray-400" />
+      </div>
+    </div>
+  );
+}
+
 function InviteContributors({ bookId }: { bookId: string }) {
   const [email, setEmail] = useState("");
+  const [isMounted, setIsMounted] = useState(false);
   const inviteMutation = useSendBookInviteMutation(bookId);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSend = async () => {
     if (!email.trim()) {
@@ -386,22 +460,28 @@ function InviteContributors({ bookId }: { bookId: string }) {
 
   return (
     <div className="space-y-2">
-      <div className="flex items-center border rounded-lg overflow-hidden">
-        <input
-          type="email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="flex-1 p-2 text-xs outline-none"
-          placeholder="email@example.com"
-        />
-        <button
-          onClick={() => void handleSend()}
-          disabled={inviteMutation.isPending}
-          className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
-        >
-          <Plus size={14} />
-        </button>
-      </div>
+      {isMounted ? (
+        <div className="flex items-center border rounded-lg overflow-hidden">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="flex-1 p-2 text-xs outline-none"
+            placeholder="email@example.com"
+          />
+          <button
+            onClick={() => void handleSend()}
+            disabled={inviteMutation.isPending}
+            className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
+          >
+            <Plus size={14} />
+          </button>
+        </div>
+      ) : (
+        <div className="flex h-9 items-center rounded-lg border border-dashed border-[#e5e7eb] px-3 text-xs text-[#9CA3AF]">
+          Loading invite input...
+        </div>
+      )}
 
       <button
         onClick={() => void handleSend()}

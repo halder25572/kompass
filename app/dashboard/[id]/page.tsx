@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 "use client";
 
 import Image from "next/image";
@@ -8,33 +9,10 @@ import { useBookDetailsQuery } from "@/features/books/hooks/services";
 import { useUpdateBookMutation } from "@/features/books/hooks/services";
 import { useSendBookInviteMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
-import {
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  closestCenter,
-  useSensor,
-  useSensors,
-  DragOverlay,
-  type DragEndEvent,
-  type DragStartEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  sortableKeyboardCoordinates,
-  useSortable,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+// DnD moved to Participants panel component (Progress.tsx)
 
 // ── Types ─────────────────────────────────────────────────
-type Contributor = {
-  id: string;
-  name: string;
-  email: string;
-  status?: string;
-};
+// Contributor type removed; participant UI lives in components/dashboard/Progress
 
 type Props = {
   params: {
@@ -42,115 +20,7 @@ type Props = {
   };
 };
 
-// ── Avatar helpers ────────────────────────────────────────
-const avatarColors = [
-  { bg: "#EEF2FF", text: "#3730A3" },
-  { bg: "#FFF5F6", text: "#BF003A" },
-  { bg: "#F0FDF4", text: "#15803D" },
-  { bg: "#FFF7ED", text: "#C2410C" },
-  { bg: "#F0F9FF", text: "#0369A1" },
-];
-
-function getInitials(name: string) {
-  return name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-}
-
-// ── Drag Handle Icon ──────────────────────────────────────
-function DragHandleIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="5.5" cy="3.5" r="1.5" fill="currentColor" />
-      <circle cx="10.5" cy="3.5" r="1.5" fill="currentColor" />
-      <circle cx="5.5" cy="8" r="1.5" fill="currentColor" />
-      <circle cx="10.5" cy="8" r="1.5" fill="currentColor" />
-      <circle cx="5.5" cy="12.5" r="1.5" fill="currentColor" />
-      <circle cx="10.5" cy="12.5" r="1.5" fill="currentColor" />
-    </svg>
-  );
-}
-
-// ── Sortable Page Order Row ───────────────────────────────
-function SortablePageRow({ contributor, index }: { contributor: Contributor; index: number }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: `page-${contributor.id}` });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 10 : undefined,
-  };
-
-  const color = avatarColors[index % avatarColors.length];
-  const initials = contributor.name ? getInitials(contributor.name) : "?";
-
-  const statusColor =
-    contributor.status === "submitted"
-      ? { bg: "#F0FDF4", text: "#15803D", label: "Submitted" }
-      : contributor.status === "pending"
-      ? { bg: "#FFF7ED", text: "#C2410C", label: "Pending" }
-      : { bg: "#EEF2FF", text: "#3730A3", label: "Invited" };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 border transition-all ${
-        isDragging
-          ? "bg-[#fff5f6] border-[#fcd5de] shadow-lg opacity-80"
-          : "bg-white border-[#e5e7eb] hover:border-[#B91C1C]/30 hover:bg-[#fffafb]"
-      }`}
-    >
-      {/* Drag handle */}
-      <button
-        type="button"
-        {...attributes}
-        {...listeners}
-        className="cursor-grab active:cursor-grabbing text-[#c5c8cc] hover:text-[#6b7280] transition-colors touch-none flex items-center justify-center w-7 h-7 rounded-lg border border-[#e5e7eb] bg-[#f9fafb] shrink-0"
-        aria-label={`Drag to reorder page ${index + 1}`}
-      >
-        <DragHandleIcon />
-      </button>
-
-      {/* Avatar */}
-      <div
-        className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
-        style={{ background: color.bg, color: color.text }}
-      >
-        {initials}
-      </div>
-
-      {/* Name + email */}
-      <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-[#1a1a2e] truncate">
-          {contributor.name || "Unnamed contributor"}
-        </p>
-        <p className="text-[11px] text-[#9CA3AF] truncate">
-          {contributor.email || "No email"}
-        </p>
-      </div>
-
-      {/* Status badge */}
-      {contributor.status && (
-        <span
-          className="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full border"
-          style={{ background: statusColor.bg, color: statusColor.text, borderColor: statusColor.bg }}
-        >
-          {statusColor.label}
-        </span>
-      )}
-
-      {/* Page number */}
-      <span className="shrink-0 text-[11px] font-semibold px-3 py-1 rounded-full bg-[#fff5f6] text-[#BF003A] border border-[#fcd5de]">
-        Page {index + 1}
-      </span>
-    </div>
-  );
-}
+// Participant UI and DnD now live in components/dashboard/Progress.tsx
 
 // ── Main Page ─────────────────────────────────────────────
 export default function DashboardPage({ params }: Props) {
@@ -159,39 +29,7 @@ export default function DashboardPage({ params }: Props) {
   const book = data?.data.book_details;
   const statistics = data?.data.statistics;
 
-  // ── Point 15: Page order state ──
-  const rawContributors: Contributor[] = (((data?.data?.book_details) as any)?.contributors ?? []) as Contributor[];
-  const [pageOrder, setPageOrder] = useState<Contributor[]>([]);
-  const [activePageId, setActivePageId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (rawContributors.length) setPageOrder(rawContributors);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data]);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
-
-  const handlePageDragStart = (event: DragStartEvent) =>
-    setActivePageId(event.active.id as string);
-
-  const handlePageDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    setActivePageId(null);
-    if (!over || active.id === over.id) return;
-    setPageOrder((prev) => {
-      const oldIndex = prev.findIndex((c) => `page-${c.id}` === active.id);
-      const newIndex = prev.findIndex((c) => `page-${c.id}` === over.id);
-      if (oldIndex < 0 || newIndex < 0) return prev;
-      return arrayMove(prev, oldIndex, newIndex);
-    });
-  };
-
-  const activePageContributor = activePageId
-    ? pageOrder.find((c) => `page-${c.id}` === activePageId)
-    : null;
+  // Participant ordering now handled in the Progress component
 
   return (
     <div className="min-h-screen bg-[#faf9f7] px-4 py-6 sm:px-6 lg:px-8">
@@ -286,80 +124,7 @@ export default function DashboardPage({ params }: Props) {
               </section>
             </div>
 
-            {/* ── Point 15: Contributor Page Order ── */}
-            <section className="rounded-3xl border border-[#f0edf1] bg-white p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-9 h-9 rounded-xl bg-[#fff5f6] border border-[#fde8ec] flex items-center justify-center shrink-0">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
-                </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-[#1a1a2e]">Contributor Page Order</h2>
-                  <p className="text-sm text-[#9CA3AF]">
-                    Drag to reorder how contributor pages appear in the final book.
-                  </p>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-[#9CA3AF] mb-4 mt-2">
-                Use the ⠿ handle to drag contributors up or down.
-              </p>
-
-              {pageOrder.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-[#e5e7eb] px-4 py-8 text-center text-sm text-[#9CA3AF]">
-                  No contributors yet. Send invites to see page order here.
-                </div>
-              ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handlePageDragStart}
-                  onDragEnd={handlePageDragEnd}
-                  onDragCancel={() => setActivePageId(null)}
-                >
-                  <SortableContext
-                    items={pageOrder.map((c) => `page-${c.id}`)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    <div className="flex flex-col gap-2">
-                      {pageOrder.map((contributor, idx) => (
-                        <SortablePageRow
-                          key={`page-${contributor.id}`}
-                          contributor={contributor}
-                          index={idx}
-                        />
-                      ))}
-                    </div>
-                  </SortableContext>
-
-                  <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
-                    {activePageContributor ? (
-                      <div className="flex items-center gap-3 rounded-xl border border-[#fcd5de] bg-white shadow-xl px-3 py-2.5 opacity-95">
-                        <div className="w-7 h-7 rounded-lg border border-[#e5e7eb] bg-[#fafafa] flex items-center justify-center text-[#B91C1C]">
-                          <DragHandleIcon />
-                        </div>
-                        <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-semibold shrink-0"
-                          style={{
-                            background: avatarColors[pageOrder.findIndex((c) => c.id === activePageContributor.id) % avatarColors.length].bg,
-                            color: avatarColors[pageOrder.findIndex((c) => c.id === activePageContributor.id) % avatarColors.length].text,
-                          }}
-                        >
-                          {getInitials(activePageContributor.name)}
-                        </div>
-                        <div className="flex-1 text-[13px] font-semibold text-[#1a1a2e] truncate">
-                          {activePageContributor.name}
-                        </div>
-                      </div>
-                    ) : null}
-                  </DragOverlay>
-                </DndContext>
-              )}
-            </section>
+            {/* Contributor page order moved to the Participants panel. */}
           </>
         )}
       </div>

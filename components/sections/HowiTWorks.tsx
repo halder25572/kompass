@@ -25,7 +25,7 @@ const steps = [
         blobSide: "right",
     },
     {
-        title: "Preview & Order",
+        title: "Preview and Order",
         points: [
             { icon: "grid", text: "Preview and approve your book" },
             { icon: "user", text: "Confirm print order" },
@@ -81,7 +81,7 @@ export default function HowItWorksSection() {
             createBook: "Create Your Book",
             step1: "Step 1 - Create Your Book",
             step2: "Step 2 - Invite Participants",
-            step3: "Step 3 - Preview & Order",
+            step3: "Step 3 - Preview and Order",
             ready: "Ready to Create Something Beautiful?",
             cta: "Create Your Book",
         };

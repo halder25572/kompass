@@ -497,16 +497,13 @@ export const useBookStore = create<BookStore>((set, get) => ({
     });
   },
 
-  // ── Occasion set করলে cover page এর background automatically update হবে ──
+  // ── When occasion is set, the cover page background will automatically update ──
   setOccasion: (occasion, subOccasion) => {
     const theme = OCCASION_THEMES[subOccasion] ?? OCCASION_THEMES[occasion] ?? DEFAULT_THEME;
     const { pages, past } = get();
     const snapshot = clonePages(pages);
-    // If a theme gradient is applied here, log it so we can trace default background assignments
-    if (theme.gradient) {
-      console.log("Default background being set:", theme.gradient, "from:", "useBookStore.setOccasion");
-    }
-    // Page 1 (cover) এর background theme gradient দিয়ে set করো
+    // If a theme gradient is applied here, note it for traceability (no console output)
+    // Set Page 1 (cover) background using the theme gradient
     const newPages = pages.map((p) =>
       p.id === 1 ? { ...p, background: theme.gradient, isCover: true } : p
     );
@@ -617,26 +614,19 @@ export const useBookStore = create<BookStore>((set, get) => ({
   },
 
   setPageBackground: (pageId, background, styleId = null) => {
-    console.log("setPageBackground received - pageNumber:", pageId, "background:", background, "styleId:", styleId);
     const { pages, past, coverPageBackground, bookPageBackground, coverPageStyleId, bookPageStyleId } = get();
     const currentPageNumber = pageId;
     const isCoverPage = currentPageNumber === 1;
     const backgroundValue = (background && typeof background === "string" && background.startsWith("http"))
       ? background
       : String(styleId ?? "");
-    console.log("Final backgroundValue being applied:", backgroundValue);
     const snapshot = clonePages(pages);
     const nextPages = pages.map((page, index) =>
       index === pageId - 1
         ? { ...page, background: backgroundValue, isCover: isCoverPage }
         : page
     );
-
-    if (isCoverPage) {
-      console.log("Applying cover style to page 1:", backgroundValue);
-    } else {
-      console.log("Applying book style to pages 2+:", backgroundValue);
-    }
+    
 
     set({
       pages: nextPages,

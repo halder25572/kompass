@@ -1138,7 +1138,6 @@ export async function uploadFinalPdf(bookId: string | number, file: Blob): Promi
 
     // Use the existing same-origin Next.js proxy so the browser does not hit CORS/preflight issues.
     const proxyUrl = `/api/user/books/${bookId}/final-pdf`;
-    console.log("📤 uploadFinalPdf: Sending to", proxyUrl);
 
     const response = await fetch(proxyUrl, {
         method: "POST",

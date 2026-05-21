@@ -41,7 +41,7 @@ export default function HowItWorksSummary() {
               description: "Share the invite link so friends and family can add messages and photos.",
             },
             {
-              title: "Review & Order",
+              title: "Preview and Order",
               description: "Preview everything, approve the design, and place your print order.",
             },
           ],

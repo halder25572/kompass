@@ -5,7 +5,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { JSX } from "react/jsx-runtime";
@@ -15,26 +15,9 @@ import { useOccasionsQuery } from "@/features/occasions/hooks/services";
 import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/services";
 import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
 import { useCreateBookMutation } from "@/features/books/hooks/services";
+import { useRegisterMutation } from "@/features/auth/components/hooks/services";
 import { updateBookUser } from "@/services/api";
-import {
-    DndContext,
-    KeyboardSensor,
-    PointerSensor,
-    closestCenter,
-    useSensor,
-    useSensors,
-    DragOverlay,
-    type DragEndEvent,
-    type DragStartEvent,
-} from "@dnd-kit/core";
-import {
-    SortableContext,
-    arrayMove,
-    sortableKeyboardCoordinates,
-    useSortable,
-    verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+// DnD removed from Invite Friends step; ordering handled in Participants panel
 
 function renderOccasionIcon(name: string) {
     switch (name) {
@@ -336,13 +319,22 @@ const stepConfig: ProgressStep[] = [
         ),
     },
     {
-        label: "Preview & Create Book",
+        label: "Review Setup",
         icon: (
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="17" viewBox="0 0 16 17" fill="none">
                 <path d="M1.33398 14.876C1.33393 13.7854 1.63007 12.7179 2.18688 11.8017C2.74369 10.8855 3.5375 10.1595 4.47305 9.71081C5.4086 9.26211 6.44614 9.10978 7.46116 9.27211C8.47617 9.43444 9.42554 9.90453 10.1953 10.626" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M6.66732 9.20833C8.50827 9.20833 10.0007 7.62267 10.0007 5.66667C10.0007 3.71066 8.50827 2.125 6.66732 2.125C4.82637 2.125 3.33398 3.71066 3.33398 5.66667C3.33398 7.62267 4.82637 9.20833 6.66732 9.20833Z" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M12.666 11.334V15.584" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                 <path d="M14.666 13.459H10.666" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+        ),
+    },
+    {
+        label: "Create Account",
+        icon: (
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
             </svg>
         ),
     },
@@ -725,7 +717,7 @@ function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => v
                     </div>
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Preview & Create Book" />
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Review Setup" />
         </>
     );
 }
@@ -880,7 +872,7 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
     );
 }
 
-// ── Step 5: Preview & Create Book ─────────────────────────
+// ── Step 5: Review Setup ─────────────────────────
 function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onBack: () => void; coverId: number; bookDraft: BookDraft | null }) {
     const headingRef = useRef<HTMLDivElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
@@ -912,7 +904,7 @@ function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onB
         <>
             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
                 <div ref={headingRef} className="mb-6">
-                    <h1 className="text-[22px] font-bold text-[#1a1a2e]">Preview & Create Book</h1>
+                    <h1 className="text-[22px] font-bold text-[#1a1a2e]">Review Setup</h1>
                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Review your selected setup before creating the book.</p>
                 </div>
                 <div ref={previewRef} className="rounded-2xl border border-[#f0edf1] bg-white p-5">
@@ -961,81 +953,167 @@ function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onB
                     </div>
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Create Book & Invite Friends" />
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Invite Friends" />
         </>
     );
 }
 
-// ── Step 6: Invite Friends (Page Order section REMOVED — Point 15) ──
+// ── Step 6: Create Account Gate ───────────────────────────
+function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
+    onBack: () => void;
+    onContinue: () => void;
+    loginHref: string;
+    onLoginNavigate: () => void;
+}) {
+    const { login } = useAuth();
+    const registerMutation = useRegisterMutation();
+    const [name, setName] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [error, setError] = useState("");
+    const headingRef = useRef<HTMLDivElement>(null);
+    const formRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        gsap.set([headingRef.current, formRef.current], { opacity: 0, y: 20 });
+        const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+        tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.45 }).to(formRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.2");
+    }, []);
+
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        setError("");
+
+        try {
+            const response = await registerMutation.mutateAsync({ name, email, password });
+            const token = response.data.token;
+            const user = response.data.user;
+
+            if (typeof window !== "undefined") {
+                window.localStorage.setItem("authToken", token);
+                window.localStorage.setItem("token", token);
+                window.localStorage.setItem("user", JSON.stringify(user));
+                window.dispatchEvent(new Event("auth-token-updated"));
+            }
+
+            login({
+                id: String(user.id),
+                name: user.name,
+                email: user.email,
+            });
+
+            toast.success(response.message || "Account created successfully");
+            onContinue();
+        } catch (mutationError) {
+            const message = mutationError instanceof Error ? mutationError.message : "Failed to create account";
+            toast.error(message);
+            setError(message);
+        }
+    };
+
+    return (
+        <>
+            <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full overflow-y-auto">
+                <div ref={headingRef} className="mb-6">
+                    <h1 className="text-[24px] font-bold text-[#1a1a2e]">Create your account</h1>
+                    <p className="text-[14px] text-[#6b7280] mt-0.5 max-w-2xl">
+                        To save your creation and complete the process, you need to make an account.
+                    </p>
+                </div>
+
+                <div ref={formRef} className="rounded-2xl border border-[#f0edf1] bg-white p-5 shadow-sm max-w-2xl">
+                    <form className="space-y-4" onSubmit={handleSubmit}>
+                        <div>
+                            <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Full Name</label>
+                            <input
+                                type="text"
+                                value={name}
+                                onChange={(event) => setName(event.target.value)}
+                                placeholder="Jane Doe"
+                                className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email</label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                                placeholder="jane@example.com"
+                                className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                                autoComplete="email"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Password</label>
+                            <input
+                                type="password"
+                                value={password}
+                                onChange={(event) => setPassword(event.target.value)}
+                                placeholder="••••••••"
+                                className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                                autoComplete="new-password"
+                                required
+                            />
+                        </div>
+
+                        {error ? <p className="text-[13px] text-red-600">{error}</p> : null}
+
+                        <button
+                            type="submit"
+                            disabled={registerMutation.isPending}
+                            className="w-full rounded-xl bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] px-4 py-3 text-[14px] font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {registerMutation.isPending ? "Creating account..." : "Create account and continue"}
+                        </button>
+
+                        <p className="text-center text-[13px] text-[#6b7280]">
+                            Already have an account?{" "}
+                            <Link href={loginHref} onClick={onLoginNavigate} className="font-semibold text-[#BF003A] hover:underline">
+                                Log in
+                            </Link>
+                        </p>
+                    </form>
+                </div>
+            </div>
+
+            <BottomNav onBack={onBack} />
+        </>
+    );
+}
+
+// ── Step 7: Invite Friends (Page Order section REMOVED — Point 15) ──
 interface Friend { id: string; name: string; email: string; }
 const createFriend = (): Friend => ({ id: `friend-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`, name: "", email: "" });
 
-function DragHandleIcon() {
-    return (
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="5.5" cy="3.5" r="1.5" fill="currentColor" />
-            <circle cx="10.5" cy="3.5" r="1.5" fill="currentColor" />
-            <circle cx="5.5" cy="8" r="1.5" fill="currentColor" />
-            <circle cx="10.5" cy="8" r="1.5" fill="currentColor" />
-            <circle cx="5.5" cy="12.5" r="1.5" fill="currentColor" />
-            <circle cx="10.5" cy="12.5" r="1.5" fill="currentColor" />
-        </svg>
-    );
-}
-
-function SortableFriendRow({ friend, index, canRemove, onUpdate, onRemove }: {
-    friend: Friend; index: number; canRemove: boolean;
-    onUpdate: (id: string, field: "name" | "email", value: string) => void;
-    onRemove: (id: string) => void;
-}) {
-    const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: friend.id });
-    const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : undefined, position: isDragging ? ("relative" as const) : undefined };
-
-    return (
-        <div ref={setNodeRef} style={style}
-            className={`flex flex-col sm:flex-row gap-2 items-end rounded-xl p-2 transition-colors ${isDragging ? "bg-[#fff5f6] border border-[#fcd5de] shadow-lg" : "border border-transparent hover:border-[#f0edf1] hover:bg-[#fafafa]"}`}>
-            <button type="button" {...attributes} {...listeners}
-                className="mb-px h-10.5 w-9 shrink-0 cursor-grab active:cursor-grabbing rounded-xl border border-[#e5e7eb] bg-white text-[#c5c8cc] hover:text-[#6b7280] hover:border-[#d1d5db] transition-colors flex items-center justify-center touch-none"
-                aria-label={`Drag to reorder contributor ${index + 1}`}>
-                <DragHandleIcon />
-            </button>
-            <div className="flex-1 w-full">
-                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Name</label>}
-                <input value={friend.name} onChange={e => onUpdate(friend.id, "name", e.target.value)} placeholder="Friend's name"
-                    className="w-full border border-[#e5e7eb] bg-white rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/20 focus:border-[#B91C1C] transition-all" />
-            </div>
-            <div className="flex-1 w-full">
-                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Email</label>}
-                <div className="relative">
-                    <input value={friend.email} onChange={e => onUpdate(friend.id, "email", e.target.value)} placeholder="friend@email.com" type="email"
-                        className="w-full border border-[#e5e7eb] bg-white rounded-xl pl-4 pr-10 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/20 focus:border-[#B91C1C] transition-all" />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md bg-[#fff0f3] flex items-center justify-center pointer-events-none">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            {canRemove ? (
-                <button type="button" onClick={() => onRemove(friend.id)}
-                    className="mb-px flex items-center justify-center w-9 h-10.5 rounded-xl border border-[#e5e7eb] bg-white text-[#c5c8cc] hover:border-red-200 hover:text-red-400 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
-                    aria-label={`Remove contributor ${index + 1}`}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                    </svg>
-                </button>
-            ) : <div className="w-9 shrink-0" />}
-        </div>
-    );
-}
-
-function Step6({ onBack, onDone, onLoginRequired, isAuthenticated, isSubmitting, errorMessage }: {
-    onBack: () => void; onDone: () => Promise<void> | void; onLoginRequired: () => void; isAuthenticated: boolean; isSubmitting?: boolean; errorMessage?: string;
+function Step7({
+    onBack,
+    onDone,
+    onLoginRequired,
+    isAuthenticated,
+    isSubmitting,
+    errorMessage,
+    inviteLink,
+    isGeneratingInviteLink,
+    onEnsureInviteLink,
+}: {
+    onBack: () => void;
+    onDone: () => Promise<void> | void;
+    onLoginRequired: () => void;
+    isAuthenticated: boolean;
+    isSubmitting?: boolean;
+    errorMessage?: string;
+    inviteLink: string;
+    isGeneratingInviteLink: boolean;
+    onEnsureInviteLink: () => Promise<void>;
 }) {
     const [emailSubject, setEmailSubject] = useState("You're invited to contribute to a memory book! 📖");
     const [emailBody, setEmailBody] = useState(`Hi [Name],\n\nYou've been invited to contribute to a special memory book.\n\nClick the link below to add your message, photos, and memories:\n[Invite Link]\n\nThis won't take long and will mean the world to the recipient.\n\nThank you so much!\n`);
     const [friends, setFriends] = useState<Friend[]>([createFriend()]);
-    const [activeId, setActiveId] = useState<string | null>(null);
 
     const headingRef = useRef<HTMLDivElement>(null);
     const emailSectionRef = useRef<HTMLDivElement>(null);
@@ -1049,36 +1127,79 @@ function Step6({ onBack, onDone, onLoginRequired, isAuthenticated, isSubmitting,
             .to(friendsSectionRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.25");
     }, []);
 
-    const sensors = useSensors(
-        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-        useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-    );
+    useEffect(() => {
+        if (!isAuthenticated) return;
+        if (!inviteLink && !isGeneratingInviteLink) {
+            void onEnsureInviteLink();
+        }
+    }, [isAuthenticated, inviteLink, isGeneratingInviteLink, onEnsureInviteLink]);
+
+    // Invite step uses a simple list; ordering moved to Participants panel
 
     const addFriend = () => setFriends(prev => [...prev, createFriend()]);
     const updateFriend = (id: string, field: "name" | "email", value: string) => setFriends(prev => prev.map(f => f.id === id ? { ...f, [field]: value } : f));
     const removeFriend = (id: string) => setFriends(prev => prev.length <= 1 ? prev : prev.filter(f => f.id !== id));
 
-    const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-        setActiveId(null);
-        if (!over || active.id === over.id) return;
-        setFriends(prev => {
-            const oldIndex = prev.findIndex(f => f.id === active.id);
-            const newIndex = prev.findIndex(f => f.id === over.id);
-            if (oldIndex < 0 || newIndex < 0) return prev;
-            return arrayMove(prev, oldIndex, newIndex);
-        });
-    };
-
-    const activeFriend = activeId ? friends.find(f => f.id === activeId) : null;
+    // No drag handlers here — plain friend rows
 
     return (
         <>
             <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full overflow-y-auto">
                 <div ref={headingRef} className="mb-6">
                     <h1 className="text-[24px] font-bold text-[#1a1a2e]">Invite Friends</h1>
-                    <p className="text-[14px] text-[#9CA3AF] mt-0.5">Customize the invitation email and add the people you&apos;d like to contribute.</p>
+                    <p className="text-[14px] text-[#9CA3AF] mt-0.5">Customize the message, copy the invite link, and add emails only if you want to send them directly.</p>
+                </div>
+
+                <div className="mb-5 rounded-2xl border border-[#f0edf1] bg-linear-to-br from-[#fff8f9] to-white p-5 shadow-sm">
+                    <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                        <div className="max-w-2xl">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#BF003A]">Share link</p>
+                            <h2 className="mt-2 text-[18px] font-bold text-[#1a1a2e]">Invite friends without email</h2>
+                            <p className="mt-1 text-[13px] leading-6 text-[#6b7280]">
+                                Copy this link or share it on WhatsApp. Email addresses are optional.
+                            </p>
+                        </div>
+                        <div className="flex flex-col gap-2 sm:flex-row">
+                            <button
+                                type="button"
+                                disabled={!inviteLink || isGeneratingInviteLink}
+                                onClick={async () => {
+                                    if (!inviteLink || typeof navigator === "undefined") return;
+                                    await navigator.clipboard.writeText(inviteLink);
+                                    toast.success("Invite link copied");
+                                }}
+                                className="inline-flex items-center justify-center rounded-xl border border-[#e5e7eb] bg-white px-4 py-2.5 text-[13px] font-semibold text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A] disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Copy link
+                            </button>
+                            <a
+                                href={inviteLink ? `https://wa.me/?text=${encodeURIComponent(`Join my memory book: ${inviteLink}`)}` : "#"}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`inline-flex items-center justify-center rounded-xl px-4 py-2.5 text-[13px] font-semibold text-white transition-opacity ${inviteLink && !isGeneratingInviteLink ? "bg-[#25D366] hover:opacity-90" : "pointer-events-none bg-[#9CA3AF] opacity-60"}`}
+                            >
+                                Share on WhatsApp
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-4">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">Invite link</p>
+                        <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
+                            <input
+                                value={inviteLink || (isGeneratingInviteLink ? "Generating invite link..." : "Invite link will appear here")}
+                                readOnly
+                                className="w-full rounded-xl border border-[#e5e7eb] bg-[#fafafa] px-4 py-3 text-[13px] text-[#374151] outline-none"
+                            />
+                            <button
+                                type="button"
+                                onClick={onLoginRequired}
+                                className="inline-flex items-center justify-center rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 text-[13px] font-semibold text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
+                            >
+                                {!isAuthenticated ? "Log in" : "Need help?"}
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 {!isAuthenticated && (
@@ -1109,16 +1230,16 @@ function Step6({ onBack, onDone, onLoginRequired, isAuthenticated, isSubmitting,
                         </div>
                         <div>
                             <h2 className="text-[14px] font-bold text-[#1a1a2e]">Email Message</h2>
-                            <p className="text-[12px] text-[#9CA3AF]">Customize the invitation message your friends will receive.</p>
+                            <p className="text-[12px] text-[#9CA3AF]">Optional email copy if you want to send direct invites.</p>
                         </div>
                     </div>
                     <div className="mb-4">
-                        <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Subject</label>
+                        <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Subject (optional)</label>
                         <input value={emailSubject} onChange={e => setEmailSubject(e.target.value)} placeholder="e.g., You're invited to contribute to a memory book!"
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
                     </div>
                     <div>
-                        <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Body</label>
+                        <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Body (optional)</label>
                         <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} rows={8} placeholder="Write your invitation message here..."
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all resize-none leading-relaxed" />
                         <p className="text-[11px] text-[#9CA3AF] mt-1.5">
@@ -1141,26 +1262,13 @@ function Step6({ onBack, onDone, onLoginRequired, isAuthenticated, isSubmitting,
                             <p className="text-[12px] text-[#9CA3AF]">Add the people you&apos;d like to contribute to this book.</p>
                         </div>
                     </div>
-                    <p className="text-[11px] text-[#9CA3AF] mb-4 mt-1">Drag contributors with the handle to reorder how their pages appear in the book.</p>
+                    <p className="text-[11px] text-[#9CA3AF] mb-4 mt-1">Add contributors and their email addresses below, or leave them blank and share the link instead.</p>
 
-                    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
-                        <SortableContext items={friends.map(f => f.id)} strategy={verticalListSortingStrategy}>
-                            <div className="flex flex-col gap-1">
-                                {friends.map((friend, idx) => (
-                                    <SortableFriendRow key={friend.id} friend={friend} index={idx} canRemove={friends.length > 1} onUpdate={updateFriend} onRemove={removeFriend} />
-                                ))}
-                            </div>
-                        </SortableContext>
-                        <DragOverlay dropAnimation={{ duration: 200, easing: "cubic-bezier(0.18, 0.67, 0.6, 1.22)" }}>
-                            {activeFriend ? (
-                                <div className="flex gap-2 items-center rounded-xl border border-[#fcd5de] bg-white shadow-xl px-3 py-2.5 opacity-95">
-                                    <div className="w-9 h-10.5 rounded-xl border border-[#e5e7eb] bg-[#fafafa] flex items-center justify-center text-[#B91C1C]"><DragHandleIcon /></div>
-                                    <div className="flex-1 text-[13px] text-[#374151] font-medium truncate">{activeFriend.name || "Friend's name"}</div>
-                                    <div className="flex-1 text-[13px] text-[#9CA3AF] truncate">{activeFriend.email || "friend@email.com"}</div>
-                                </div>
-                            ) : null}
-                        </DragOverlay>
-                    </DndContext>
+                    <div className="flex flex-col gap-1">
+                        {friends.map((friend, idx) => (
+                            <FriendRow key={friend.id} friend={friend} index={idx} canRemove={friends.length > 1} onUpdate={updateFriend} onRemove={removeFriend} />
+                        ))}
+                    </div>
 
                     <button type="button" onClick={addFriend}
                         className="mt-3 w-full flex items-center justify-center gap-2 border border-dashed border-[#e5e7eb] text-[#9CA3AF] hover:border-[#B91C1C] hover:text-[#B91C1C] hover:bg-[#fff8f9] text-[13px] font-medium py-3 rounded-xl cursor-pointer transition-all">
@@ -1176,7 +1284,7 @@ function Step6({ onBack, onDone, onLoginRequired, isAuthenticated, isSubmitting,
                 onBack={onBack}
                 onNext={isAuthenticated ? () => { void onDone(); } : onLoginRequired}
                 nextLabel={isAuthenticated ? "Send Invites" : "Log in to Send Invites"}
-                nextDisabled={isSubmitting}
+                nextDisabled={isSubmitting || isGeneratingInviteLink}
             />
             {errorMessage && (
                 <div className="px-4 sm:px-6 pb-6 max-w-4xl mx-auto w-full">
@@ -1241,10 +1349,68 @@ export default function BookCreator() {
     const [selectedThemeId, setSelectedThemeId] = useState<number>(1);
     const [selectedCoverId, setSelectedCoverId] = useState(1);
     const [bookDraft, setBookDraft] = useState<BookDraft | null>(null);
+    const [createdInviteLink, setCreatedInviteLink] = useState("");
+    const [isGeneratingInviteLink, setIsGeneratingInviteLink] = useState(false);
     const createBookMutation = useCreateBookMutation();
 
     const urlCoverId = searchParams ? Number(searchParams.get("cover")) || undefined : undefined;
     const urlStep = searchParams?.get("step")?.toLowerCase() ?? "";
+    const inviteStepQuery = (() => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("step", "invite");
+        params.set("resume", "1");
+        const query = params.toString();
+        return query ? `${pathname}?${query}` : pathname;
+    })();
+    const loginRedirectHref = `/login?redirect=${encodeURIComponent(inviteStepQuery)}`;
+
+    const persistWizardState = () => {
+        if (typeof window === "undefined") return;
+        window.sessionStorage.setItem(
+            CREATE_WIZARD_STORAGE_KEY,
+            JSON.stringify({ step, selectedSubTab, selectedCoverId, bookDraft })
+        );
+    };
+
+    const ensureInviteLink = useCallback(async () => {
+        if (isGeneratingInviteLink) return;
+        if (!bookDraft) {
+            throw new Error("Book details are missing");
+        }
+        if (!bookDraft.bookTitle?.trim()) {
+            throw new Error("Book title is required.");
+        }
+
+        if (createdInviteLink) return;
+
+        setIsGeneratingInviteLink(true);
+        try {
+            const result = await createBookMutation.mutateAsync({
+                book_title: bookDraft.bookTitle,
+                book_subtitle: bookDraft.bookSubtitle,
+                recipient_name: bookDraft.recipientName,
+                occasion_id: bookDraft.occasionId || null,
+                sub_occasion_id: bookDraft.subOccasionId || null,
+                book_page_style_id: selectedThemeId || null,
+                cover_page_style_id: selectedCoverId || null,
+            });
+
+            await updateBookUser(result.data.id, {
+                book_title: bookDraft.bookTitle,
+                book_subtitle: bookDraft.bookSubtitle || null,
+                recipient_name: bookDraft.recipientName,
+                occasion_id: bookDraft.occasionId || null,
+                sub_occasion_id: bookDraft.subOccasionId || null,
+                cover_page_style_id: selectedCoverId || null,
+                book_page_style_id: selectedThemeId || null,
+            });
+
+            setCreatedInviteLink(result.data.invite_link);
+            return result.data.invite_link;
+        } finally {
+            setIsGeneratingInviteLink(false);
+        }
+    }, [bookDraft, createdInviteLink, createBookMutation, isGeneratingInviteLink, selectedCoverId, selectedThemeId]);
 
     const stepFromQuery = (() => {
         switch (urlStep) {
@@ -1253,8 +1419,10 @@ export default function BookCreator() {
             case "choose-cover": return 3;
             case "questionnaire": return 4;
             case "preview": return 5;
+            case "account":
+            case "register": return 6;
             case "invite":
-            case "send-invites": return 6;
+            case "send-invites": return 7;
             default: return undefined;
         }
     })();
@@ -1270,7 +1438,7 @@ export default function BookCreator() {
             if (parsed.selectedSubTab) setSelectedSubTab(parsed.selectedSubTab);
             if (typeof parsed.selectedCoverId === "number") setSelectedCoverId(parsed.selectedCoverId);
             if (parsed.bookDraft) setBookDraft(parsed.bookDraft);
-            if (typeof parsed.step === "number") setStep(parsed.step);
+            if (typeof parsed.step === "number") setStep(parsed.step === 6 ? 7 : parsed.step);
         } catch {
             window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
         }
@@ -1289,69 +1457,80 @@ export default function BookCreator() {
             {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} />}
             {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} initialCoverId={urlCoverId} />}
             {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={selectedSubTab} />}
-            {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} />}
+            {step === 5 && <Step5 onNext={() => setStep(isAuthenticated ? 7 : 6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} />}
             {step === 6 && (
                 <Step6
                     onBack={() => setStep(5)}
+                    onContinue={() => setStep(7)}
+                    loginHref={loginRedirectHref}
+                    onLoginNavigate={persistWizardState}
+                />
+            )}
+            {step === 7 && (
+                <Step7
+                    onBack={() => setStep(6)}
                     isAuthenticated={isAuthenticated}
+                    inviteLink={createdInviteLink}
+                    isGeneratingInviteLink={isGeneratingInviteLink}
+                    onEnsureInviteLink={async () => { await ensureInviteLink(); }}
                     onLoginRequired={() => {
-                        if (typeof window !== "undefined") {
-                            window.sessionStorage.setItem(CREATE_WIZARD_STORAGE_KEY, JSON.stringify({ step, selectedSubTab, selectedCoverId, bookDraft }));
-                        }
-                        const params = new URLSearchParams(searchParams.toString());
-                        params.set("step", "invite");
-                        params.set("resume", "1");
-                        const query = params.toString();
-                        const currentUrl = query ? `${pathname}?${query}` : pathname;
-                        router.push(`/login?redirect=${encodeURIComponent(currentUrl)}`);
+                        persistWizardState();
+                        router.push(loginRedirectHref);
                     }}
                     onDone={async () => {
                         if (isLoading) { toast.info("Checking login status..."); return; }
                         if (!isAuthenticated) { return; }
-                        if (!bookDraft) { toast.error("Book details are missing"); return; }
-                        if (!bookDraft.bookTitle?.trim()) { toast.error("Book title is required."); return; }
                         try {
-                            console.log("Creating book with payload:", {
-                                book_title: bookDraft.bookTitle,
-                                book_subtitle: bookDraft.bookSubtitle,
-                                recipient_name: bookDraft.recipientName,
-                                occasion_id: bookDraft.occasionId,
-                                sub_occasion_id: bookDraft.subOccasionId,
-                            });
-                            console.log("bookDraft:", bookDraft);
-                            const result = await createBookMutation.mutateAsync({
-                                book_title: bookDraft.bookTitle,
-                                book_subtitle: bookDraft.bookSubtitle,
-                                recipient_name: bookDraft.recipientName,
-                                occasion_id: bookDraft.occasionId || null,
-                                sub_occasion_id: bookDraft.subOccasionId || null,
-                                book_page_style_id: selectedThemeId || null,
-                                cover_page_style_id: selectedCoverId || null,
-                            });
-                            console.log("Created book result:", result);
-                            console.log("Saved occasion:", result?.data?.occasion);
-                            console.log("Saved sub_occasion:", result?.data?.sub_occasion);
-                            await updateBookUser(result.data.id, {
-                                book_title: bookDraft.bookTitle,
-                                book_subtitle: bookDraft.bookSubtitle || null,
-                                recipient_name: bookDraft.recipientName,
-                                occasion_id: bookDraft.occasionId || null,
-                                sub_occasion_id: bookDraft.subOccasionId || null,
-                                cover_page_style_id: selectedCoverId || null,
-                                book_page_style_id: selectedThemeId || null,
-                            });
+                            await ensureInviteLink();
                             if (typeof window !== "undefined") window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
-                            toast.success(result.message || "Book created successfully!");
+                            toast.success("Invite link ready");
                             setShowSuccess(true);
                         } catch (error) {
                             toast.error(error instanceof Error ? error.message : "Failed to create book");
                         }
                     }}
-                    isSubmitting={createBookMutation.isPending}
+                    isSubmitting={isGeneratingInviteLink || createBookMutation.isPending}
                     errorMessage={createBookMutation.error?.message}
                 />
             )}
             {showSuccess && <SuccessModal onClose={() => setShowSuccess(false)} />}
+        </div>
+    );
+}
+
+function FriendRow({ friend, index, canRemove, onUpdate, onRemove }: {
+    friend: Friend; index: number; canRemove: boolean;
+    onUpdate: (id: string, field: "name" | "email", value: string) => void;
+    onRemove: (id: string) => void;
+}) {
+    return (
+        <div className={`flex flex-col sm:flex-row gap-2 items-end rounded-xl p-2 border border-transparent hover:border-[#f0edf1] hover:bg-[#fafafa]`}>
+            <div className="flex-1 w-full">
+                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Name</label>}
+                <input value={friend.name} onChange={e => onUpdate(friend.id, "name", e.target.value)} placeholder="Friend's name"
+                    className="w-full border border-[#e5e7eb] bg-white rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/20 focus:border-[#B91C1C] transition-all" />
+            </div>
+            <div className="flex-1 w-full">
+                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Email (optional)</label>}
+                <div className="relative">
+                    <input value={friend.email} onChange={e => onUpdate(friend.id, "email", e.target.value)} placeholder="friend@email.com" type="email"
+                        className="w-full border border-[#e5e7eb] bg-white rounded-xl pl-4 pr-10 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/20 focus:border-[#B91C1C] transition-all" />
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-md bg-[#fff0f3] flex items-center justify-center pointer-events-none">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            {canRemove ? (
+                <button type="button" onClick={() => onRemove(friend.id)}
+                    className="mb-px flex items-center justify-center w-9 h-10.5 rounded-xl border border-[#e5e7eb] bg-white text-[#c5c8cc] hover:border-red-200 hover:text-red-400 hover:bg-red-50 transition-colors cursor-pointer shrink-0"
+                    aria-label={`Remove contributor ${index + 1}`}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                </button>
+            ) : <div className="w-9 shrink-0" />}
         </div>
     );
 }

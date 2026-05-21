@@ -18,11 +18,7 @@ export async function POST(request: Request, context: RouteContext) {
     const authorization = request.headers.get("authorization") || "";
     const csrf = request.headers.get("x-csrf-token") || "";
     
-    console.log("🔐 Proxy /finalize route received:");
-    console.log("  - Book ID:", id);
-    console.log("  - Authorization header present:", !!authorization);
-    console.log("  - Authorization header value:", authorization.substring(0, 20) + (authorization.length > 20 ? "..." : ""));
-    console.log("  - X-CSRF-TOKEN header present:", !!csrf);
+    
     
     if (!authorization) {
         console.warn("⚠️  No Authorization header received at proxy");
@@ -41,7 +37,7 @@ export async function POST(request: Request, context: RouteContext) {
 
     const backendBaseUrl = BASE_URL.replace(/\/api\/?$/, "");
 
-    console.log("📤 Proxy forwarding to backend:", `${backendBaseUrl}/user/books/${id}/finalize`);
+    
 
     const response = await fetch(`${backendBaseUrl}/user/books/${id}/finalize`, {
         method: "POST",
@@ -52,15 +48,14 @@ export async function POST(request: Request, context: RouteContext) {
         body: forwardForm,
     });
 
-    console.log("📥 Backend response status:", response.status);
+    
 
     const responseText = await response.text();
     let result: unknown;
 
     if (responseText) {
-        try {
+            try {
             result = JSON.parse(responseText);
-            console.log("✅ Backend returned valid JSON");
         } catch {
             console.warn("⚠️  Backend returned non-JSON (likely HTML - possible auth failure)");
             result = {
