@@ -219,12 +219,9 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
     let isActive = true;
 
-    const loadBookStyles = async () => {
+    const loadThemeLists = async () => {
       try {
-        console.log("Starting loadBookStyles for bookId:", bookId);
-
-        const [bookDetailsResponse, bookStylesResponse, coverStylesResponse] = await Promise.all([
-          fetchBookDetails(bookId),
+        const [bookStylesResponse, coverStylesResponse] = await Promise.all([
           fetchBookPageStyles().catch((error) => {
             console.warn("Failed to load book page styles", error);
             return null;
@@ -234,6 +231,23 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
             return null;
           }),
         ]);
+
+        if (!isActive) return;
+
+        setCoverStylesList(coverStylesResponse?.data ?? []);
+        setBookStylesList(bookStylesResponse?.data ?? []);
+      } catch (error) {
+        console.error("loadThemeLists error:", error);
+      }
+    };
+
+    void loadThemeLists();
+
+    const loadBookStyles = async () => {
+      try {
+        console.log("Starting loadBookStyles for bookId:", bookId);
+
+        const bookDetailsResponse = await fetchBookDetails(bookId);
 
         const book = bookDetailsResponse.data.book_details as {
           cover_style?: { id?: number | null; name?: string; image?: string[] } | null;
@@ -250,10 +264,6 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
         console.log("page_style:", book.page_style);
         console.log("Applying cover image:", coverImageUrl);
         console.log("Applying page image:", pageImageUrl);
-
-        // store available style lists for UI
-        setCoverStylesList(coverStylesResponse?.data ?? []);
-        setBookStylesList(bookStylesResponse?.data ?? []);
 
         if (!isActive) return;
 
