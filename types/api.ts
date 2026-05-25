@@ -507,6 +507,7 @@ export interface Contribution {
     id: number;
     name: string;
     email: string;
+    status?: string;
     answers: string[];
     images: string[];
     participant_number?: number; // optional explicit participant slot (1-based)

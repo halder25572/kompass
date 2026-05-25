@@ -82,7 +82,6 @@ export default function RegisterPage() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
-
       {/* LEFT SIDE */}
       <div className="hidden md:flex w-1/2 relative">
         <Image
@@ -123,7 +122,7 @@ export default function RegisterPage() {
 
           {/* Header */}
           <p className="text-sm text-[#7A1E3A] mb-2">
-            ✦ {text.headerTag}
+             {text.headerTag}
           </p>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
@@ -196,11 +195,12 @@ export default function RegisterPage() {
             {/* Social */}
             <div className="flex gap-3">
               <button className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
+                <Image src="/google.png" width={18} height={18} alt="google" className="inline mr-2" />
                 Google
               </button>
-              <button className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
+              {/* <button className="flex-1 bg-white border border-gray-300 py-2 rounded-lg text-sm cursor-pointer">
                 Apple
-              </button>
+              </button> */}
             </div>
 
             {/* Login */}

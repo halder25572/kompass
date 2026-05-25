@@ -391,12 +391,24 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
         {/* ── Header ── */}
         <header className="shrink-0 h-13 flex items-center justify-between gap-2 px-5 bg-transparent mb-6 mt-4">
-          <Link href="/">
-            <div className="flex items-center gap-2">
-              <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
-              <span className="font-semibold text-lg text-white">Mein HerzGeschenk</span>
-            </div>
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/">
+              <div className="flex items-center gap-2">
+                <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
+                <span className="font-semibold text-lg text-white">Mein HerzGeschenk</span>
+              </div>
+            </Link>
+
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center gap-2 rounded-full border border-[#b5192c] bg-white/10 px-3 py-1.5 text-[12px] font-semibold text-[#b5192c] transition-colors hover:bg-white/15"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+              Back to Dashboard
+            </Link>
+          </div>
 
           <div className="flex items-center gap-2">
             {/* ── Format Toggle ── */}

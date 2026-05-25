@@ -457,14 +457,44 @@ type BookDraft = {
     subOccasionId: number | null;
 };
 
-function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
-    const [bookTitle, setBookTitle] = useState("");
-    const [bookSubtitle, setBookSubtitle] = useState("");
-    const [recipientName, setRecipientName] = useState("");
-    const [selectedOccasion, setSelectedOccasion] = useState<string | null>(null);
-    const [selectedOccasionId, setSelectedOccasionId] = useState<number | null>(null);
-    const [selectedSubTab, setSelectedSubTab] = useState("");
-    const [selectedSubOccasionId, setSelectedSubOccasionId] = useState<number | null>(null);
+type BookDetailsForm = {
+    bookTitle: string;
+    bookSubtitle: string;
+    recipientName: string;
+    selectedOccasion: string | null;
+    selectedOccasionId: number | null;
+    selectedSubTab: string;
+    selectedSubOccasionId: number | null;
+};
+
+type QuestionnaireMap = typeof questionnairesBySubOccasion;
+
+type AccountDraft = {
+    name: string;
+    email: string;
+    password: string;
+    error: string;
+};
+
+type InviteDraft = {
+    emailSubject: string;
+    emailBody: string;
+    friends: Friend[];
+    showHelpText: boolean;
+};
+
+function Step1({
+    form,
+    selectedOccasion,
+    onChange,
+    onNext,
+}: {
+    form: BookDetailsForm;
+    selectedOccasion: string | null;
+    onChange: (updates: Partial<BookDetailsForm>) => void;
+    onNext: (data: BookDraft) => void;
+}) {
+    const [attemptedContinue, setAttemptedContinue] = useState(false);
     const [isOccasionModalOpen, setIsOccasionModalOpen] = useState(false);
 
     const headingRef = useRef<HTMLDivElement>(null);
@@ -499,24 +529,51 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
         }
     }, [isOccasionModalOpen]);
 
-    const selectedOccasionRecord = occasions.find((occ) => occ.name === selectedOccasion) ?? null;
+    const selectedOccasionRecord = occasions.find((occ) => occ.name === form.selectedOccasion) ?? null;
     const selectedOccasionLabel = selectedOccasionRecord?.name ?? "";
     const selectedItems = selectedOccasionRecord?.sub_occasions ?? [];
 
+    const hasBookTitleError = attemptedContinue && !form.bookTitle.trim();
+    const hasRecipientError = attemptedContinue && !form.recipientName.trim();
+    const hasOccasionError = attemptedContinue && !form.selectedOccasion;
+    const hasSubTabError = attemptedContinue && !form.selectedSubTab;
+
     const handleOccasionChange = (occasionId: string) => {
         const selectedOcc = occasions.find((o) => o.name === occasionId) ?? null;
-        setSelectedOccasion(occasionId);
-        setSelectedOccasionId(selectedOcc?.id ?? null);
-        setSelectedSubTab("");
-        setSelectedSubOccasionId(null);
+        onChange({
+            selectedOccasion: occasionId,
+            selectedOccasionId: selectedOcc?.id ?? null,
+            selectedSubTab: "",
+            selectedSubOccasionId: null,
+        });
         setIsOccasionModalOpen(true);
     };
 
     const handleSubTabSelect = (subTab: string, subOccasionId: number) => {
         const selectedSub = selectedItems.find((s) => s.name === subTab) ?? null;
-        setSelectedSubTab(subTab);
-        setSelectedSubOccasionId(selectedSub?.id ?? subOccasionId);
+        onChange({
+            selectedSubTab: subTab,
+            selectedSubOccasionId: selectedSub?.id ?? subOccasionId,
+        });
         setIsOccasionModalOpen(false);
+    };
+
+    const handleContinue = () => {
+        setAttemptedContinue(true);
+
+        if (!form.bookTitle.trim() || !form.recipientName.trim() || !form.selectedOccasion || !form.selectedSubTab) {
+            return;
+        }
+
+        onNext({
+            bookTitle: form.bookTitle,
+            bookSubtitle: form.bookSubtitle,
+            recipientName: form.recipientName,
+            occasion: form.selectedOccasion,
+            subTab: form.selectedSubTab,
+            occasionId: form.selectedOccasionId,
+            subOccasionId: form.selectedSubOccasionId,
+        });
     };
 
     return (
@@ -534,18 +591,19 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
                         {occasions.map((occ) => (
                             <button key={occ.id} onClick={() => handleOccasionChange(occ.name)}
                                 className={`occasion-btn flex flex-col items-center justify-center gap-1.5 py-3.5 rounded-xl border text-[14px] font-medium transition-all cursor-pointer
-                                    ${selectedOccasion === occ.name ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50"}`}>
-                                <span className={selectedOccasion === occ.name ? "text-[#B91C1C]" : "text-[#9CA3AF]"}>{renderOccasionIcon(occ.name)}</span>
+                                    ${form.selectedOccasion === occ.name ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50"}`}>
+                                <span className={form.selectedOccasion === occ.name ? "text-[#B91C1C]" : "text-[#9CA3AF]"}>{renderOccasionIcon(occ.name)}</span>
                                 {occ.name}
                             </button>
                         ))}
                     </div>
-                    {selectedSubTab ? (
+                    {hasOccasionError && <p className="mt-2 text-[12px] text-red-500">Please pick an occasion to continue.</p>}
+                    {form.selectedSubTab ? (
                         <div className="mt-4 rounded-2xl border border-[#f0edf1] bg-white px-4 py-3 shadow-sm">
                             <div className="flex items-start justify-between gap-3">
                                 <div>
                                     <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Selected item</p>
-                                    <h3 className="mt-1 text-[15px] font-bold text-[#1a1a2e]">{selectedSubTab}</h3>
+                                    <h3 className="mt-1 text-[15px] font-bold text-[#1a1a2e]">{form.selectedSubTab}</h3>
                                     <p className="text-[12px] text-[#9CA3AF]">{selectedOccasionLabel}</p>
                                 </div>
                                 <button type="button" onClick={() => setIsOccasionModalOpen(true)}
@@ -557,24 +615,27 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
                     ) : (
                         <p className="mt-3 text-[12px] text-[#9CA3AF]">Pick an occasion, then choose one item from the modal to continue.</p>
                     )}
+                    {hasSubTabError && <p className="mt-2 text-[12px] text-red-500">Please select one item for the chosen occasion.</p>}
                 </div>
 
                 {/* ── POINT 13: Fields after occasion ── */}
                 <div ref={fieldsRef}>
                     <div className="mb-4">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Title</label>
-                        <input value={bookTitle} onChange={e => setBookTitle(e.target.value)} placeholder={ph.title}
+                        <input value={form.bookTitle} onChange={e => onChange({ bookTitle: e.target.value })} placeholder={ph.title}
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+                        {hasBookTitleError && <p className="mt-1.5 text-[12px] text-red-500">Book title is required.</p>}
                     </div>
                     <div className="mb-4">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Book Subtitle</label>
-                        <input value={bookSubtitle} onChange={e => setBookSubtitle(e.target.value)} placeholder={ph.subtitle}
+                        <input value={form.bookSubtitle} onChange={e => onChange({ bookSubtitle: e.target.value })} placeholder={ph.subtitle}
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
                     </div>
                     <div className="mb-5">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Recipient Name</label>
-                        <input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder={ph.recipient}
+                        <input value={form.recipientName} onChange={e => onChange({ recipientName: e.target.value })} placeholder={ph.recipient}
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
+                        {hasRecipientError && <p className="mt-1.5 text-[12px] text-red-500">Recipient name is required.</p>}
                     </div>
                 </div>
             </div>
@@ -597,7 +658,7 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
                         <div className="p-5 sm:p-6">
                             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 {selectedItems.map((tab) => {
-                                    const isSelected = selectedSubTab === tab.name;
+                                    const isSelected = form.selectedSubTab === tab.name;
                                     return (
                                         <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name, tab.id)}
                                             className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
@@ -624,16 +685,8 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
             <BottomNav
                 showBack={true}
                 onBack={undefined}
-                onNext={() => selectedSubTab && onNext({
-                    bookTitle,
-                    bookSubtitle,
-                    recipientName,
-                    occasion: selectedOccasion ?? "",
-                    subTab: selectedSubTab,
-                    occasionId: selectedOccasionId,
-                    subOccasionId: selectedSubOccasionId,
-                })}
-                nextDisabled={!selectedSubTab}
+                onNext={handleContinue}
+                nextDisabled={false}
                 nextLabel="Continue"
             />
         </>
@@ -641,8 +694,13 @@ function Step1({ onNext }: { onNext: (data: BookDraft) => void }) {
 }
 
 // ── Step 2: Questionnaire ─────────────────────────────────
-function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => void; subTab: string }) {
-    const [questions, setQuestions] = useState(questionnairesBySubOccasion);
+function Step2({ onNext, onBack, subTab, questions, onQuestionsChange }: {
+    onNext: () => void;
+    onBack: () => void;
+    subTab: string;
+    questions: QuestionnaireMap;
+    onQuestionsChange: (next: QuestionnaireMap) => void;
+}) {
     const headingRef = useRef<HTMLDivElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
 
@@ -657,13 +715,13 @@ function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => v
     const currentQuestions = questions[subTab] ?? [];
     const handleAddQuestion = () => {
         const newQ = { id: Date.now(), question: "New question:", placeholder: "Your answer..." };
-        setQuestions(prev => ({ ...prev, [subTab]: [...(prev[subTab] ?? []), newQ] }));
+        onQuestionsChange({ ...questions, [subTab]: [...(questions[subTab] ?? []), newQ] });
     };
     const handleUpdateQuestion = (id: number, value: string) => {
-        setQuestions(prev => ({ ...prev, [subTab]: (prev[subTab] ?? []).map(q => q.id === id ? { ...q, question: value } : q) }));
+        onQuestionsChange({ ...questions, [subTab]: (questions[subTab] ?? []).map(q => q.id === id ? { ...q, question: value } : q) });
     };
     const handleDeleteQuestion = (id: number) => {
-        setQuestions(prev => ({ ...prev, [subTab]: (prev[subTab] ?? []).filter(q => q.id !== id) }));
+        onQuestionsChange({ ...questions, [subTab]: (questions[subTab] ?? []).filter(q => q.id !== id) });
     };
 
     return (
@@ -723,8 +781,17 @@ function Step2({ onNext, onBack, subTab }: { onNext: () => void; onBack: () => v
 }
 
 // ── Step 3: Choose Theme ──────────────────────────────────
-function Step3({ onNext, onBack }: { onNext: (themeId: number) => void; onBack: () => void }) {
-    const [selected, setSelected] = useState<number | null>(null);
+function Step3({
+    onNext,
+    onBack,
+    selectedThemeId,
+    onSelectedThemeIdChange,
+}: {
+    onNext: (themeId: number) => void;
+    onBack: () => void;
+    selectedThemeId: number | null;
+    onSelectedThemeIdChange: (themeId: number) => void;
+}) {
     const headingRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const { data: bookPageStylesResponse, isLoading, error } = useBookPageStylesQuery();
@@ -749,8 +816,10 @@ function Step3({ onNext, onBack }: { onNext: (themeId: number) => void; onBack: 
     const templates = templatesFromApi.length > 0 ? templatesFromApi : fallbackTemplates;
 
     useEffect(() => {
-        if (templates.length > 0 && !templates.some((t) => t.id === selected)) setSelected(templates[0].id);
-    }, [selected, templates]);
+        if (templates.length > 0 && !templates.some((t) => t.id === selectedThemeId)) {
+            onSelectedThemeIdChange(templates[0].id);
+        }
+    }, [onSelectedThemeIdChange, selectedThemeId, templates]);
 
     useEffect(() => {
         gsap.set([headingRef.current], { opacity: 0, y: 20 });
@@ -773,11 +842,11 @@ function Step3({ onNext, onBack }: { onNext: (themeId: number) => void; onBack: 
                 </div>
                 <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {templates.length > 0 ? templates.map((tpl) => (
-                        <button key={tpl.id} onClick={() => setSelected(tpl.id)} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
-                            className={`tpl-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 ${selected === tpl.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
+                        <button key={tpl.id} onClick={() => onSelectedThemeIdChange(tpl.id)} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
+                            className={`tpl-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 ${selectedThemeId === tpl.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
                             <div className="relative w-full aspect-4/3 bg-[#d1cfc8]">
                                 <Image src={tpl.image} alt={tpl.name} fill className="group-hover:scale-105 transition-transform duration-300" />
-                                {selected === tpl.id && <CheckIcon />}
+                                {selectedThemeId === tpl.id && <CheckIcon />}
                                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
                                     <span className="text-white text-[11px] sm:text-[12px] font-medium">{tpl.name}</span>
                                 </div>
@@ -797,14 +866,23 @@ function Step3({ onNext, onBack }: { onNext: (themeId: number) => void; onBack: 
                     {error && <div className="col-span-2 sm:col-span-3 text-center text-[12px] text-red-500">Error: {error.message}</div>}
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={() => onNext(selected ?? 0)} nextLabel="Choose A Cover" />
+            <BottomNav onBack={onBack} onNext={() => onNext(selectedThemeId ?? 0)} nextLabel="Choose A Cover" />
         </>
     );
 }
 
 // ── Step 4: Choose Cover ──────────────────────────────────
-function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) => void; onBack: () => void; initialCoverId?: number }) {
-    const [selected, setSelected] = useState(initialCoverId ?? 1);
+function Step4({
+    onNext,
+    onBack,
+    selectedCoverId,
+    onSelectedCoverIdChange,
+}: {
+    onNext: (coverId: number) => void;
+    onBack: () => void;
+    selectedCoverId: number;
+    onSelectedCoverIdChange: (coverId: number) => void;
+}) {
     const headingRef = useRef<HTMLDivElement>(null);
     const gridRef = useRef<HTMLDivElement>(null);
     const { data: coverPageStylesResponse, isLoading, error } = useCoverPageStylesQuery();
@@ -824,8 +902,10 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
     const covers = coversFromApi.length > 0 ? coversFromApi : fallbackCovers;
 
     useEffect(() => {
-        if (covers.length > 0 && !covers.some((c) => c.id === selected)) setSelected(covers[0].id);
-    }, [covers, selected]);
+        if (covers.length > 0 && !covers.some((c) => c.id === selectedCoverId)) {
+            onSelectedCoverIdChange(covers[0].id);
+        }
+    }, [covers, onSelectedCoverIdChange, selectedCoverId]);
 
     useEffect(() => {
         gsap.set(headingRef.current, { opacity: 0, y: 20 });
@@ -848,11 +928,11 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
                 </div>
                 <div ref={gridRef} className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {covers.length > 0 ? covers.map((cover) => (
-                        <button key={cover.id} onClick={() => setSelected(cover.id)} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
-                            className={`cover-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 ${selected === cover.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
+                        <button key={cover.id} onClick={() => onSelectedCoverIdChange(cover.id)} onMouseEnter={onCardEnter} onMouseLeave={onCardLeave}
+                            className={`cover-card relative rounded-xl overflow-hidden cursor-pointer group transition-all duration-200 ${selectedCoverId === cover.id ? "ring-2 ring-[#B91C1C] ring-offset-2" : "ring-1 ring-transparent hover:ring-[#B91C1C]/40"}`}>
                             <div className="relative w-full aspect-3/4 bg-[#d1cfc8]">
                                 <Image src={cover.image} alt={cover.name} fill className="group-hover:scale-105 transition-transform duration-300" />
-                                {selected === cover.id && <CheckIcon />}
+                                {selectedCoverId === cover.id && <CheckIcon />}
                                 <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/60 to-transparent px-2 py-2">
                                     <span className="text-white text-[11px] sm:text-[12px] font-medium">{cover.name}</span>
                                 </div>
@@ -867,7 +947,7 @@ function Step4({ onNext, onBack, initialCoverId }: { onNext: (coverId: number) =
                     {error && <div className="col-span-2 sm:col-span-3 text-center text-[12px] text-red-500">Error: {error.message}</div>}
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={() => onNext(selected)} nextLabel="Design Questionnaire" />
+            <BottomNav onBack={onBack} onNext={() => onNext(selectedCoverId)} nextLabel="Design Questionnaire" />
         </>
     );
 }
@@ -959,18 +1039,16 @@ function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onB
 }
 
 // ── Step 6: Create Account Gate ───────────────────────────
-function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
+function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, onAccountDraftChange }: {
     onBack: () => void;
     onContinue: () => void;
     loginHref: string;
     onLoginNavigate: () => void;
+    accountDraft: AccountDraft;
+    onAccountDraftChange: (updates: Partial<AccountDraft>) => void;
 }) {
     const { login } = useAuth();
     const registerMutation = useRegisterMutation();
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
     const headingRef = useRef<HTMLDivElement>(null);
     const formRef = useRef<HTMLDivElement>(null);
 
@@ -982,10 +1060,10 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
-        setError("");
+        onAccountDraftChange({ error: "" });
 
         try {
-            const response = await registerMutation.mutateAsync({ name, email, password });
+            const response = await registerMutation.mutateAsync({ name: accountDraft.name, email: accountDraft.email, password: accountDraft.password });
             const token = response.data.token;
             const user = response.data.user;
 
@@ -1007,7 +1085,7 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
         } catch (mutationError) {
             const message = mutationError instanceof Error ? mutationError.message : "Failed to create account";
             toast.error(message);
-            setError(message);
+            onAccountDraftChange({ error: message });
         }
     };
 
@@ -1027,8 +1105,8 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
                             <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Full Name</label>
                             <input
                                 type="text"
-                                value={name}
-                                onChange={(event) => setName(event.target.value)}
+                                value={accountDraft.name}
+                                onChange={(event) => onAccountDraftChange({ name: event.target.value })}
                                 placeholder="Jane Doe"
                                 className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
                                 required
@@ -1039,8 +1117,8 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
                             <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email</label>
                             <input
                                 type="email"
-                                value={email}
-                                onChange={(event) => setEmail(event.target.value)}
+                                value={accountDraft.email}
+                                onChange={(event) => onAccountDraftChange({ email: event.target.value })}
                                 placeholder="jane@example.com"
                                 className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
                                 autoComplete="email"
@@ -1052,8 +1130,8 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
                             <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Password</label>
                             <input
                                 type="password"
-                                value={password}
-                                onChange={(event) => setPassword(event.target.value)}
+                                value={accountDraft.password}
+                                onChange={(event) => onAccountDraftChange({ password: event.target.value })}
                                 placeholder="••••••••"
                                 className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
                                 autoComplete="new-password"
@@ -1061,7 +1139,7 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate }: {
                             />
                         </div>
 
-                        {error ? <p className="text-[13px] text-red-600">{error}</p> : null}
+                        {accountDraft.error ? <p className="text-[13px] text-red-600">{accountDraft.error}</p> : null}
 
                         <button
                             type="submit"
@@ -1100,6 +1178,8 @@ function Step7({
     inviteLink,
     isGeneratingInviteLink,
     onEnsureInviteLink,
+    inviteDraft,
+    onInviteDraftChange,
 }: {
     onBack: () => void;
     onDone: () => Promise<void> | void;
@@ -1110,12 +1190,9 @@ function Step7({
     inviteLink: string;
     isGeneratingInviteLink: boolean;
     onEnsureInviteLink: () => Promise<void>;
+    inviteDraft: InviteDraft;
+    onInviteDraftChange: (updates: Partial<InviteDraft>) => void;
 }) {
-    const [emailSubject, setEmailSubject] = useState("You're invited to contribute to a memory book! 📖");
-    const [emailBody, setEmailBody] = useState(`Hi [Name],\n\nYou've been invited to contribute to a special memory book.\n\nClick the link below to add your message, photos, and memories:\n[Invite Link]\n\nThis won't take long and will mean the world to the recipient.\n\nThank you so much!\n`);
-    const [friends, setFriends] = useState<Friend[]>([createFriend()]);
-    const [showHelpText, setShowHelpText] = useState(false);
-
     const headingRef = useRef<HTMLDivElement>(null);
     const emailSectionRef = useRef<HTMLDivElement>(null);
     const friendsSectionRef = useRef<HTMLDivElement>(null);
@@ -1137,9 +1214,13 @@ function Step7({
 
     // Invite step uses a simple list; ordering moved to Participants panel
 
-    const addFriend = () => setFriends(prev => [...prev, createFriend()]);
-    const updateFriend = (id: string, field: "name" | "email", value: string) => setFriends(prev => prev.map(f => f.id === id ? { ...f, [field]: value } : f));
-    const removeFriend = (id: string) => setFriends(prev => prev.length <= 1 ? prev : prev.filter(f => f.id !== id));
+    const addFriend = () => onInviteDraftChange({ friends: [...inviteDraft.friends, createFriend()] });
+    const updateFriend = (id: string, field: "name" | "email", value: string) => {
+        onInviteDraftChange({ friends: inviteDraft.friends.map(f => f.id === id ? { ...f, [field]: value } : f) });
+    };
+    const removeFriend = (id: string) => {
+        onInviteDraftChange({ friends: inviteDraft.friends.length <= 1 ? inviteDraft.friends : inviteDraft.friends.filter(f => f.id !== id) });
+    };
 
     // No drag handlers here — plain friend rows
 
@@ -1187,11 +1268,7 @@ function Step7({
                     <div className="mt-4 rounded-2xl border border-dashed border-[#e5e7eb] bg-white p-4">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">Invite link</p>
                         <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-center">
-                            <input
-                                value={inviteLink || (isGeneratingInviteLink ? "Generating invite link..." : "Invite link will appear here")}
-                                readOnly
-                                className="w-full rounded-xl border border-[#e5e7eb] bg-[#fafafa] px-4 py-3 text-[13px] text-[#374151] outline-none"
-                            />
+                            <input value={inviteLink || (isGeneratingInviteLink ? "Generating invite link..." : "Invite link will appear here")} readOnly className="w-full rounded-xl border border-[#e5e7eb] bg-[#fafafa] px-4 py-3 text-[13px] text-[#374151] outline-none" />
                             <button
                                 type="button"
                                 onClick={() => {
@@ -1200,14 +1277,14 @@ function Step7({
                                         return;
                                     }
 
-                                    setShowHelpText((current) => !current);
+                                    onInviteDraftChange({ showHelpText: !inviteDraft.showHelpText });
                                 }}
                                 className="inline-flex items-center justify-center rounded-xl border border-[#e5e7eb] bg-white px-4 py-3 text-[13px] font-semibold text-[#374151] transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
                             >
                                 {!isAuthenticated ? "Log in" : "Need help?"}
                             </button>
                         </div>
-                        {isAuthenticated && showHelpText && (
+                        {isAuthenticated && inviteDraft.showHelpText && (
                             <p className="mt-3 rounded-xl border border-[#f3d4db] bg-[#fff8f9] px-4 py-3 text-[12px] leading-5 text-[#6b7280]">
                                 Copy the invite link and share it with contributors. Anyone with the link can open the book invitation page.
                             </p>
@@ -1248,12 +1325,12 @@ function Step7({
                     </div>
                     <div className="mb-4">
                         <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Subject (optional)</label>
-                        <input value={emailSubject} onChange={e => setEmailSubject(e.target.value)} placeholder="e.g., You're invited to contribute to a memory book!"
+                        <input value={inviteDraft.emailSubject} onChange={e => onInviteDraftChange({ emailSubject: e.target.value })} placeholder="e.g., You're invited to contribute to a memory book!"
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
                     </div>
                     <div>
                         <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Email Body (optional)</label>
-                        <textarea value={emailBody} onChange={e => setEmailBody(e.target.value)} rows={8} placeholder="Write your invitation message here..."
+                        <textarea value={inviteDraft.emailBody} onChange={e => onInviteDraftChange({ emailBody: e.target.value })} rows={8} placeholder="Write your invitation message here..."
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-3 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all resize-none leading-relaxed" />
                         <p className="text-[11px] text-[#9CA3AF] mt-1.5">
                             Use <code className="bg-[#f5f5f5] px-1 rounded text-[#374151]">[Name]</code> and <code className="bg-[#f5f5f5] px-1 rounded text-[#374151]">[Invite Link]</code> — they will be replaced automatically for each recipient.
@@ -1278,9 +1355,7 @@ function Step7({
                     <p className="text-[11px] text-[#9CA3AF] mb-4 mt-1">Add contributors and their email addresses below, or leave them blank and share the link instead.</p>
 
                     <div className="flex flex-col gap-1">
-                        {friends.map((friend, idx) => (
-                            <FriendRow key={friend.id} friend={friend} index={idx} canRemove={friends.length > 1} onUpdate={updateFriend} onRemove={removeFriend} />
-                        ))}
+                        {inviteDraft.friends.map((friend, idx) => <FriendRow key={friend.id} friend={friend} index={idx} canRemove={inviteDraft.friends.length > 1} onUpdate={updateFriend} onRemove={removeFriend} />)}
                     </div>
 
                     <button type="button" onClick={addFriend}
@@ -1360,13 +1435,34 @@ export default function BookCreator() {
     const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
     const [step, setStep] = useState(1);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [selectedSubTab, setSelectedSubTab] = useState("Birthday");
+    const [bookDetailsForm, setBookDetailsForm] = useState<BookDetailsForm>({
+        bookTitle: "",
+        bookSubtitle: "",
+        recipientName: "",
+        selectedOccasion: null,
+        selectedOccasionId: null,
+        selectedSubTab: "Birthday",
+        selectedSubOccasionId: null,
+    });
+    const [questionsBySubOccasion, setQuestionsBySubOccasion] = useState<QuestionnaireMap>(questionnairesBySubOccasion);
     const [selectedThemeId, setSelectedThemeId] = useState<number>(1);
     const [selectedCoverId, setSelectedCoverId] = useState(1);
-    const [bookDraft, setBookDraft] = useState<BookDraft | null>(null);
+    const [accountDraft, setAccountDraft] = useState<AccountDraft>({
+        name: "",
+        email: "",
+        password: "",
+        error: "",
+    });
+    const [inviteDraft, setInviteDraft] = useState<InviteDraft>({
+        emailSubject: "You're invited to contribute to a memory book! 📖",
+        emailBody: `Hi [Name],\n\nYou've been invited to contribute to a special memory book.\n\nClick the link below to add your message, photos, and memories:\n[Invite Link]\n\nThis won't take long and will mean the world to the recipient.\n\nThank you so much!\n`,
+        friends: [createFriend()],
+        showHelpText: false,
+    });
     const [createdInviteLink, setCreatedInviteLink] = useState("");
     const [isGeneratingInviteLink, setIsGeneratingInviteLink] = useState(false);
     const createBookMutation = useCreateBookMutation();
+    const hasInitializedWizardRef = useRef(false);
 
     const urlCoverId = searchParams ? Number(searchParams.get("cover")) || undefined : undefined;
     const urlStep = searchParams?.get("step")?.toLowerCase() ?? "";
@@ -1380,14 +1476,40 @@ export default function BookCreator() {
     const loginRedirectHref = `/login?redirect=${encodeURIComponent(inviteStepQuery)}`;
     const availableThemeIds = useMemo(() => bookPageStylesResponse?.data?.map((style) => style.id) ?? [], [bookPageStylesResponse]);
     const availableCoverIds = useMemo(() => coverPageStylesResponse?.data?.map((style) => style.id) ?? [], [coverPageStylesResponse]);
+    const bookDraft = useMemo<BookDraft>(() => ({
+        bookTitle: bookDetailsForm.bookTitle,
+        bookSubtitle: bookDetailsForm.bookSubtitle,
+        recipientName: bookDetailsForm.recipientName,
+        occasion: bookDetailsForm.selectedOccasion ?? "",
+        subTab: bookDetailsForm.selectedSubTab,
+        occasionId: bookDetailsForm.selectedOccasionId,
+        subOccasionId: bookDetailsForm.selectedSubOccasionId,
+    }), [bookDetailsForm]);
+
+    const updateBookDetailsForm = useCallback((updates: Partial<BookDetailsForm>) => {
+        setBookDetailsForm((prev) => ({ ...prev, ...updates }));
+    }, []);
 
     const persistWizardState = () => {
         if (typeof window === "undefined") return;
+        if (!hasInitializedWizardRef.current) return;
         window.sessionStorage.setItem(
             CREATE_WIZARD_STORAGE_KEY,
-            JSON.stringify({ step, selectedSubTab, selectedCoverId, bookDraft })
+            JSON.stringify({
+                step,
+                selectedThemeId,
+                selectedCoverId,
+                bookDraft,
+                questionsBySubOccasion,
+                accountDraft,
+                inviteDraft,
+            })
         );
     };
+
+    useEffect(() => {
+        persistWizardState();
+    }, [step, selectedThemeId, selectedCoverId, bookDraft, questionsBySubOccasion, accountDraft, inviteDraft]);
 
     const ensureInviteLink = useCallback(async () => {
         if (isGeneratingInviteLink) return;
@@ -1479,15 +1601,55 @@ export default function BookCreator() {
         try {
             const rawState = window.sessionStorage.getItem(CREATE_WIZARD_STORAGE_KEY);
             if (!rawState) return;
-            const parsed = JSON.parse(rawState) as { step?: number; selectedSubTab?: string; selectedCoverId?: number; bookDraft?: BookDraft | null };
-            if (parsed.selectedSubTab) setSelectedSubTab(parsed.selectedSubTab);
+            const parsed = JSON.parse(rawState) as {
+                step?: number;
+                selectedSubTab?: string;
+                selectedThemeId?: number;
+                selectedCoverId?: number;
+                bookDraft?: BookDraft | null;
+                questionsBySubOccasion?: QuestionnaireMap;
+                accountDraft?: AccountDraft;
+                inviteDraft?: InviteDraft;
+            };
+            if (typeof parsed.selectedThemeId === "number") setSelectedThemeId(parsed.selectedThemeId);
             if (typeof parsed.selectedCoverId === "number") setSelectedCoverId(parsed.selectedCoverId);
-            if (parsed.bookDraft) setBookDraft(parsed.bookDraft);
+            if (parsed.questionsBySubOccasion) setQuestionsBySubOccasion(parsed.questionsBySubOccasion);
+            if (parsed.accountDraft) {
+                setAccountDraft({
+                    name: parsed.accountDraft.name ?? "",
+                    email: parsed.accountDraft.email ?? "",
+                    password: parsed.accountDraft.password ?? "",
+                    error: parsed.accountDraft.error ?? "",
+                });
+            }
+            if (parsed.inviteDraft) {
+                setInviteDraft({
+                    emailSubject: parsed.inviteDraft.emailSubject ?? "You're invited to contribute to a memory book! 📖",
+                    emailBody: parsed.inviteDraft.emailBody ?? `Hi [Name],\n\nYou've been invited to contribute to a special memory book.\n\nClick the link below to add your message, photos, and memories:\n[Invite Link]\n\nThis won't take long and will mean the world to the recipient.\n\nThank you so much!\n`,
+                    friends: parsed.inviteDraft.friends?.length ? parsed.inviteDraft.friends : [createFriend()],
+                    showHelpText: parsed.inviteDraft.showHelpText ?? false,
+                });
+            }
+            if (parsed.bookDraft) {
+                setBookDetailsForm({
+                    bookTitle: parsed.bookDraft.bookTitle ?? "",
+                    bookSubtitle: parsed.bookDraft.bookSubtitle ?? "",
+                    recipientName: parsed.bookDraft.recipientName ?? "",
+                    selectedOccasion: parsed.bookDraft.occasion || null,
+                    selectedOccasionId: parsed.bookDraft.occasionId ?? null,
+                    selectedSubTab: parsed.bookDraft.subTab ?? "Birthday",
+                    selectedSubOccasionId: parsed.bookDraft.subOccasionId ?? null,
+                });
+            }
             if (typeof parsed.step === "number") setStep(parsed.step === 6 ? 7 : parsed.step);
         } catch {
             window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
         }
     }, [searchParams, urlStep]);
+
+    useEffect(() => {
+        hasInitializedWizardRef.current = true;
+    }, []);
 
     useEffect(() => {
         if (stepFromQuery) setStep(stepFromQuery);
@@ -1498,10 +1660,10 @@ export default function BookCreator() {
     return (
         <div className="flex flex-col min-h-screen">
             <TopBar step={step} />
-            {step === 1 && <Step1 onNext={({ subTab, ...draft }) => { setSelectedSubTab(subTab); setBookDraft({ subTab, ...draft }); setStep(2); }} />}
-            {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} />}
-            {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} initialCoverId={urlCoverId} />}
-            {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={selectedSubTab} />}
+            {step === 1 && <Step1 form={bookDetailsForm} selectedOccasion={bookDetailsForm.selectedOccasion} onChange={updateBookDetailsForm} onNext={() => setStep(2)} />}
+            {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} selectedThemeId={selectedThemeId} onSelectedThemeIdChange={setSelectedThemeId} />}
+            {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} selectedCoverId={selectedCoverId} onSelectedCoverIdChange={setSelectedCoverId} />}
+            {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={bookDetailsForm.selectedSubTab} questions={questionsBySubOccasion} onQuestionsChange={setQuestionsBySubOccasion} />}
             {step === 5 && <Step5 onNext={() => setStep(isAuthenticated ? 7 : 6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} />}
             {step === 6 && (
                 <Step6
@@ -1509,6 +1671,8 @@ export default function BookCreator() {
                     onContinue={() => setStep(7)}
                     loginHref={loginRedirectHref}
                     onLoginNavigate={persistWizardState}
+                    accountDraft={accountDraft}
+                    onAccountDraftChange={(updates) => setAccountDraft((prev) => ({ ...prev, ...updates }))}
                 />
             )}
             {step === 7 && (
@@ -1518,6 +1682,8 @@ export default function BookCreator() {
                     inviteLink={createdInviteLink}
                     isGeneratingInviteLink={isGeneratingInviteLink}
                     onEnsureInviteLink={async () => { await ensureInviteLink(); }}
+                    inviteDraft={inviteDraft}
+                    onInviteDraftChange={(updates) => setInviteDraft((prev) => ({ ...prev, ...updates }))}
                     onLoginRequired={() => {
                         persistWizardState();
                         router.push(loginRedirectHref);

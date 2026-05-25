@@ -3,6 +3,8 @@ import {
 	createBookUser,
 	fetchBooks,
 	fetchBookDetails,
+	fetchBookContributions,
+	fetchContribution,
 	updateBookUser,
 	BooksResponse,
 	BookDetailResponse,
@@ -13,6 +15,9 @@ import {
 	UpdateBookResponse,
 	inviteByEmail,
 } from "@/services/api";
+import type { Contribution, ContributionsListResponse, ContributionDetailResponse } from "@/types/api";
+
+const EMPTY_CONTRIBUTIONS: Contribution[] = [];
 
 export function useBooksQuery() {
 	return useQuery<BooksResponse, Error>({
@@ -64,4 +69,46 @@ export function useSendBookInviteMutation(bookId: string | number | undefined) {
             await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
         },
     });
+}
+
+export type BookContributionsSummary = {
+	bookId: number;
+	statistics: NonNullable<ContributionsListResponse["data"]>["statistics"] | null;
+	contributions: Contribution[];
+};
+
+export function useBookContributionsQuery(bookId: string | number | undefined) {
+	const query = useQuery<ContributionsListResponse, Error, BookContributionsSummary>({
+		queryKey: ["contributions", bookId],
+		queryFn: () => fetchBookContributions(bookId as string | number),
+		enabled: Boolean(bookId),
+		retry: false,
+		select: (response) => ({
+			bookId: response.data?.book_id ?? Number(bookId),
+			statistics: response.data?.statistics ?? null,
+			contributions: response.data?.contributions ?? [],
+		}),
+	});
+
+	const contributions = query.data?.contributions ?? EMPTY_CONTRIBUTIONS;
+
+	// Log contributions shape for debugging inconsistent API responses
+	try {
+		console.log("useBookContributionsQuery contributions:", contributions);
+	} catch {}
+
+	return {
+		...query,
+		contributions,
+		statistics: query.data?.statistics ?? null,
+	};
+}
+
+export function useContributionQuery(contributionId: string | number | undefined) {
+	return useQuery<ContributionDetailResponse, Error>({
+		queryKey: ["contribution", contributionId],
+		queryFn: () => fetchContribution(contributionId as string | number),
+		enabled: Boolean(contributionId),
+		retry: false,
+	});
 }

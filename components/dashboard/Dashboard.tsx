@@ -90,11 +90,9 @@ const DashboardPageMain: FC = () => {
 
   function mapBookItemToBook(book: BookItem, index: number): Book {
     const rawStatus = typeof book.status === "string" ? book.status : "";
-    const title = typeof book.title === "string"
-      ? book.title
-      : typeof book.name === "string"
-        ? book.name
-        : `Book ${book.id}`;
+    const title = [book.book_title, book.title, book.name]
+      .find((value) => typeof value === "string" && value.trim().length > 0)
+      ?.trim() ?? "Untitled Book";
 
     const pages = typeof book.pages === "number"
       ? book.pages

@@ -4,6 +4,7 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useBookDetailsQuery } from "@/features/books/hooks/services";
 
 /* ── Questions config ── */
 const QUESTIONS = [
@@ -17,13 +18,39 @@ const QUESTIONS = [
 
 interface Props {
     name: string;
+    bookId?: string;
+    bookTitle?: string;
+    occasion?: string;
 }
 
-export default function QuestionnaireStep({ name }: Props) {
+export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }: Props) {
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [photos, setPhotos] = useState<string[]>([]);
     const [showDone, setShowDone] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
+
+    // If parent didn't provide bookTitle/occasion, fetch book details using bookId
+    const { data: bookDetails } = useBookDetailsQuery(bookId);
+
+    const recipientName = bookDetails?.data?.book_details?.recipient_name ?? undefined;
+    const fetchedOccasion = bookDetails?.data?.book_details?.occasion ?? undefined;
+
+    const displaySubtitle = (() => {
+        // If `name` prop is provided, prefer it for the subtitle (as requested).
+        if (name && name.trim()) {
+            if (occasion) return `${name}'s ${occasion}`;
+            if (fetchedOccasion) return `${name}'s ${fetchedOccasion}`;
+            return `${name}'s Book`;
+        }
+
+        // Priority: explicit bookTitle -> recipient + occasion -> recipient -> occasion -> fallback
+        if (bookTitle && bookTitle.trim()) return bookTitle;
+        if (recipientName && fetchedOccasion) return `${recipientName}'s ${fetchedOccasion}`;
+        if (recipientName) return `${recipientName}'s Book`;
+        if (occasion) return occasion;
+        if (fetchedOccasion) return fetchedOccasion;
+        return "the book";
+    })();
 
     const setAnswer = (id: string, val: string) =>
         setAnswers(prev => ({ ...prev, [id]: val }));
@@ -184,13 +211,15 @@ export default function QuestionnaireStep({ name }: Props) {
                         </div>
                         <h3 className="text-[18px] font-extrabold text-[#1A1A2E] mb-1.5">Thank You !</h3>
                         <p className="text-[13px] text-gray-400 mb-6">Your contribution has been sent.</p>
-                        <button
-                            onClick={() => setShowDone(false)}
-                            className="w-full py-3.5 rounded-xl text-white cursor-pointer text-[14px] font-bold hover:opacity-90 active:scale-[0.98] transition-all"
-                            style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
-                        >
-                            Done
-                        </button>
+                        <Link href="/" className="w-full">
+                            <button
+                                onClick={() => setShowDone(false)}
+                                className="w-full py-3.5 rounded-xl text-white cursor-pointer text-[14px] font-bold hover:opacity-90 active:scale-[0.98] transition-all"
+                                style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
+                            >
+                                Done
+                            </button>
+                        </Link>
                     </div>
                 </div>
             )}

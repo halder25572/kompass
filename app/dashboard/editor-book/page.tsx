@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation";
 
 type EditorMainPageProps = {
-    searchParams?: {
+    searchParams?: Promise<{
         bookId?: string;
-    };
+    }>;
 };
 
-const EditorMainPage = ({ searchParams }: EditorMainPageProps) => {
-    if (searchParams?.bookId) {
-        redirect(`/dashboard/${searchParams.bookId}/editor-book`);
+const EditorMainPage = async ({ searchParams }: EditorMainPageProps) => {
+    const resolvedSearchParams = searchParams ? await searchParams : undefined;
+
+    if (resolvedSearchParams?.bookId) {
+        redirect(`/dashboard/${resolvedSearchParams.bookId}/editor-book`);
     }
 
     redirect("/dashboard");

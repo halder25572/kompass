@@ -7,29 +7,125 @@ import { Plus, ChevronRight, Copy } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import gsap from "gsap";
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor, closestCenter } from "@dnd-kit/core";
 import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { useBookDetailsQuery, useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
+import { useBookContributionsQuery, useBookDetailsQuery, useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
+import type { Contribution } from "@/types/api";
 
-
-const initialParticipants = [
-  { id: "sarah-m", name: "Sarah M.", initials: "SM", status: "Submitted" },
-  { id: "james-k", name: "James K.", initials: "JK", status: "Submitted" },
-  { id: "emily-r", name: "Emily R.", initials: "ER", status: "Pending" },
-  { id: "michael-b", name: "Michael B.", initials: "MB", status: "Pending" },
-  { id: "lisa-t", name: "Lisa T.", initials: "LT", status: "Invited" },
-  { id: "david-w", name: "David W.", initials: "DW", status: "Invited" },
-];
+type ParticipantView = {
+  id: string;
+  name: string;
+  initials: string;
+  status: string;
+  avatar?: string | null;
+};
 
 const statusStyle = {
   Submitted: "bg-green-500 text-white",
   Pending: "bg-purple-500 text-white",
   Invited: "bg-gray-200 text-gray-600",
 };
+
+function normalizeStatus(status?: string) {
+  if (!status) return "Pending";
+  return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+}
+
+function getInitials(name: string) {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("")
+    .slice(0, 2) || "?";
+}
+
+function getContributionName(contribution: Contribution) {
+  const rawName =
+    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).name ??
+    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).participant_name ??
+    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).contributor_name ??
+    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).full_name ??
+    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).display_name ??
+    contribution.email;
+
+  const normalized = typeof rawName === "string" ? rawName.trim() : "";
+  const placeholderValues = new Set(["unknown", "n/a", "na", "null", "undefined", "-"]);
+
+  if (normalized.length > 0 && !placeholderValues.has(normalized.toLowerCase())) {
+    return normalized;
+  }
+
+  return "";
+}
+
+function mapContributionToParticipant(contribution: Contribution): ParticipantView {
+  // Check common fields in preferred order then fallback to broader normalizer
+  const item: any = contribution as any;
+  const preferredKeys = ["name", "full_name", "contributor_name", "email"];
+
+  let foundKey: string | null = null;
+  let name = "";
+
+  for (const k of preferredKeys) {
+    const v = item[k];
+    if (typeof v === "string" && v.trim()) {
+      name = v.trim();
+      foundKey = k;
+      break;
+    }
+  }
+
+  if (!name) {
+    name = item.name || item.email || "Unknown";
+    foundKey = item.name ? "name" : item.email ? "email" : null;
+  }
+
+  // Log where the name was found to help debug inconsistent API shapes
+  try {
+    console.log(`contribution:${contribution.id} name field -> ${foundKey ?? "(none)"}`);
+  } catch {}
+
+  return {
+    id: String(contribution.id),
+    name,
+    initials: getInitials(name || item.email || "Unknown"),
+    status: normalizeStatus(contribution.status),
+    avatar: (contribution as Contribution & { avatar?: string | null }).avatar ?? null,
+  };
+}
+
+function getProgressPercent(progress: number | string | null | undefined) {
+  if (typeof progress === "number" && Number.isFinite(progress)) {
+    return Math.max(0, Math.min(progress, 100));
+  }
+
+  if (typeof progress === "string") {
+    const parsed = Number.parseFloat(progress.replace("%", ""));
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.min(parsed, 100));
+    }
+  }
+
+  return 0;
+}
+
+function formatProgress(progress: number | string | null | undefined) {
+  if (typeof progress === "number" && Number.isFinite(progress)) {
+    return `${progress}%`;
+  }
+
+  if (typeof progress === "string" && progress.trim()) {
+    return progress;
+  }
+
+  return "--";
+}
 
 const previewPages = [
   {
@@ -167,9 +263,17 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   const settingsRef = useRef<HTMLDivElement>(null);
   const inviteRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
-  const [participants, setParticipants] = useState(initialParticipants);
+  const [participants, setParticipants] = useState<ParticipantView[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const { data: bookDetails } = useBookDetailsQuery(bookId);
+  const {
+    contributions,
+    statistics,
+    isLoading: isContributionsLoading,
+    isError: isContributionsError,
+    error: contributionsError,
+    refetch: refetchContributions,
+  } = useBookContributionsQuery(bookId);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -178,39 +282,42 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
 
   const updateMutation = useUpdateBookMutation(bookId);
   const inviteLink = bookDetails?.data.book_details.invite_link ?? "";
+  const progressValue = getProgressPercent(statistics?.progress);
+  const participantTotal = statistics?.total ?? contributions.length;
+  const contributionParticipantKey = contributions
+    .map((contribution) => `${contribution.id}:${contribution.name ?? ""}:${contribution.status ?? ""}`)
+    .join("|");
+
+  const mappedParticipants = useMemo(() => contributions.map(mapContributionToParticipant), [contributions]);
 
   const handleDragStart = ({ active }: any) => setActiveId(active.id as string);
   const handleDragEnd = ({ active, over }: any) => {
     setActiveId(null);
     if (!over || active.id === over.id) return;
-    const prev = participants;
+    const prev = mappedParticipants;
     const oldIndex = prev.findIndex((p) => p.id === active.id);
     const newIndex = prev.findIndex((p) => p.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
     const next = arrayMove(prev, oldIndex, newIndex);
 
-    // Optimistically update UI
-    setParticipants(next);
-
-    // Persist order to server
+    // Persist order to server (no optimistic UI mutation)
     try {
-      // payload: send ordering info (backend may expect different key — cast to any)
       const payload: any = { participant_order: next.map((p, i) => ({ participant_id: p.id, participant_number: i + 1 })) };
       updateMutation.mutateAsync(payload).then(() => {
         toast.success("Participant order saved");
       }).catch((err) => {
         console.error("Failed to persist participant order:", err);
-        setParticipants(prev);
         toast.error(err instanceof Error ? err.message : "Failed to save order");
       });
     } catch (err) {
       console.error(err);
-      setParticipants(prev);
       toast.error("Failed to save participant order");
     }
   };
 
   useEffect(() => {
+    if (!mappedParticipants || mappedParticipants.length === 0) return;
+
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
     /* initial states */
@@ -237,7 +344,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
       gsap.set(rows, { opacity: 0, x: -16 });
       tl.to(rows, { opacity: 1, x: 0, duration: 0.4, stagger: 0.07, ease: "power2.out" }, "-=0.35");
     }
-  }, []);
+  }, [mappedParticipants]);
 
   /* ── Hover helpers ── */
   const onParticipantEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -292,20 +399,21 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
           <div ref={progressRef} className="bg-white rounded-xl p-5 shadow-sm">
             <div className="flex justify-between text-sm mb-3">
               <span className="text-gray-600">Book Progress</span>
-              <span className="font-semibold gradient-text">80%</span>
+              <span className="font-semibold gradient-text">{isContributionsLoading ? "--" : (statistics?.progress ?? "0%")}</span>
             </div>
 
             <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
               <div
                 ref={progressBarRef}
-                className="w-[80%] h-2 bg-linear-to-r from-[#BF003A] to-[#59001C] rounded-full"
+                className="h-2 bg-linear-to-r from-[#BF003A] to-[#59001C] rounded-full"
+                style={{ width: `${progressValue}%` }}
               />
             </div>
 
             <div ref={statsRef} className="grid grid-cols-3 text-center">
-              <Stat number="6" label="Submitted" />
-              <Stat number="2" label="Pending" />
-              <Stat number="1" label="Invited" />
+              <Stat number={isContributionsLoading ? "--" : String(statistics?.submitted ?? 0)} label="Submitted" />
+              <Stat number={isContributionsLoading ? "--" : String(statistics?.pending ?? 0)} label="Pending" />
+              <Stat number={isContributionsLoading ? "--" : String(statistics?.invited ?? 0)} label="Invited" />
             </div>
           </div>
 
@@ -314,15 +422,38 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             <h2 className="text-sm font-medium mb-4">Participants</h2>
 
             <div className="space-y-3">
-              <DndContext sensors={sensors} collisionDetection={(closestCenter as any)} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
-                <SortableContext items={participants.map((p) => p.id)} strategy={verticalListSortingStrategy}>
-                  <div className="flex flex-col gap-1">
-                    {participants.map((p) => (
-                      <SortableParticipantRow key={p.id} p={p} bookId={bookId} />
-                    ))}
-                  </div>
-                </SortableContext>
-              </DndContext>
+              {isContributionsLoading ? (
+                <div className="space-y-2">
+                  <div className="h-12 rounded-lg bg-gray-100 animate-pulse" />
+                  <div className="h-12 rounded-lg bg-gray-100 animate-pulse" />
+                  <div className="h-12 rounded-lg bg-gray-100 animate-pulse" />
+                </div>
+              ) : isContributionsError ? (
+                <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 space-y-3">
+                  <p>{contributionsError instanceof Error ? contributionsError.message : "Failed to load contributions."}</p>
+                  <button
+                    type="button"
+                    onClick={() => void refetchContributions()}
+                    className="rounded-md bg-[#BF003A] px-3 py-2 text-white"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : mappedParticipants.length === 0 ? (
+                <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
+                  No contributions yet. Invite contributors to get started.
+                </div>
+              ) : (
+                <DndContext sensors={sensors} collisionDetection={(closestCenter as any)} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
+                  <SortableContext items={mappedParticipants.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                    <div className="flex flex-col gap-1">
+                      {mappedParticipants.map((p) => (
+                        <SortableParticipantRow key={p.id} p={p} bookId={bookId} />
+                      ))}
+                    </div>
+                  </SortableContext>
+                </DndContext>
+              )}
             </div>
           </div>
         </div>
@@ -347,7 +478,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
               <Row label="Recipient Name" value="Jack" />
               <Row label="Occasion" value="Birthday" />
               <Row label="Deadline" value="Mar 20, 2026" />
-              <Row label="Contributors" value="15" />
+              <Row label="Contributors" value={String(participantTotal)} />
             </div>
           </div>
 
@@ -396,7 +527,7 @@ function Row({ label, value }: { label: string; value: string }) {
       <span>{value}</span>
     </div>
   );
-}
+};
 
 function Stat({ number, label }: { number: string; label: string }) {
   return (
@@ -431,8 +562,12 @@ function SortableParticipantRow({ p, bookId }: { p: any; bookId: string }) {
         <button type="button" {...attributes} {...listeners} className="mb-px h-9 w-9 shrink-0 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] flex items-center justify-center">
           <DragHandleIcon />
         </button>
-        <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">{p.initials}</div>
-        <span className="text-sm">{p.name}</span>
+        {p.avatar ? (
+          <Image src={p.avatar} alt={p.name} width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">{p.initials}</div>
+        )}
+        <span className="text-sm font-medium text-gray-900">{p.name}</span>
       </div>
 
       <div className="flex items-center gap-3">

@@ -60,7 +60,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       {!hideLayout && <Navbar />}
       <main className="min-h-screen">{children}</main>
       {!hideLayout && <Footer />}
-      <Toaster position="top-right" richColors closeButton duration={5000} />
+      <Toaster position="top-right" richColors closeButton duration={3000} />
     </GoogleOAuthProvider>
   );
 }

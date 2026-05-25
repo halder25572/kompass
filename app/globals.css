@@ -21,3 +21,27 @@ body {
   color: var(--foreground);
   font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
+
+/* Sonner toast: place the close button at the top-right corner of the toast */
+[data-sonner-toast] {
+  position: relative !important;
+}
+
+/* Stronger rules to override sonner defaults and ensure the close button sits at top-right */
+[data-sonner-toast] [data-close-button] {
+  position: absolute !important;
+  top: 0.375rem !important;
+  right: 0.375rem !important;
+  left: auto !important;
+  transform: none !important;
+  padding: 0.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 5 !important;
+}
+
+/* Increase toast top padding so content doesn't overlap the close button */
+[data-sonner-toast] > *:first-child {
+  padding-top: 1rem !important;
+}

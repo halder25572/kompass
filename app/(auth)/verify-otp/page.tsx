@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useRef } from "react";
 import { toast } from "sonner";
@@ -166,12 +167,12 @@ export default function VerifyOtpPage() {
         <div className="w-full max-w-md text-center">
 
           {/* Logo */}
-          <div className="flex justify-center items-center gap-2 mb-4">
+          <Link href="/" className="flex justify-center items-center gap-2 mb-4">
             <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
             <span className="font-semibold text-lg text-gray-900">
               Mein HerzGeschenk
             </span>
-          </div>
+          </Link>
 
           <h1 className="text-xl font-semibold text-gray-900 mb-1">
             {text.title}
@@ -221,6 +222,16 @@ export default function VerifyOtpPage() {
               {isResending ? text.resending : text.resend}
             </button>
           </p>
+
+          <div className="mt-4 flex items-center justify-center gap-4 text-xs">
+            <Link href="/reset-password" className="text-[#7A1E3A] hover:underline">
+              Back
+            </Link>
+            <span className="text-gray-300">|</span>
+            <Link href="/" className="text-[#7A1E3A] hover:underline">
+              Go to Home
+            </Link>
+          </div>
 
           {/* <div className="mt-4">
             <Link href="/login" className="text-xs text-[#7A1E3A] hover:underline">

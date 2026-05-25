@@ -741,6 +741,45 @@ export async function fetchBookDetails(bookId: string | number): Promise<BookDet
     return result;
 }
 
+export async function fetchBookContributions(bookId: string | number): Promise<ContributionsListResponse> {
+    if (!bookId && bookId !== 0) {
+        throw new Error("Book ID is required.");
+    }
+
+    const token = getAuthToken();
+    const response = await fetch(`/api/user/books/${bookId}/contributions`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+    });
+
+    const result = await safeParseJson<ContributionsListResponse>(response);
+
+    if (!response.ok) {
+        throw new Error(
+            result ? getApiErrorMessage(result, result.message || "Failed to load contributions") : "Failed to load contributions"
+        );
+    }
+
+    if (!result) {
+        return {
+            success: true,
+            message: "",
+            data: null,
+            meta: {},
+            code: 200,
+        };
+    }
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to load contributions"));
+    }
+
+    return result;
+}
+
 // Join invite (non-throwing) — returns backend response directly so UI can show message
 export async function joinInviteByCode(code: string): Promise<CheckInResponse> {
     if (!code) throw new Error("Check-in code is required.");
@@ -794,8 +833,11 @@ export async function submitContribution(
         throw new Error("Inviter ID is required.");
     }
 
+    // Use same-origin Next.js proxy so browser requests don't hit CORS or expose BASE_URL.
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/contribute/submit/${inviterId}`, {
+    const proxyUrl = `/api/contribute/submit/${inviterId}`;
+
+    const response = await fetch(proxyUrl, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -805,10 +847,18 @@ export async function submitContribution(
         body: JSON.stringify(payload),
     });
 
-    const result = (await response.json()) as SubmitContributionResponse;
+    const result = await safeParseJson<SubmitContributionResponse>(response);
 
-    if (!response.ok || !result.success) {
-        throw new Error(result?.message || "Failed to submit contribution");
+    if (!response.ok) {
+        throw new Error(result ? getApiErrorMessage(result, result.message || `Failed to submit contribution (HTTP ${response.status})`) : `Failed to submit contribution (HTTP ${response.status})`);
+    }
+
+    if (!result) {
+        throw new Error("Server returned an empty response when submitting contribution");
+    }
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to submit contribution"));
     }
 
     return result;
@@ -1098,13 +1148,45 @@ export async function fetchContributions(bookId: string | number): Promise<Contr
 }
 
 // Contribution details API (used in contribution details page) - throws on failure so UI can show error message
+function normalizeContributionDetail(result: unknown): ContributionDetailResponse {
+    const response = result as ContributionDetailResponse & {
+        data?: unknown;
+    };
+
+    const candidate = response?.data;
+
+    if (candidate && typeof candidate === "object" && !Array.isArray(candidate)) {
+        const detailCandidate = candidate as Record<string, unknown>;
+        const nested =
+            detailCandidate.contribution ??
+            detailCandidate.book_contribution ??
+            detailCandidate.participant ??
+            detailCandidate.item ??
+            detailCandidate.data;
+
+        if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+            response.data = nested as ContributionDetailResponse["data"];
+        } else if (
+            typeof detailCandidate.name === "string" ||
+            typeof detailCandidate.email === "string" ||
+            Array.isArray(detailCandidate.answers) ||
+            Array.isArray(detailCandidate.images)
+        ) {
+            response.data = detailCandidate as ContributionDetailResponse["data"];
+        }
+    }
+
+    return response;
+}
+
 export async function fetchContribution(contributionId: string | number): Promise<ContributionDetailResponse> {
     if (!contributionId && contributionId !== 0) {
         throw new Error("Contribution ID is required.");
     }
 
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/user/books/contribution/${contributionId}`, {
+    
+    const response = await fetch(`/api/user/books/contribution/${contributionId}`, {
         method: "GET",
         headers: {
             "Accept": "application/json",
@@ -1113,7 +1195,7 @@ export async function fetchContribution(contributionId: string | number): Promis
         },
     });
 
-    const result = (await response.json()) as ContributionDetailResponse;
+    const result = normalizeContributionDetail(await response.json());
 
     if (!response.ok || !result.success) {
         throw new Error(result?.message || "Failed to load contribution details");

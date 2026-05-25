@@ -6,7 +6,7 @@ type RouteContext = {
     params: Promise<{ id: string }>;
 };
 
-export async function POST(request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
     if (!BASE_URL) {
         return NextResponse.json(
             { success: false, message: "Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env", data: null, meta: {}, code: 500 },
@@ -16,16 +16,14 @@ export async function POST(request: Request, context: RouteContext) {
 
     const { id } = await context.params;
     const authorization = request.headers.get("authorization") || "";
-    const bodyText = await request.text();
 
-    const response = await fetch(`${BASE_URL}/user/books/${id}/invite`, {
-        method: "POST",
+    const response = await fetch(`${BASE_URL}/user/books/contribution/${id}`, {
+        method: "GET",
         headers: {
-            "Content-Type": "application/json",
             "Accept": "application/json",
+            "Content-Type": "application/json",
             ...(authorization ? { Authorization: authorization } : {}),
         },
-        body: bodyText || undefined,
     });
 
     const responseText = await response.text();
@@ -46,14 +44,12 @@ export async function POST(request: Request, context: RouteContext) {
     } else {
         result = {
             success: response.ok,
-            message: response.ok ? "Invitation sent successfully" : "Failed to send invitation",
+            message: response.ok ? "Success" : `Request failed (HTTP ${response.status})`,
             data: null,
             meta: {},
             code: response.status,
         };
     }
 
-    const status = response.status === 204 ? 200 : response.status;
-
-    return NextResponse.json(result, { status });
+    return NextResponse.json(result, { status: response.status });
 }
