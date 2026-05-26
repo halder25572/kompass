@@ -26,29 +26,33 @@ export async function GET(request: Request, context: RouteContext) {
     });
 
     const responseText = await response.text();
-    let result: unknown;
 
-    if (responseText) {
+    if (responseText.trim()) {
         try {
-            result = JSON.parse(responseText);
+            const parsed = JSON.parse(responseText);
+            return NextResponse.json(parsed, { status: response.status });
         } catch {
-            result = {
-                success: response.ok,
-                message: responseText,
-                data: null,
-                meta: {},
-                code: response.status,
-            };
+            return NextResponse.json(
+                {
+                    success: response.ok,
+                    message: responseText,
+                    data: null,
+                    meta: {},
+                    code: response.status,
+                },
+                { status: response.status }
+            );
         }
-    } else {
-        result = {
+    }
+
+    return NextResponse.json(
+        {
             success: response.ok,
             message: response.ok ? "Success" : `Request failed (HTTP ${response.status})`,
             data: null,
             meta: {},
             code: response.status,
-        };
-    }
-
-    return NextResponse.json(result, { status: response.status });
+        },
+        { status: response.status }
+    );
 }

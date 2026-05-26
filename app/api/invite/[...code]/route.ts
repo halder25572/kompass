@@ -4,7 +4,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUB
 
 export async function GET(
     request: NextRequest,
-    context: { params: Promise<{ code: string }> }
+    context: { params: Promise<{ code: string[] }> }
 ) {
     if (!BASE_URL) {
         return NextResponse.json(
@@ -15,10 +15,10 @@ export async function GET(
 
     try {
         const { code } = await context.params;
-
+        const inviteCode = Array.isArray(code) ? code.join("/") : code;
         const authHeader = request.headers.get("authorization");
 
-        const response = await fetch(`${BASE_URL}/invite/${code}`, {
+        const response = await fetch(`${BASE_URL}/invite/${inviteCode}`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

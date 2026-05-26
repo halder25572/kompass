@@ -635,6 +635,32 @@ export async function fetchBooks(): Promise<BooksResponse> {
     return result;
 }
 
+function appendBookField(formData: FormData, key: string, value: unknown) {
+    if (value === undefined || value === null) return;
+    formData.append(key, String(value));
+}
+
+function buildBookFormData(payload: CreateBookPayload | UpdateBookPayload): FormData {
+    const formData = new FormData();
+
+    Object.entries(payload as unknown as Record<string, unknown>).forEach(([key, value]) => {
+        if (key === "questions") return;
+        if (key === "sub_occasion_id" && (value === "" || value === 0 || value === null)) return;
+        appendBookField(formData, key, value);
+    });
+
+    const questions = payload.questions;
+    if (Array.isArray(questions)) {
+        questions.forEach((question, index) => {
+            if (typeof question === "string" && question.trim()) {
+                formData.append(`questions[${index}]`, question);
+            }
+        });
+    }
+
+    return formData;
+}
+
 // ── FIXED: createBookUser ────────────────────────────────────────────────────
 export async function createBookUser(payload: CreateBookPayload): Promise<CreateBookResponse> {
     const token = getAuthToken();
@@ -642,13 +668,14 @@ export async function createBookUser(payload: CreateBookPayload): Promise<Create
         throw new Error("Authentication token is missing. Please log in again.");
     }
 
+    const formData = buildBookFormData(payload);
+
     const response = await fetch(`/api/user/books`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(payload),
+        body: formData,
     });
 
     // Safe parse — server may return empty body on 500
@@ -679,13 +706,13 @@ export async function updateBookUser(
     }
 
     const token = getAuthToken();
+    const formData = buildBookFormData(payload);
     const response = await fetch(`/api/user/books/${bookId}`, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: formData,
     });
 
     const result = (await response.json()) as UpdateBookResponse;
@@ -741,12 +768,15 @@ export async function fetchBookDetails(bookId: string | number): Promise<BookDet
     return result;
 }
 
-export async function fetchBookContributions(bookId: string | number): Promise<ContributionsListResponse> {
+export async function fetchBookContributions(
+    bookId: string | number,
+    authToken?: string | null
+): Promise<ContributionsListResponse> {
     if (!bookId && bookId !== 0) {
         throw new Error("Book ID is required.");
     }
 
-    const token = getAuthToken();
+    const token = authToken ?? getAuthToken();
     const response = await fetch(`/api/user/books/${bookId}/contributions`, {
         method: "GET",
         headers: {
@@ -755,7 +785,16 @@ export async function fetchBookContributions(bookId: string | number): Promise<C
         },
     });
 
-    const result = await safeParseJson<ContributionsListResponse>(response);
+    const responseText = await response.text();
+    let result: ContributionsListResponse | null = null;
+
+    if (responseText.trim()) {
+        try {
+            result = JSON.parse(responseText) as ContributionsListResponse;
+        } catch {
+            result = null;
+        }
+    }
 
     if (!response.ok) {
         throw new Error(
@@ -765,11 +804,11 @@ export async function fetchBookContributions(bookId: string | number): Promise<C
 
     if (!result) {
         return {
-            success: true,
-            message: "",
+            success: response.ok,
+            message: response.ok ? "" : `Failed to load contributions (HTTP ${response.status})`,
             data: null,
             meta: {},
-            code: 200,
+            code: response.status,
         };
     }
 
@@ -781,23 +820,34 @@ export async function fetchBookContributions(bookId: string | number): Promise<C
 }
 
 // Join invite (non-throwing) — returns backend response directly so UI can show message
-export async function joinInviteByCode(code: string): Promise<CheckInResponse> {
+export async function joinInviteByCode(code: string, name: string, email: string): Promise<CheckInResponse> {
     if (!code) throw new Error("Check-in code is required.");
 
-    const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/contribute/check-in/${code}`, {
+    const response = await fetch(`/api/contribute/check-in/${code}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
+        body: JSON.stringify({ name, email }),
     });
 
-    const result = await safeParseJson<CheckInResponse>(response);
+    const rawBody = await response.text();
 
-    if (!result) return { success: response.ok, message: "", data: null, meta: {}, code: response.status };
+    if (!rawBody.trim()) {
+        return { success: response.ok, message: "", data: null, meta: {}, code: response.status };
+    }
 
-    return result;
+    try {
+        return JSON.parse(rawBody) as CheckInResponse;
+    } catch {
+        return {
+            success: response.ok,
+            message: rawBody.trim(),
+            data: null,
+            meta: {},
+            code: response.status,
+        };
+    }
 }
 
 // Fetch invite details by code (used in contribution page to show invite info before joining)
@@ -807,7 +857,7 @@ export async function fetchInviteDetails(code: string): Promise<GetInviteRespons
     }
 
     const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/invite/${code}`, {
+    const response = await fetch(`/api/invite/${code}`, {
         method: "GET",
         headers: {
             "Accept": "application/json",
@@ -828,6 +878,14 @@ export async function fetchInviteDetails(code: string): Promise<GetInviteRespons
 export async function submitContribution(
     inviterId: string | number,
     payload: SubmitContributionPayload
+): Promise<SubmitContributionResponse>;
+export async function submitContribution(
+    inviterId: string | number,
+    formData: FormData
+): Promise<SubmitContributionResponse>;
+export async function submitContribution(
+    inviterId: string | number,
+    payload: SubmitContributionPayload | FormData
 ): Promise<SubmitContributionResponse> {
     if (!inviterId && inviterId !== 0) {
         throw new Error("Inviter ID is required.");
@@ -840,11 +898,25 @@ export async function submitContribution(
     const response = await fetch(proxyUrl, {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
             "Accept": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(payload),
+        body: payload instanceof FormData ? payload : (() => {
+            const formData = new FormData();
+
+            formData.append("name", payload.name);
+            formData.append("email", payload.email);
+
+            payload.answers.forEach((answer, index) => {
+                formData.append(`answers[${index}]`, answer);
+            });
+
+            payload.images.forEach((image, index) => {
+                formData.append(`images[${index}]`, image);
+            });
+
+            return formData;
+        })(),
     });
 
     const result = await safeParseJson<SubmitContributionResponse>(response);

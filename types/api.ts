@@ -328,6 +328,7 @@ export interface CreateBookPayload {
     sub_occasion_id: number | null;
     book_page_style_id: number | null;
     cover_page_style_id: number | null;
+    questions?: string[] | null;
 }
 
 export interface CreateBookResponse {
@@ -468,7 +469,7 @@ export interface SubmitContributionPayload {
     name: string;
     email: string;
     answers: string[];
-    images?: string[];
+    images: File[] | string[];
 }
 
 export interface SubmitContributionResponse {

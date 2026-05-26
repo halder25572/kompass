@@ -39,16 +39,28 @@ export async function POST(request: Request, context: RouteContext) {
     }
 
     const { id } = await context.params;
-    const payload = await request.json();
     const authorization = request.headers.get("authorization") || "";
+    const contentType = request.headers.get("content-type") || "";
+
+    const isFormData = contentType.includes("multipart/form-data") || contentType.includes("application/x-www-form-urlencoded");
+
+    const headers: Record<string, string> = {
+        ...(authorization ? { Authorization: authorization } : {}),
+    };
+
+    let body: BodyInit | undefined;
+    if (isFormData) {
+        body = await request.formData();
+    } else {
+        const payload = await request.json();
+        headers["Content-Type"] = "application/json";
+        body = JSON.stringify(payload);
+    }
 
     const response = await fetch(`${BASE_URL}/user/books/${id}`, {
         method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            ...(authorization ? { Authorization: authorization } : {}),
-        },
-        body: JSON.stringify(payload),
+        headers,
+        body,
     });
 
     const result = await response.json();

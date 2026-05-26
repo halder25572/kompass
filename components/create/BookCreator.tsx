@@ -549,11 +549,11 @@ function Step1({
         setIsOccasionModalOpen(true);
     };
 
-    const handleSubTabSelect = (subTab: string, subOccasionId: number) => {
+    const handleSubTabSelect = (subTab: string) => {
         const selectedSub = selectedItems.find((s) => s.name === subTab) ?? null;
         onChange({
             selectedSubTab: subTab,
-            selectedSubOccasionId: selectedSub?.id ?? subOccasionId,
+            selectedSubOccasionId: selectedSub?.id ?? null,
         });
         setIsOccasionModalOpen(false);
     };
@@ -660,7 +660,7 @@ function Step1({
                                 {selectedItems.map((tab) => {
                                     const isSelected = form.selectedSubTab === tab.name;
                                     return (
-                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name, tab.id)}
+                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
                                             className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
                                             <div className="flex items-center justify-between gap-3">
                                                 <span className="text-[14px] font-semibold">{tab.name}</span>
@@ -1526,6 +1526,9 @@ export default function BookCreator() {
         try {
             const resolvedThemeId = availableThemeIds.includes(selectedThemeId) ? selectedThemeId : availableThemeIds[0] ?? null;
             const resolvedCoverId = availableCoverIds.includes(selectedCoverId) ? selectedCoverId : availableCoverIds[0] ?? null;
+            const selectedQuestions = (questionsBySubOccasion[bookDraft.subTab] ?? [])
+                .map((questionItem) => questionItem.question?.trim())
+                .filter((question): question is string => Boolean(question));
 
             if (resolvedThemeId !== selectedThemeId) {
                 setSelectedThemeId(resolvedThemeId ?? 1);
@@ -1543,6 +1546,7 @@ export default function BookCreator() {
                 sub_occasion_id: bookDraft.subOccasionId || null,
                 book_page_style_id: resolvedThemeId,
                 cover_page_style_id: resolvedCoverId,
+                questions: selectedQuestions,
             });
 
             const inviteLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
@@ -1560,6 +1564,7 @@ export default function BookCreator() {
                     sub_occasion_id: bookDraft.subOccasionId || null,
                     cover_page_style_id: resolvedCoverId,
                     book_page_style_id: resolvedThemeId,
+                    questions: selectedQuestions,
                 });
             }
 

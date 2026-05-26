@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useSubmitContributionMutation } from "@/features/contribute/hooks/services";
+import type { SubmitContributionPayload, SubmitContributionResponse } from "@/types/api";
 
 interface Props {
   inviterId: string | number;
@@ -17,16 +18,33 @@ export default function SubmitContributionForm({ inviterId }: Props) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
+    const payload: SubmitContributionPayload = {
+      name,
+      email,
+      answers: [],
+      images: [],
+    };
+
     mutate(
-      { inviterId, payload: { name, email, answers: [], images: [] } },
+      { inviterId, payload },
       {
-        onSuccess: (response) => {
-          const id = response?.data?.id ?? null;
+        onSuccess: (response: SubmitContributionResponse) => {
+          const contributor = response?.data;
+          const id = contributor?.id ?? null;
           if (id) {
             setContributionId(id);
-            toast.success("Contribution submitted successfully");
+            toast.success(contributor?.name ? `${contributor.name} submitted successfully` : "Contribution submitted successfully");
           } else {
             toast.success(response.message || "Submitted");
+          }
+
+          if (contributor) {
+            console.log("Contribution submitted:", {
+              id: contributor.id,
+              name: contributor.name,
+              email: contributor.email,
+              status: contributor.status,
+            });
           }
         },
         onError: (err: Error) => {

@@ -16,20 +16,25 @@ export async function POST(
     try {
         const { inviter_id } = await context.params;
         const authHeader = request.headers.get("authorization");
-        const body = await request.json();
+        const formData = await request.formData();
 
         const response = await fetch(`${BASE_URL}/contribute/submit/${inviter_id}`, {
             method: "POST",
             headers: {
-                "Content-Type": "application/json",
+                Accept: "application/json",
                 ...(authHeader ? { Authorization: authHeader } : {}),
             },
-            body: JSON.stringify(body),
+            body: formData,
         });
 
-        const data = await response.json();
+        const data = await response.text();
 
-        return NextResponse.json(data, { status: response.status });
+        return new Response(data, {
+            status: response.status,
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
     } catch (error) {
         console.error("Contribution submit proxy error:", error);
         return NextResponse.json(

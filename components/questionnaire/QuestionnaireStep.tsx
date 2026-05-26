@@ -1,52 +1,72 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useBookDetailsQuery } from "@/features/books/hooks/services";
+import { submitContribution } from "@/services/api";
 
-/* ── Questions config ── */
-const QUESTIONS = [
-    { id: "motto", label: "My life motto:", placeholder: "Words you live by...", textarea: false },
-    { id: "childhood", label: "This is what I wanted to be when I was a child:", placeholder: "An astronaut, a doctor...", textarea: false },
-    { id: "grumpy", label: "I get grumpy about:", placeholder: "What grinds your gears?", textarea: false },
-    { id: "invention", label: "The best invention ever:", placeholder: "Coffee? The internet?", textarea: false },
-    { id: "dream", label: "My ultimate dream:", placeholder: "Your biggest dream...", textarea: false },
-    { id: "memory", label: "My fondest childhood memory:", placeholder: "Share a cherished memory...", textarea: true },
-];
+type QuestionItem = {
+    id: string;
+    label: string;
+    placeholder: string;
+    textarea: boolean;
+};
 
 interface Props {
+    inviterId: string | number;
     name: string;
+    email: string;
     bookId?: string;
+    questions?: string[];
     bookTitle?: string;
+    recipientName?: string;
     occasion?: string;
 }
 
-export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }: Props) {
+function questionToItem(question: string, index: number): QuestionItem {
+    const normalized = question.trim();
+    const lower = normalized.toLowerCase();
+
+    return {
+        id: `question-${index}`,
+        label: normalized,
+        placeholder: `Answer to: ${normalized}`,
+        textarea: lower.length > 80 || /memory|describe|share|tell/i.test(lower),
+    };
+}
+
+export default function QuestionnaireStep({ inviterId, name, email, bookId, questions: inviteQuestions, bookTitle, recipientName, occasion }: Props) {
     const [answers, setAnswers] = useState<Record<string, string>>({});
-    const [photos, setPhotos] = useState<string[]>([]);
+    const [photos, setPhotos] = useState<File[]>([]);
+    const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
     const [showDone, setShowDone] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
     // If parent didn't provide bookTitle/occasion, fetch book details using bookId
     const { data: bookDetails } = useBookDetailsQuery(bookId);
 
-    const recipientName = bookDetails?.data?.book_details?.recipient_name ?? undefined;
+    const fetchedRecipientName = bookDetails?.data?.book_details?.recipient_name ?? undefined;
     const fetchedOccasion = bookDetails?.data?.book_details?.occasion ?? undefined;
 
+    const questions = useMemo<QuestionItem[]>(() => {
+        const questionStrings = bookDetails?.data?.book_details?.questions ?? inviteQuestions ?? [];
+        const source = questionStrings.length > 0 ? questionStrings : [];
+        return source.map(questionToItem);
+    }, [bookDetails, inviteQuestions]);
+
     const displaySubtitle = (() => {
-        // If `name` prop is provided, prefer it for the subtitle (as requested).
-        if (name && name.trim()) {
-            if (occasion) return `${name}'s ${occasion}`;
-            if (fetchedOccasion) return `${name}'s ${fetchedOccasion}`;
-            return `${name}'s Book`;
+        const resolvedRecipientName = recipientName?.trim() || fetchedRecipientName?.trim();
+
+        if (resolvedRecipientName) {
+            if (occasion) return `${resolvedRecipientName}'s ${occasion}`;
+            if (fetchedOccasion) return `${resolvedRecipientName}'s ${fetchedOccasion}`;
+            return `${resolvedRecipientName}'s Book`;
         }
 
-        // Priority: explicit bookTitle -> recipient + occasion -> recipient -> occasion -> fallback
         if (bookTitle && bookTitle.trim()) return bookTitle;
-        if (recipientName && fetchedOccasion) return `${recipientName}'s ${fetchedOccasion}`;
-        if (recipientName) return `${recipientName}'s Book`;
         if (occasion) return occasion;
         if (fetchedOccasion) return fetchedOccasion;
         return "the book";
@@ -55,11 +75,50 @@ export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }:
     const setAnswer = (id: string, val: string) =>
         setAnswers(prev => ({ ...prev, [id]: val }));
 
-    const handleAddPhotos = (files: FileList) => {
-        const remaining = 2 - photos.length;
-        Array.from(files).slice(0, remaining).forEach(file => {
-            setPhotos(prev => [...prev, URL.createObjectURL(file)]);
-        });
+    const handleAddPhotos = async (files: FileList) => {
+        const remaining = Math.max(0, 2 - photos.length);
+        const selectedFiles = Array.from(files).slice(0, remaining);
+        setPhotos(prev => [...prev, ...selectedFiles]);
+    };
+
+    useEffect(() => {
+        const previewUrls = photos.map(file => URL.createObjectURL(file));
+        setPhotoPreviews(previewUrls);
+
+        return () => {
+            previewUrls.forEach(url => URL.revokeObjectURL(url));
+        };
+    }, [photos]);
+
+    const handleSubmit = async () => {
+        if (!inviterId && inviterId !== 0) {
+            toast.error("Invite information is missing.");
+            return;
+        }
+
+        try {
+            setIsSubmitting(true);
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("email", email);
+
+            questions.forEach((question, index) => {
+                formData.append(`answers[${index}]`, answers[question.id] ?? "");
+            });
+
+            photos.forEach((file, index) => {
+                formData.append(`images[${index}]`, file);
+            });
+
+            await submitContribution(inviterId, formData);
+            setShowDone(true);
+            toast.success("Your contribution has been sent.");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Failed to submit contribution";
+            toast.error(message);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-[#BF003A] focus:ring-1 focus:ring-[#BF003A]/10 transition-all placeholder-gray-300 bg-white";
@@ -96,18 +155,18 @@ export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }:
                 </div>
                 <p className="text-[13px] text-gray-400 mb-6 ml-7.25">
                     Your contribution for{" "}
-                    <span className="text-[#BF003A] font-semibold">Mom&apos;s 60th Birthday</span>
+                    <span className="text-[#BF003A] font-semibold">{displaySubtitle}</span>
                 </p>
 
                 <div className="flex flex-col lg:flex-row gap-5 items-start">
 
                     {/* Questions card */}
                     <div className="flex-1 w-full bg-white rounded-2xl shadow-[0_1px_4px_rgba(0,0,0,0.07)] overflow-hidden">
-                        {QUESTIONS.map((q, i) => {
+                        {questions.length > 0 ? questions.map((q, i) => {
                             const value = answers[q.id] ?? "";
                             const filled = value.trim().length > 0;
                             return (
-                                <div key={q.id} className={`px-5 py-4 ${i < QUESTIONS.length - 1 ? "border-b border-gray-100" : ""}`}>
+                                <div key={q.id} className={`px-5 py-4 ${i < questions.length - 1 ? "border-b border-gray-100" : ""}`}>
                                     {/* Label row */}
                                     <div className="flex items-center justify-between mb-2">
                                         <label className="text-[13px] font-semibold text-[#1A1A2E]">{q.label}</label>
@@ -138,7 +197,11 @@ export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }:
                                     )}
                                 </div>
                             );
-                        })}
+                        }) : (
+                            <div className="px-5 py-6 text-sm text-gray-500">
+                                No questions were provided for this book.
+                            </div>
+                        )}
                     </div>
 
                     {/* Photo upload card */}
@@ -149,7 +212,7 @@ export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }:
                         <div
                             onClick={() => photos.length < 2 && fileRef.current?.click()}
                             onDragOver={e => e.preventDefault()}
-                            onDrop={e => { e.preventDefault(); handleAddPhotos(e.dataTransfer.files); }}
+                            onDrop={e => { e.preventDefault(); void handleAddPhotos(e.dataTransfer.files); }}
                             className={`border-2 border-dashed rounded-xl flex flex-col items-center justify-center py-8 px-4 mb-3 transition-all ${photos.length < 2 ? "border-gray-200 hover:border-[#BF003A]/40 cursor-pointer hover:bg-[#FFF8F9]" : "border-gray-100 bg-gray-50 cursor-not-allowed opacity-50"
                                 }`}
                         >
@@ -163,14 +226,14 @@ export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }:
                             <p className="text-[11px] text-gray-400 mt-0.5 text-center">PNG, JPG up to 10MB each · Max 2 photos</p>
                         </div>
 
-                        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => e.target.files && handleAddPhotos(e.target.files)} />
+                        <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => { if (e.target.files) void handleAddPhotos(e.target.files); }} />
 
                         <div className="grid grid-cols-2 gap-2">
                             {[0, 1].map(i => (
                                 <div key={i} className="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center relative">
-                                    {photos[i] ? (
+                                    {photoPreviews[i] ? (
                                         <>
-                                            <Image src={photos[i]} alt={`Photo ${i + 1}`} fill style={{ objectFit: "cover" }} />
+                                            <Image src={photoPreviews[i]} alt={`Photo ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
                                             <button onClick={() => setPhotos(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors">
                                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                                             </button>
@@ -190,11 +253,13 @@ export default function QuestionnaireStep({ name, bookId, bookTitle, occasion }:
                 {/* Submit */}
                 <div className="mt-5">
                     <button
-                        onClick={() => setShowDone(true)}
-                        className="w-full py-4 rounded-xl text-white text-[14px] font-bold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all"
+                        type="button"
+                        onClick={() => void handleSubmit()}
+                        disabled={isSubmitting}
+                        className="w-full py-4 rounded-xl text-white text-[14px] font-bold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:cursor-not-allowed disabled:opacity-70"
                         style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
                     >
-                        Submit My Contribution
+                        {isSubmitting ? "Submitting..." : "Submit My Contribution"}
                     </button>
                 </div>
 

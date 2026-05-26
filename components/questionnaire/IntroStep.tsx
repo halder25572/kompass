@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useState } from "react";
 
 interface Props {
-    onContinue: (name: string, email: string) => void;
+    onContinue: (name: string, email: string) => void | Promise<void>;
+    recipientName?: string;
+    isSubmitting?: boolean;
+    errorMessage?: string;
 }
 
-export default function IntroStep({ onContinue }: Props) {
+export default function IntroStep({ onContinue, recipientName, isSubmitting = false, errorMessage }: Props) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
 
@@ -41,7 +44,7 @@ export default function IntroStep({ onContinue }: Props) {
                         <p className="text-[15px] sm:text-[16px] font-bold text-[#1A1A2E] leading-snug">
                             Enter your name and email to start<br />
                             your contribution for{" "}
-                            <span className="uppercase">RECIPIENT NAME.</span>
+                            <span className="uppercase">{recipientName || "the recipient"}.</span>
                         </p>
                     </div>
 
@@ -76,14 +79,23 @@ export default function IntroStep({ onContinue }: Props) {
                             Enter your name and email to start your page.
                         </p>
 
+                        {errorMessage ? (
+                            <p className="text-[12px] text-red-600 -mt-1">
+                                {errorMessage}
+                            </p>
+                        ) : null}
+
                         <button
-                            onClick={() => valid && onContinue(name, email)}
-                            disabled={!valid}
+                            onClick={() => {
+                                if (!valid || isSubmitting) return;
+                                void onContinue(name, email);
+                            }}
+                            disabled={!valid || isSubmitting}
                             className={`w-full py-3.5 rounded-xl bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[14px] font-bold transition-all ${valid ? "opacity-100 hover:opacity-90 active:scale-[0.98] cursor-pointer" : "opacity-60 cursor-not-allowed"
                                 }`}
                             style={{ background: "linear-gradient(102deg,#BF003A_0%,#59001C_100%)" }}
                         >
-                            Continue
+                            {isSubmitting ? "Checking in..." : "Continue"}
                         </button>
                     </div>
                 </div>

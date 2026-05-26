@@ -46,15 +46,40 @@ function getInitials(name: string) {
 }
 
 function getContributionName(contribution: Contribution) {
-  const rawName =
-    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).name ??
-    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).participant_name ??
-    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).contributor_name ??
-    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).full_name ??
-    (contribution as Contribution & { participant_name?: string; contributor_name?: string; full_name?: string; display_name?: string }).display_name ??
-    contribution.email;
+  const rawContribution = contribution as Contribution & {
+    participant_name?: string;
+    contributor_name?: string;
+    full_name?: string;
+    display_name?: string;
+    participant_status?: string;
+    user?: { name?: string; full_name?: string; display_name?: string; email?: string };
+    invitee?: { name?: string; full_name?: string; display_name?: string; email?: string };
+    participant?: { name?: string; full_name?: string; display_name?: string; email?: string };
+    contributor?: { name?: string; full_name?: string; display_name?: string; email?: string };
+  };
 
-  const normalized = typeof rawName === "string" ? rawName.trim() : "";
+  const candidates = [
+    rawContribution.name,
+    rawContribution.participant_name,
+    rawContribution.contributor_name,
+    rawContribution.full_name,
+    rawContribution.display_name,
+    rawContribution.user?.name,
+    rawContribution.user?.full_name,
+    rawContribution.user?.display_name,
+    rawContribution.invitee?.name,
+    rawContribution.invitee?.full_name,
+    rawContribution.invitee?.display_name,
+    rawContribution.participant?.name,
+    rawContribution.participant?.full_name,
+    rawContribution.participant?.display_name,
+    rawContribution.contributor?.name,
+    rawContribution.contributor?.full_name,
+    rawContribution.contributor?.display_name,
+    rawContribution.email,
+  ];
+
+  const normalized = candidates.find((value) => typeof value === "string" && value.trim().length > 0)?.trim() ?? "";
   const placeholderValues = new Set(["unknown", "n/a", "na", "null", "undefined", "-"]);
 
   if (normalized.length > 0 && !placeholderValues.has(normalized.toLowerCase())) {
@@ -64,38 +89,55 @@ function getContributionName(contribution: Contribution) {
   return "";
 }
 
+function getContributionStatus(contribution: Contribution) {
+  const rawContribution = contribution as Contribution & {
+    participant_status?: string;
+    status?: string;
+    participant?: { status?: string; participant_status?: string };
+    user?: { status?: string; participant_status?: string };
+    invitee?: { status?: string; participant_status?: string };
+    contributor?: { status?: string; participant_status?: string };
+  };
+
+  const statusCandidates = [
+    rawContribution.participant_status,
+    rawContribution.status,
+    rawContribution.participant?.participant_status,
+    rawContribution.participant?.status,
+    rawContribution.user?.participant_status,
+    rawContribution.user?.status,
+    rawContribution.invitee?.participant_status,
+    rawContribution.invitee?.status,
+    rawContribution.contributor?.participant_status,
+    rawContribution.contributor?.status,
+  ];
+
+  const normalized = statusCandidates.find((value) => typeof value === "string" && value.trim().length > 0)?.trim().toLowerCase();
+
+  if (normalized === "invited") return "Invited";
+  if (normalized === "pending") return "Pending";
+  if (normalized === "submitted") return "Submitted";
+
+  return "Pending";
+}
+
 function mapContributionToParticipant(contribution: Contribution): ParticipantView {
-  // Check common fields in preferred order then fallback to broader normalizer
-  const item: any = contribution as any;
-  const preferredKeys = ["name", "full_name", "contributor_name", "email"];
-
-  let foundKey: string | null = null;
-  let name = "";
-
-  for (const k of preferredKeys) {
-    const v = item[k];
-    if (typeof v === "string" && v.trim()) {
-      name = v.trim();
-      foundKey = k;
-      break;
-    }
-  }
-
-  if (!name) {
-    name = item.name || item.email || "Unknown";
-    foundKey = item.name ? "name" : item.email ? "email" : null;
-  }
-
-  // Log where the name was found to help debug inconsistent API shapes
+  // Log the raw contribution object so we can see the backend shape in the console.
   try {
-    console.log(`contribution:${contribution.id} name field -> ${foundKey ?? "(none)"}`);
+    console.log("Raw contribution object:", contribution);
   } catch {}
+
+  const resolvedName = getContributionName(contribution);
+  const name = resolvedName && resolvedName !== "Unknown"
+    ? resolvedName
+    : contribution.email || "Unknown";
+  const status = getContributionStatus(contribution);
 
   return {
     id: String(contribution.id),
     name,
-    initials: getInitials(name || item.email || "Unknown"),
-    status: normalizeStatus(contribution.status),
+    initials: getInitials(name || contribution.email || "Unknown"),
+    status,
     avatar: (contribution as Contribution & { avatar?: string | null }).avatar ?? null,
   };
 }
