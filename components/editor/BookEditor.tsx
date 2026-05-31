@@ -12,7 +12,6 @@ import { Theme, Categories } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
 import { useBookStore } from "@/store/useBookStore";
 import { fetchBookDetails, fetchBookPageStyles, fetchCoverPageStyles } from "@/services/api";
-import { exportBookToPDF } from "./utils/exportPdf";
 import CanvasPage from "./CanvasPage";
 import Toolbar from "./Toolbar";
 
@@ -144,9 +143,9 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [activePanel, setActivePanel] = useState<"upload"|"emoji"|"sticker"|"bg"|"layers"|null>(null);
-  const [isExporting, setIsExporting] = useState(false);
   const [coverStylesList, setCoverStylesList] = useState<any[]>([]);
   const [bookStylesList, setBookStylesList] = useState<any[]>([]);
+  const elementSequence = useRef(0);
 
   // ── Format state (per-book, user picks once) ──────────────────────────
   const [bookFormat, setBookFormat] = useState<BookFormat>("a4-landscape");
@@ -157,6 +156,16 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   const panelFileRef = useRef<HTMLInputElement>(null);
   const stageRefs   = useRef<(Konva.Stage | null)[]>([]);
   const hasHydratedPagesRef = useRef(false);
+
+  const nextElementId = (prefix: string) => {
+    elementSequence.current += 1;
+    return `${prefix}-${currentPage}-${elementSequence.current}`;
+  };
+
+  const nextPlacementOffset = () => {
+    const index = elementSequence.current % 5;
+    return (index - 2) * 14;
+  };
 
   // Inject picker CSS once
   useEffect(() => {
@@ -328,7 +337,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
   const handleImageClick = (src: string) => {
     addElement(currentPage, {
-      id: `img-${Date.now()}`, type: "image", src,
+      id: nextElementId("img"), type: "image", src,
       x: A4_WIDTH / 2 - 100, y: A4_HEIGHT / 2 - 100,
       width: 200, height: 200,
       zIndex: page?.elements.length || 0,
@@ -337,7 +346,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
   const handleAddText = () => {
     addElement(currentPage, {
-      id: `text-${Date.now()}`, type: "text",
+      id: nextElementId("text"), type: "text",
       text: "Click to edit text",
       x: A4_WIDTH / 2 - 100, y: A4_HEIGHT / 2 - 20,
       fontSize: 32, fontFamily: "Arial", fill: "#000000",
@@ -346,27 +355,29 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
     });
   };
 
-  const handleEmojiSelect = (emojiData: EmojiClickData) => {
-    addElement(currentPage, {
-      id: `text-${Date.now()}`, type: "text",
-      text: emojiData.emoji,
-      x: A4_WIDTH / 2 - 40 + (Math.random() * 80 - 40),
-      y: A4_HEIGHT / 2 - 40 + (Math.random() * 80 - 40),
-      fontSize: 72, fontFamily: "Arial", fill: "#000000",
-      width: 100, textAlign: "center",
-      zIndex: page?.elements.length || 0,
-    });
+  const emojiToTwemojiUrl = (emoji: string) => {
+    const codepoints = Array.from(emoji)
+      .map((character) => character.codePointAt(0)?.toString(16))
+      .filter((value): value is string => Boolean(value))
+      .join("-");
+
+    return `/api/image-proxy?url=${encodeURIComponent(`https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/svg/${codepoints}.svg`)}`;
   };
 
-  const handleExportPDF = async () => {
-    setIsExporting(true);
-    try {
-      await exportBookToPDF(pages, A4_WIDTH, A4_HEIGHT);
-    } catch (err) {
-      console.error("PDF export failed", err);
-    } finally {
-      setIsExporting(false);
-    }
+  const handleEmojiSelect = (emojiData: EmojiClickData) => {
+    const emojiSrc = emojiToTwemojiUrl(emojiData.emoji);
+    const offset = nextPlacementOffset();
+
+    addElement(currentPage, {
+      id: nextElementId("emoji"),
+      type: "image",
+      src: emojiSrc,
+      x: A4_WIDTH / 2 - 48 + offset,
+      y: A4_HEIGHT / 2 - 48 + offset,
+      width: 96,
+      height: 96,
+      zIndex: page?.elements.length || 0,
+    });
   };
 
   const pickerProps = {
@@ -442,14 +453,6 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
             <button onClick={redo} title="Redo (Ctrl+Y)"
               className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-black transition-all">
               <RedoSvg />
-            </button>
-            <span className="w-px h-5 bg-white/30 mx-1" />
-            <button
-              onClick={handleExportPDF}
-              disabled={isExporting}
-              className="flex items-center gap-2 bg-[#b5192c] hover:bg-[#9e1626] text-white font-semibold text-sm rounded-xl py-2 px-4 transition-all disabled:opacity-50"
-            >
-              {isExporting ? "Generating HD PDF…" : "Export to PDF"}
             </button>
           </div>
         </header>
@@ -633,6 +636,30 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                       height={A4_HEIGHT}
                       stageRef={(node) => { if (stageRefs.current) stageRefs.current[currentPage] = node; }}
                     />
+                  </div>
+
+                  <div
+                    aria-hidden="true"
+                    className="pointer-events-none absolute inset-0 overflow-hidden select-none"
+                    style={{ mixBlendMode: "multiply" }}
+                  >
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="whitespace-nowrap font-black tracking-[0.45em] text-[#7a1e3a] opacity-[0.18] rotate-[-28deg]"
+                        style={{ fontSize: Math.max(42, Math.round(Math.min(A4_WIDTH, A4_HEIGHT) * 0.11)) }}
+                      >
+                        MEIN HERZGESCHENK
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-0">
+                      {Array.from({ length: 4 }).map((_, index) => (
+                        <div key={index} className="flex items-center justify-center">
+                          <span className="rotate-[-28deg] whitespace-nowrap text-[18px] font-black tracking-[0.35em] text-[#7a1e3a] opacity-[0.10]">
+                            MEIN HERZGESCHENK
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   {/* Safe-area dashed border overlay */}

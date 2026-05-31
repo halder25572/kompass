@@ -17,8 +17,44 @@ import {
 } from "@/services/api";
 import type { Contribution, ContributionsListResponse, ContributionDetailResponse } from "@/types/api";
 import { useSession } from "next-auth/react";
+import { getContributionIdentityKey, getContributionDisplayName } from "@/lib/contributor";
 
 const EMPTY_CONTRIBUTIONS: Contribution[] = [];
+
+type SendBookInviteMutationContext = {
+	previousContributions?: ContributionsListResponse;
+};
+
+function getContributionSortValue(contribution: Contribution) {
+	const createdAt = typeof contribution.created_at === "string" ? Date.parse(contribution.created_at) : Number.NaN;
+	if (Number.isFinite(createdAt)) {
+		return createdAt;
+	}
+
+	return Number.isFinite(contribution.id) ? contribution.id : 0;
+}
+
+function dedupeContributionsByName(contributions: Contribution[]) {
+	const orderedKeys: string[] = [];
+	const contributionsByKey = new Map<string, Contribution>();
+
+	for (const contribution of contributions) {
+		const key = getContributionIdentityKey(contribution);
+		const existing = contributionsByKey.get(key);
+
+		if (!existing) {
+			orderedKeys.push(key);
+			contributionsByKey.set(key, contribution);
+			continue;
+		}
+
+		if (getContributionSortValue(contribution) >= getContributionSortValue(existing)) {
+			contributionsByKey.set(key, contribution);
+		}
+	}
+
+	return orderedKeys.map((key) => contributionsByKey.get(key)).filter((value): value is Contribution => Boolean(value));
+}
 
 export function useBooksQuery() {
 	return useQuery<BooksResponse, Error>({
@@ -63,8 +99,62 @@ export function useUpdateBookMutation(bookId: string | number | undefined) {
 export function useSendBookInviteMutation(bookId: string | number | undefined) {
     const queryClient = useQueryClient();
 
-    return useMutation<SendBookInviteResponse, Error, string>({
+    return useMutation<SendBookInviteResponse, Error, string, SendBookInviteMutationContext>({
         mutationFn: (email: string) => inviteByEmail(bookId as string | number, email),
+		onMutate: async (email: string) => {
+			if (!bookId) {
+				return { previousContributions: undefined };
+			}
+
+			await queryClient.cancelQueries({ queryKey: ["contributions", bookId] });
+
+			const previousContributions = queryClient.getQueryData<ContributionsListResponse>(["contributions", bookId]);
+			const trimmedEmail = email.trim();
+
+			if (!previousContributions?.data || !trimmedEmail) {
+				return { previousContributions };
+			}
+
+			const existingEmails = previousContributions.data.contributions.map((contribution) => contribution.email.trim().toLowerCase());
+
+			if (existingEmails.includes(trimmedEmail.toLowerCase())) {
+				return { previousContributions };
+			}
+
+			const nextParticipantNumber = previousContributions.data.contributions.length + 1;
+			const optimisticContribution: Contribution = {
+				id: -Date.now(),
+				name: "",
+				email: trimmedEmail,
+				status: "invited",
+				answers: [],
+				images: [],
+				participant_number: nextParticipantNumber,
+				created_at: new Date().toISOString(),
+			};
+
+			queryClient.setQueryData<ContributionsListResponse>(["contributions", bookId], {
+				...previousContributions,
+				data: {
+					...previousContributions.data,
+					contributions: [...previousContributions.data.contributions, optimisticContribution],
+					statistics: {
+						...previousContributions.data.statistics,
+						total: previousContributions.data.statistics.total + 1,
+						invited: previousContributions.data.statistics.invited + 1,
+					},
+				},
+			});
+
+			return { previousContributions };
+		},
+		onError: (error: Error, _email: string, context) => {
+			if (bookId && context?.previousContributions) {
+				queryClient.setQueryData(["contributions", bookId], context.previousContributions);
+			}
+
+			console.error("Invite failed:", error.message);
+		},
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["books"] });
             await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
@@ -119,6 +209,14 @@ function pickContributionList(payload: Record<string, unknown>): Contribution[] 
 	return [];
 }
 
+function normalizeContributionList(contributions: Contribution[]) {
+	return dedupeContributionsByName(contributions).map((contribution) => ({
+		...contribution,
+		name: getContributionDisplayName(contribution) || contribution.name,
+		contributor_key: getContributionIdentityKey(contribution),
+	}));
+}
+
 function normalizeStatistics(payload: Record<string, unknown>, contributions: Contribution[]) {
 	const stats =
 		payload.statistics && typeof payload.statistics === "object" && !Array.isArray(payload.statistics)
@@ -164,7 +262,7 @@ function normalizeContributionsSummary(
 
 	const candidateContributions = pickContributionList(candidate);
 	const rootContributions = pickContributionList(rootCandidate);
-	const contributions = candidateContributions.length > 0 ? candidateContributions : rootContributions;
+	const contributions = normalizeContributionList(candidateContributions.length > 0 ? candidateContributions : rootContributions);
 	const statistics = normalizeStatistics(candidate, contributions);
 
 	const resolvedBookId =

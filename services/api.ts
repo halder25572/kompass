@@ -828,7 +828,7 @@ export async function joinInviteByCode(code: string, name: string, email: string
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, email }),
+        body: JSON.stringify({ name, participant_name: name, contributor_name: name, email }),
     });
 
     const rawBody = await response.text();
@@ -905,6 +905,8 @@ export async function submitContribution(
             const formData = new FormData();
 
             formData.append("name", payload.name);
+            formData.append("participant_name", payload.name);
+            formData.append("contributor_name", payload.name);
             formData.append("email", payload.email);
 
             payload.answers.forEach((answer, index) => {

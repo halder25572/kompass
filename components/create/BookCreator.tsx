@@ -953,7 +953,7 @@ function Step4({
 }
 
 // ── Step 5: Review Setup ─────────────────────────
-function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onBack: () => void; coverId: number; bookDraft: BookDraft | null }) {
+function Step5({ onNext, onBack, coverId, bookDraft, isAuthenticated }: { onNext: () => void; onBack: () => void; coverId: number; bookDraft: BookDraft | null; isAuthenticated: boolean }) {
     const headingRef = useRef<HTMLDivElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
     const { data: coverPageStylesResponse, isLoading } = useCoverPageStylesQuery();
@@ -1033,30 +1033,46 @@ function Step5({ onNext, onBack, coverId, bookDraft }: { onNext: () => void; onB
                     </div>
                 </div>
             </div>
-            <BottomNav onBack={onBack} onNext={onNext} nextLabel="Invite Friends" />
+            <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 pb-2">
+                <p className="text-[12px] text-[#9CA3AF]">
+                    {isAuthenticated
+                        ? "You are already signed in. Continue to the invite step."
+                        : "Next you&apos;ll create your account before inviting friends."}
+                </p>
+            </div>
+            <BottomNav onBack={onBack} onNext={onNext} nextLabel={isAuthenticated ? "Invite Friends" : "Create Account"} />
         </>
     );
 }
 
 // ── Step 6: Create Account Gate ───────────────────────────
-function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, onAccountDraftChange }: {
+function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, onAccountDraftChange, isAuthenticated }: {
     onBack: () => void;
     onContinue: () => void;
     loginHref: string;
     onLoginNavigate: () => void;
     accountDraft: AccountDraft;
     onAccountDraftChange: (updates: Partial<AccountDraft>) => void;
+    isAuthenticated: boolean;
 }) {
     const { login } = useAuth();
     const registerMutation = useRegisterMutation();
     const headingRef = useRef<HTMLDivElement>(null);
     const formRef = useRef<HTMLDivElement>(null);
+    const autoAdvancedRef = useRef(false);
 
     useEffect(() => {
         gsap.set([headingRef.current, formRef.current], { opacity: 0, y: 20 });
         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.45 }).to(formRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.2");
     }, []);
+
+    useEffect(() => {
+        if (isAuthenticated && !autoAdvancedRef.current) {
+            autoAdvancedRef.current = true;
+            onContinue();
+        }
+    }, [isAuthenticated, onContinue]);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -1669,7 +1685,7 @@ export default function BookCreator() {
             {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} selectedThemeId={selectedThemeId} onSelectedThemeIdChange={setSelectedThemeId} />}
             {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} selectedCoverId={selectedCoverId} onSelectedCoverIdChange={setSelectedCoverId} />}
             {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={bookDetailsForm.selectedSubTab} questions={questionsBySubOccasion} onQuestionsChange={setQuestionsBySubOccasion} />}
-            {step === 5 && <Step5 onNext={() => setStep(isAuthenticated ? 7 : 6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} />}
+            {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} isAuthenticated={isAuthenticated} />}
             {step === 6 && (
                 <Step6
                     onBack={() => setStep(5)}
@@ -1678,6 +1694,7 @@ export default function BookCreator() {
                     onLoginNavigate={persistWizardState}
                     accountDraft={accountDraft}
                     onAccountDraftChange={(updates) => setAccountDraft((prev) => ({ ...prev, ...updates }))}
+                    isAuthenticated={isAuthenticated}
                 />
             )}
             {step === 7 && (

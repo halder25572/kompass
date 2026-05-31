@@ -15,9 +15,11 @@ import { CSS } from "@dnd-kit/utilities";
 import { useBookContributionsQuery, useBookDetailsQuery, useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
 import type { Contribution } from "@/types/api";
+import { getContributionDisplayName, getContributionIdentityName, getContributorRouteKeyFromName } from "@/lib/contributor";
 
 type ParticipantView = {
   id: string;
+  routeKey: string;
   name: string;
   initials: string;
   status: string;
@@ -127,16 +129,18 @@ function mapContributionToParticipant(contribution: Contribution): ParticipantVi
     console.log("Raw contribution object:", contribution);
   } catch {}
 
-  const resolvedName = getContributionName(contribution);
-  const name = resolvedName && resolvedName !== "Unknown"
+  const resolvedName = getContributionDisplayName(contribution);
+  const identityName = resolvedName && resolvedName !== "Unknown"
     ? resolvedName
     : contribution.email || "Unknown";
+  const routeKeyFromName = getContributorRouteKeyFromName(getContributionIdentityName(contribution));
   const status = getContributionStatus(contribution);
 
   return {
     id: String(contribution.id),
-    name,
-    initials: getInitials(name || contribution.email || "Unknown"),
+    routeKey: routeKeyFromName || String(contribution.id),
+    name: identityName,
+    initials: getInitials(identityName || contribution.email || "Unknown"),
     status,
     avatar: (contribution as Contribution & { avatar?: string | null }).avatar ?? null,
   };
@@ -167,6 +171,10 @@ function formatProgress(progress: number | string | null | undefined) {
   }
 
   return "--";
+}
+
+function getWhatsAppShareUrl(inviteLink: string) {
+  return `https://wa.me/?text=${encodeURIComponent(`Join my memory book: ${inviteLink}`)}`;
 }
 
 const previewPages = [
@@ -529,25 +537,38 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             <h2 className="text-sm font-medium mb-4">Invite Contributors</h2>
 
             {/* SHARE LINK */}
-            <div className="flex items-center border rounded-lg overflow-hidden mb-3">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch border rounded-lg overflow-hidden mb-3">
               <input
-                className="flex-1 p-2 text-xs outline-none"
+                className="flex-1 p-2 text-xs outline-none min-w-0"
                   value={inviteLink || "Invite link will appear here"}
                 readOnly
               />
-              <button
-                  type="button"
-                  disabled={!inviteLink}
-                  onClick={async () => {
-                    if (!inviteLink || typeof navigator === "undefined") return;
-                    await navigator.clipboard.writeText(inviteLink);
-                    toast.success("Invite link copied");
-                  }}
-                onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                  className="p-2 bg-linear-to-r from-[#BF003A] to-[#59001C] text-white disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                <Copy size={14} />
-              </button>
+              <div className="flex items-stretch gap-2 border-t border-[#f0edf1] bg-white p-2 sm:border-t-0 sm:border-l sm:p-1.5">
+                <button
+                    type="button"
+                    disabled={!inviteLink}
+                    onClick={async () => {
+                      if (!inviteLink || typeof navigator === "undefined") return;
+                      await navigator.clipboard.writeText(inviteLink);
+                      toast.success("Invite link copied");
+                    }}
+                  onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
+                    className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-[#BF003A] to-[#59001C] px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  <Copy size={14} />
+                </button>
+
+                <a
+                  href={inviteLink ? getWhatsAppShareUrl(inviteLink) : "#"}
+                  target="_blank"
+                  rel="noreferrer"
+                  onMouseEnter={onBtnEnter as any}
+                  onMouseLeave={onBtnLeave as any}
+                  className={`inline-flex items-center justify-center rounded-xl px-4 py-2 text-[13px] font-semibold text-white transition-opacity ${inviteLink ? "bg-[#25D366] hover:opacity-90" : "pointer-events-none bg-[#9CA3AF] opacity-60"}`}
+                >
+                  Share on WhatsApp
+                </a>
+              </div>
             </div>
 
             <InviteContributors bookId={bookId} />
@@ -599,7 +620,7 @@ function SortableParticipantRow({ p, bookId }: { p: any; bookId: string }) {
   const router = useRouter();
 
   return (
-    <div ref={setNodeRef} style={style} className="participant-row flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/dashboard/${bookId}/participant/${p.id}`)}>
+    <div ref={setNodeRef} style={style} className="participant-row flex items-center justify-between hover:bg-gray-50 p-2 rounded-lg transition-colors cursor-pointer" onClick={() => router.push(`/dashboard/${bookId}/participant/${encodeURIComponent(p.routeKey)}`)}>
       <div className="flex items-center gap-3">
         <button type="button" {...attributes} {...listeners} className="mb-px h-9 w-9 shrink-0 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] flex items-center justify-center">
           <DragHandleIcon />

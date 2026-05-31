@@ -6,6 +6,7 @@ import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { useBookContributionsQuery, useContributionQuery } from "@/features/books/hooks/services";
 import type { Contribution, ContributionDetailResponse } from "@/types/api";
+import { getContributionIdentityKey, getContributorRouteKeyFromName, getDefaultContributorPhotos, isNumericContributorParam } from "@/lib/contributor";
 
 const fallbackQuestions = [
   "My life motto:",
@@ -73,14 +74,36 @@ function pickContributionData(
   };
 }
 
+function findContributionByRouteKey(contributions: Contribution[] | undefined, participantId: string) {
+  if (!contributions || contributions.length === 0) {
+    return null;
+  }
+
+  const normalizedParticipantId = decodeURIComponent(participantId).trim();
+
+  return contributions.find((contribution) => {
+    const identityKey = getContributionIdentityKey(contribution);
+    if (identityKey === `id:${normalizedParticipantId}`) {
+      return true;
+    }
+
+    const routeKey = getContributorRouteKeyFromName(contribution.name);
+    return routeKey.length > 0 && routeKey === normalizedParticipantId;
+  }) ?? null;
+}
+
 export default function ParticipantPage() {
   const params = useParams<{ id: string; participantId: string }>();
   const bookId = params?.id;
   const participantId = params?.participantId;
   const { contributions: bookContributions } = useBookContributionsQuery(bookId);
-  const { data: detailData, isLoading: isDetailLoading, isError: isDetailError, error: detailError, refetch } = useContributionQuery(participantId);
+  const listContribution = useMemo(
+    () => findContributionByRouteKey(bookContributions, participantId),
+    [bookContributions, participantId]
+  );
+  const shouldFetchDetail = !listContribution && isNumericContributorParam(participantId);
+  const { data: detailData, isLoading: isDetailLoading, isError: isDetailError, error: detailError, refetch } = useContributionQuery(shouldFetchDetail ? participantId : undefined);
 
-  const listContribution = bookContributions?.find((contribution) => String(contribution.id) === String(participantId));
   const contribution = useMemo(
     () => pickContributionData(detailData?.data ?? null, listContribution),
     [detailData?.data, listContribution]
@@ -90,7 +113,7 @@ export default function ParticipantPage() {
   const showError = isDetailError && !contribution;
   const participantName = contribution?.name ?? "Participant";
   const answers = contribution?.answers ?? [];
-  const images = contribution?.images ?? [];
+  const images = contribution?.images?.length ? contribution.images : getDefaultContributorPhotos(2);
   const hasDetails = Boolean(contribution && (contribution.name || contribution.email || contribution.answers.length > 0 || contribution.images.length > 0));
   const answerRowCount = Math.max(fallbackQuestions.length, answers.length);
 

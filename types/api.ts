@@ -467,6 +467,8 @@ export interface GetInviteResponse {
 // ── Contribution Interfaces ─────────────────────────────────────────────────
 export interface SubmitContributionPayload {
     name: string;
+    participant_name?: string;
+    contributor_name?: string;
     email: string;
     answers: string[];
     images: File[] | string[];
@@ -478,6 +480,8 @@ export interface SubmitContributionResponse {
     data: {
         id: number;
         name: string;
+        participant_name?: string;
+        contributor_name?: string;
         email: string;
         answers: string[];
         images: string[];
@@ -493,6 +497,8 @@ export interface ContributionDetailResponse {
     data: {
         id: number;
         name: string;
+        participant_name?: string;
+        contributor_name?: string;
         email: string;
         answers: string[];
         images: string[];
@@ -507,11 +513,14 @@ export interface ContributionDetailResponse {
 export interface Contribution {
     id: number;
     name: string;
+    participant_name?: string;
+    contributor_name?: string;
     email: string;
     status?: string;
     answers: string[];
     images: string[];
     participant_number?: number; // optional explicit participant slot (1-based)
+    contributor_key?: string;
     created_at?: string;
 }
 

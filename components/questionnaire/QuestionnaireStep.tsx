@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useBookDetailsQuery } from "@/features/books/hooks/services";
 import { submitContribution } from "@/services/api";
+import { getDefaultContributorPhotos } from "@/lib/contributor";
 
 type QuestionItem = {
     id: string;
@@ -100,6 +101,8 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
             setIsSubmitting(true);
             const formData = new FormData();
             formData.append("name", name);
+            formData.append("participant_name", name);
+            formData.append("contributor_name", name);
             formData.append("email", email);
 
             questions.forEach((question, index) => {
@@ -109,6 +112,12 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
             photos.forEach((file, index) => {
                 formData.append(`images[${index}]`, file);
             });
+
+            if (photos.length === 0) {
+                getDefaultContributorPhotos(2).forEach((image, index) => {
+                    formData.append(`images[${index}]`, image);
+                });
+            }
 
             await submitContribution(inviterId, formData);
             setShowDone(true);
@@ -152,6 +161,9 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
                     <h1 className="text-[20px] sm:text-[22px] font-extrabold text-[#1A1A2E] tracking-tight">
                         Questionnaire <span className="uppercase">Birthday</span>
                     </h1>
+                    <p className="mt-2 max-w-3xl text-[12px] leading-5 text-gray-400">
+                        We have already made some suggestions for the questions. But all questions can easily be edited, removed or rewritten — even in any language you want. You can also add extra questions.
+                    </p>
                 </div>
                 <p className="text-[13px] text-gray-400 mb-6 ml-7.25">
                     Your contribution for{" "}

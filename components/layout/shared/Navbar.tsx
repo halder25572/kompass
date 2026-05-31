@@ -92,6 +92,10 @@ export default function Navbar() {
     { label: t.pricing, href: "/pricing-delivery" },
   ];
 
+  const mobileAuthLink = isAuthenticated
+    ? { label: t.dashboard, href: "/dashboard" }
+    : { label: t.login, href: "/login" };
+
   return (
     <nav className="w-full sticky top-0 z-50" style={{ background: "#F5F5F5" }}>
       <div
@@ -349,14 +353,24 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* ── Mobile hamburger ── */}
-        <button
-          className="md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{ background: "none", border: "none", cursor: "pointer", color: "#374151" }}
-        >
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div className="md:hidden flex items-center gap-2 shrink-0">
+          <Link
+            href={mobileAuthLink.href}
+            className="inline-flex items-center justify-center rounded-full px-3 py-2 text-xs font-semibold text-white shadow-sm whitespace-nowrap"
+            style={{ background: "linear-gradient(102deg,#BF003A 0%,#59001C 100%)" }}
+            onClick={() => setMenuOpen(false)}
+          >
+            {mobileAuthLink.label}
+          </Link>
+
+          <button
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{ background: "none", border: "none", cursor: "pointer", color: "#374151" }}
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </div>
 
       {/* ── Mobile menu ── */}
@@ -389,6 +403,24 @@ export default function Navbar() {
               </Link>
             );
           })}
+
+          <div className="mt-3 grid grid-cols-2 gap-3">
+            <Link
+              href={isAuthenticated ? "/dashboard" : "/login"}
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex items-center justify-center rounded-xl px-4 py-3 text-sm font-semibold text-white"
+              style={{ background: "linear-gradient(102deg,#BF003A 0%,#59001C 100%)" }}
+            >
+              {isAuthenticated ? t.dashboard : t.login}
+            </Link>
+            <Link
+              href="/create"
+              onClick={() => setMenuOpen(false)}
+              className="inline-flex items-center justify-center rounded-xl border border-[#E5E7EB] px-4 py-3 text-sm font-semibold text-[#374151]"
+            >
+              {t.createBook}
+            </Link>
+          </div>
 
           {/* Mobile lang + actions */}
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 12 }}>

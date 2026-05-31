@@ -28,6 +28,8 @@ export default function VerifyOtpPage() {
       leftSubtitle: "Gib den OTP-Code aus deiner E-Mail ein, um fortzufahren.",
       title: "OTP eingeben",
       subtitle: "Wir haben einen 4-stelligen Code an deine E-Mail gesendet",
+      helperText: "Wir senden dir ein Einmalpasswort (OTP), wenn deine E-Mail-Adresse registriert ist.",
+      spamNote: "Du siehst die E-Mail nicht? Bitte pruefe auch deinen Spam- oder Junk-Ordner.",
       verifying: "Wird verifiziert...",
       verifyOtp: "OTP bestaetigen",
       didntReceive: "Code nicht erhalten?",
@@ -41,6 +43,8 @@ export default function VerifyOtpPage() {
       leftSubtitle: "Enter the OTP sent to your email to continue.",
       title: "Enter OTP",
       subtitle: "We’ve sent a 4-digit code to your email",
+      helperText: "We will send a one-time password (OTP) if your email address is registered.",
+      spamNote: "Don't see the email? Please also check your spam or junk folder.",
       verifying: "Verifying...",
       verifyOtp: "Verify OTP",
       didntReceive: "Didn’t receive the code?",
@@ -198,6 +202,15 @@ export default function VerifyOtpPage() {
                   className="w-14 h-14 text-center text-lg rounded-lg bg-gray-200 outline-none"
                 />
               ))}
+            </div>
+
+            <div className="mb-5 space-y-1 text-center">
+              <p className="text-xs text-gray-500 leading-relaxed">
+                {text.helperText}
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {text.spamNote}
+              </p>
             </div>
 
             {error ? <p className="mb-4 text-sm text-red-600">{error}</p> : null}

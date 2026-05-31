@@ -147,12 +147,20 @@ const DashboardPageMain: FC = () => {
 
         {/* Page header */}
         <div className="flex items-start justify-between gap-4 mb-6">
-          <div ref={headerLogoRef}>
+          <div ref={headerLogoRef} className="flex flex-col items-start gap-2">
             <Link href="/">
               <div className="flex items-center gap-2">
                 <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
                 <span className="font-semibold text-lg">Mein HerzGeschenk</span>
               </div>
+            </Link>
+
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6b7280] hover:text-[#BF003A] transition-colors"
+            >
+              <span aria-hidden="true">←</span>
+              Back to home page
             </Link>
           </div>
 

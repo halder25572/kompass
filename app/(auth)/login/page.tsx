@@ -35,6 +35,7 @@ export default function LoginPage() {
       welcome: "Willkommen zurueck",
       title: "Melde dich in deinem Konto an",
       subtitle: "Mach dort weiter, wo du aufgehort hast",
+      backHome: "Zur Startseite",
       email: "E-Mail",
       emailPlaceholder: "jane@example.com",
       password: "Passwort",
@@ -52,6 +53,7 @@ export default function LoginPage() {
       welcome: "Welcome back",
       title: "Log in to your account",
       subtitle: "Pick up where you left off",
+      backHome: "Back to home page",
       email: "Email",
       emailPlaceholder: "jane@example.com",
       password: "Password",
@@ -139,6 +141,13 @@ export default function LoginPage() {
 
           {/* Welcome */}
           <p className="text-sm text-[#7A1E3A] mb-2"> {text.welcome}</p>
+
+          <div className="mb-4">
+            <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-medium text-gray-500 hover:text-[#BF003A] transition-colors">
+              <span aria-hidden="true">←</span>
+              {text.backHome}
+            </Link>
+          </div>
 
           <h1 className="text-2xl font-bold text-gray-900 mb-1">
             {text.title}
