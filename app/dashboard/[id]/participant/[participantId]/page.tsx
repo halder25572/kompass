@@ -96,6 +96,7 @@ export default function ParticipantPage() {
   const params = useParams<{ id: string; participantId: string }>();
   const bookId = params?.id;
   const participantId = params?.participantId;
+  const contributorsListHref = bookId ? `/dashboard/progress?bookId=${encodeURIComponent(bookId)}` : "/dashboard";
   const { contributions: bookContributions } = useBookContributionsQuery(bookId);
   const listContribution = useMemo(
     () => findContributionByRouteKey(bookContributions, participantId),
@@ -120,13 +121,21 @@ export default function ParticipantPage() {
   return (
     <div className="min-h-screen bg-[#f7f7fb] px-4 py-5 md:px-8">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center gap-2 mb-6">
+        <div className="mb-5 flex items-center justify-between gap-3">
           {/* Logo */}
           <Link href="/">
             <div className="flex items-center gap-2">
               <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
               <span className="font-semibold text-lg">Mein HerzGeschenk</span>
             </div>
+          </Link>
+
+          <Link
+            href={contributorsListHref}
+            className="inline-flex items-center gap-2 rounded-full border border-[#e5e7eb] bg-white px-4 py-2 text-xs font-semibold text-[#374151] shadow-sm transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
+          >
+            <span aria-hidden="true">←</span>
+            Back to contributors
           </Link>
         </div>
 

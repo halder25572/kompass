@@ -26,7 +26,7 @@ export function getContributorRouteKeyFromName(name?: string | null) {
   return normalized
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
-}
+};
 
 export function getContributionDisplayName(contribution: ContributionLike) {
   const candidates = [

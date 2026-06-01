@@ -733,9 +733,13 @@ function Step2({ onNext, onBack, subTab, questions, onQuestionsChange }: {
                             <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                         </svg>
                     </div>
-                    <h1 className="text-[18px] font-bold text-[#1a1a2e]">Questionnaire <span className="uppercase">{subTab}</span></h1>
+                    <div>
+                        <h1 className="text-[18px] font-bold text-[#1a1a2e]">Questionnaire <span className="uppercase">{subTab}</span></h1>
+                        <p className="mt-1 text-[12px] leading-5 text-[#9CA3AF] max-w-3xl">
+                            We have already made some suggestions for the questions. But all questions can easily be edited, removed or rewritten — even in any language you want. You can also add extra questions.
+                        </p>
+                    </div>
                 </div>
-                <h3 className="font-semibold mt-2">Create and manage the questions for invited contributors.</h3>
                 <p className="text-[12px] text-[#9CA3AF] mb-5">Add, edit, or delete questions. No answers are collected in this step.</p>
                 <div ref={cardRef} className="bg-white rounded-2xl border border-[#f0edf1] overflow-hidden mb-4">
                     <div className="divide-y divide-[#f9fafb]">

@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useBookDetailsQuery } from "@/features/books/hooks/services";
 import { submitContribution } from "@/services/api";
@@ -45,6 +46,7 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
     const [showDone, setShowDone] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
+    const queryClient = useQueryClient();
 
     // If parent didn't provide bookTitle/occasion, fetch book details using bookId
     const { data: bookDetails } = useBookDetailsQuery(bookId);
@@ -120,6 +122,19 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
             }
 
             await submitContribution(inviterId, formData);
+
+            await queryClient.invalidateQueries({
+                queryKey: bookId ? ["contributions", bookId] : ["contributions"],
+            });
+
+            if (bookId) {
+                await queryClient.refetchQueries({ queryKey: ["contributions", bookId] });
+            }
+
+            if (bookId) {
+                await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
+            }
+
             setShowDone(true);
             toast.success("Your contribution has been sent.");
         } catch (error) {

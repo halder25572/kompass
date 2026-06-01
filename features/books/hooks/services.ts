@@ -156,6 +156,8 @@ export function useSendBookInviteMutation(bookId: string | number | undefined) {
 			console.error("Invite failed:", error.message);
 		},
         onSuccess: async () => {
+            await queryClient.invalidateQueries({ queryKey: ["contributions", bookId] });
+			await queryClient.refetchQueries({ queryKey: ["contributions", bookId] });
             await queryClient.invalidateQueries({ queryKey: ["books"] });
             await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
         },
