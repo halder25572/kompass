@@ -393,7 +393,7 @@ export default function HomePage() {
               Why This Gift Is Special
             </h2>
             <p className="text-[15px] text-gray-500 max-w-120 mx-auto leading-relaxed">
-             It&apos;s not just a book. It&apos;s a collection of real moments, created together by the people who matter most.
+              It&apos;s not just a book. It&apos;s a collection of real moments, created together by the people who matter most.
             </p>
           </div>
           <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-5">
