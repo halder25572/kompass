@@ -25,6 +25,8 @@ interface Props {
     bookTitle?: string;
     recipientName?: string;
     occasion?: string;
+    /** True when the check-in API confirmed this person has already submitted once. */
+    isAlreadySubmitted?: boolean;
 }
 
 function questionToItem(question: string, index: number): QuestionItem {
@@ -39,12 +41,13 @@ function questionToItem(question: string, index: number): QuestionItem {
     };
 }
 
-export default function QuestionnaireStep({ inviterId, name, email, bookId, questions: inviteQuestions, bookTitle, recipientName, occasion }: Props) {
+export default function QuestionnaireStep({ inviterId, name, email, bookId, questions: inviteQuestions, bookTitle, recipientName, occasion, isAlreadySubmitted }: Props) {
     const [answers, setAnswers] = useState<Record<string, string>>({});
     const [photos, setPhotos] = useState<File[]>([]);
     const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
     const [showDone, setShowDone] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showNoPhotoConfirm, setShowNoPhotoConfirm] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
     const queryClient = useQueryClient();
 
@@ -80,7 +83,22 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
 
     const handleAddPhotos = async (files: FileList) => {
         const remaining = Math.max(0, 2 - photos.length);
-        const selectedFiles = Array.from(files).slice(0, remaining);
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+        const selectedFiles: File[] = [];
+
+        for (const file of Array.from(files)) {
+            if (selectedFiles.length >= remaining) break;
+            if (!allowedTypes.includes(file.type)) {
+                toast.error(`File "${file.name}" is not a supported format. Please upload PNG, JPG, WEBP, or GIF.`);
+                continue;
+            }
+            if (file.size > 10 * 1024 * 1024) {
+                toast.error(`File "${file.name}" exceeds the 10MB size limit.`);
+                continue;
+            }
+            selectedFiles.push(file);
+        }
+
         setPhotos(prev => [...prev, ...selectedFiles]);
     };
 
@@ -93,12 +111,7 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
         };
     }, [photos]);
 
-    const handleSubmit = async () => {
-        if (!inviterId && inviterId !== 0) {
-            toast.error("Invite information is missing.");
-            return;
-        }
-
+    const doSubmit = async () => {
         try {
             setIsSubmitting(true);
             const formData = new FormData();
@@ -106,6 +119,13 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
             formData.append("participant_name", name);
             formData.append("contributor_name", name);
             formData.append("email", email);
+
+            // If this person already submitted before, signal the backend to replace
+            // rather than append images. Common field names used by Laravel-based APIs:
+            if (isAlreadySubmitted) {
+                formData.append("_method", "PUT");
+                formData.append("replace_images", "1");
+            }
 
             questions.forEach((question, index) => {
                 formData.append(`answers[${index}]`, answers[question.id] ?? "");
@@ -116,9 +136,22 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
             });
 
             if (photos.length === 0) {
-                getDefaultContributorPhotos(2).forEach((image, index) => {
-                    formData.append(`images[${index}]`, image);
-                });
+                // Fetch each placeholder URL as a real image file so the API
+                // receives an actual multipart file rather than a plain-text URL.
+                const placeholderUrls = getDefaultContributorPhotos(2);
+                await Promise.all(
+                    placeholderUrls.map(async (url, index) => {
+                        try {
+                            const res = await fetch(url);
+                            const blob = await res.blob();
+                            const ext = blob.type.split("/")[1] ?? "jpg";
+                            const file = new File([blob], `placeholder_${index}.${ext}`, { type: blob.type });
+                            formData.append(`images[${index}]`, file);
+                        } catch {
+                            // If the fetch fails (e.g. offline), skip this placeholder silently
+                        }
+                    })
+                );
             }
 
             await submitContribution(inviterId, formData);
@@ -145,6 +178,27 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
         }
     };
 
+    const handleSubmit = async () => {
+        if (!inviterId && inviterId !== 0) {
+            toast.error("Invite information is missing.");
+            return;
+        }
+
+        const allowedTypes = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+        const hasInvalidPhoto = photos.some(file => !allowedTypes.includes(file.type));
+        if (hasInvalidPhoto) {
+            toast.error("Please use pictures with one of the following formats: jpg, png, webp, gif.");
+            return;
+        }
+
+        if (photos.length === 0) {
+            setShowNoPhotoConfirm(true);
+            return;
+        }
+
+        await doSubmit();
+    };
+
     const inputClass = "w-full border border-gray-200 rounded-lg px-3 py-2 text-[13px] text-gray-700 outline-none focus:border-[#BF003A] focus:ring-1 focus:ring-[#BF003A]/10 transition-all placeholder-gray-300 bg-white";
 
     return (
@@ -165,6 +219,23 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
                         </div>
                     </Link>
                 </header>
+
+                {/* Re-submission warning */}
+                {isAlreadySubmitted && (
+                    <div className="mt-5 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+                        <svg className="mt-0.5 shrink-0 text-amber-500" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                            <line x1="12" y1="9" x2="12" y2="13" />
+                            <line x1="12" y1="17" x2="12.01" y2="17" />
+                        </svg>
+                        <div>
+                            <p className="text-[13px] font-semibold text-amber-800">You have already submitted a contribution.</p>
+                            <p className="mt-0.5 text-[12px] leading-relaxed text-amber-700">
+                                Submitting again will update your previous entry. Your new photos will replace the old ones.
+                            </p>
+                        </div>
+                    </div>
+                )}
 
                 {/* Title */}
                 <div className="flex items-center gap-2.5 mb-1 mt-6.25">
@@ -250,7 +321,7 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
                                 </svg>
                             </div>
                             <p className="text-[12px] font-medium text-gray-600 text-center">Drop photos here or click to browse</p>
-                            <p className="text-[11px] text-gray-400 mt-0.5 text-center">PNG, JPG up to 10MB each · Max 2 photos</p>
+                            <p className="text-[11px] text-gray-400 mt-0.5 text-center">PNG, JPG, WEBP, GIF up to 10MB each · Max 2 photos</p>
                         </div>
 
                         <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={e => { if (e.target.files) void handleAddPhotos(e.target.files); }} />
@@ -291,6 +362,40 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
                 </div>
 
             </main>
+
+            {/* No-Photo Confirmation Modal */}
+            {showNoPhotoConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center px-5" style={{ background: "rgba(0,0,0,0.35)" }}>
+                    <div className="bg-white rounded-2xl w-full max-w-sm px-8 py-8 flex flex-col items-center text-center shadow-[0_24px_64px_rgba(0,0,0,0.18)]">
+                        {/* Icon */}
+                        <div className="w-12 h-12 rounded-full bg-[#FFF0F3] border border-[#BF003A]/30 flex items-center justify-center mb-4">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#BF003A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><polyline points="21 15 16 10 5 21" />
+                            </svg>
+                        </div>
+                        <h3 className="text-[17px] font-extrabold text-[#1A1A2E] mb-2">No photos added</h3>
+                        <p className="text-[13px] text-gray-500 mb-6 leading-relaxed">
+                            Are you sure you don&apos;t want to add any pictures?
+                        </p>
+                        <div className="flex gap-3 w-full">
+                            <button
+                                onClick={() => setShowNoPhotoConfirm(false)}
+                                className="flex-1 py-3 rounded-xl border border-gray-200 text-[13px] font-semibold text-gray-600 cursor-pointer hover:bg-gray-50 active:scale-[0.98] transition-all"
+                            >
+                                No, add photos
+                            </button>
+                            <button
+                                onClick={() => { setShowNoPhotoConfirm(false); void doSubmit(); }}
+                                disabled={isSubmitting}
+                                className="flex-1 py-3 rounded-xl text-white text-[13px] font-semibold cursor-pointer hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-70"
+                                style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
+                            >
+                                {isSubmitting ? "Submitting..." : "Yes, submit"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Thank You Modal */}
             {showDone && (

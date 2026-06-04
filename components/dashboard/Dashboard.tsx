@@ -46,7 +46,7 @@ const DashboardPageMain: FC = () => {
   const activityRef = useRef<HTMLDivElement>(null);
   const { data: booksResponse, isLoading, isError } = useBooksQuery();
 
-  
+
 
   const books: Book[] = (booksResponse?.data ?? []).map((book, index) => mapBookItemToBook(book, index));
 

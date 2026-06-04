@@ -6,7 +6,7 @@ import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { useBookContributionsQuery, useContributionQuery } from "@/features/books/hooks/services";
 import type { Contribution, ContributionDetailResponse } from "@/types/api";
-import { getContributionIdentityKey, getContributorRouteKeyFromName, getDefaultContributorPhotos, isNumericContributorParam } from "@/lib/contributor";
+import { getContributionIdentityKey, getContributorRouteKeyFromName, getContributorRouteKey, getDefaultContributorPhotos, isNumericContributorParam } from "@/lib/contributor";
 
 const fallbackQuestions = [
   "My life motto:",
@@ -82,11 +82,19 @@ function findContributionByRouteKey(contributions: Contribution[] | undefined, p
   const normalizedParticipantId = decodeURIComponent(participantId).trim();
 
   return contributions.find((contribution) => {
+    // 1. Match by numeric DB id (fallback for old links)
     const identityKey = getContributionIdentityKey(contribution);
     if (identityKey === `id:${normalizedParticipantId}`) {
       return true;
     }
 
+    // 2. Match by composite name+email route key (primary, new format)
+    const compositeKey = getContributorRouteKey(contribution);
+    if (compositeKey && compositeKey === normalizedParticipantId) {
+      return true;
+    }
+
+    // 3. Fallback: match by name-only slug (legacy links)
     const routeKey = getContributorRouteKeyFromName(contribution.name);
     return routeKey.length > 0 && routeKey === normalizedParticipantId;
   }) ?? null;

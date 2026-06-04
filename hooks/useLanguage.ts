@@ -18,6 +18,7 @@ export function useLanguage() {
     if (typeof window === "undefined") return;
 
     const stored = normalizeLanguage(window.localStorage.getItem(LANGUAGE_KEY));
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLanguageState(stored);
     document.documentElement.lang = stored;
 

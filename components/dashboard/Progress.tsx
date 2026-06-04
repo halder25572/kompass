@@ -15,7 +15,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useBookContributionsQuery, useBookDetailsQuery, useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
 import type { Contribution } from "@/types/api";
-import { getContributionDisplayName, getContributionIdentityName, getContributorRouteKeyFromName } from "@/lib/contributor";
+import { getContributionDisplayName, getContributionIdentityName, getContributorRouteKeyFromName, getContributorRouteKey } from "@/lib/contributor";
 
 type ParticipantView = {
   id: string;
@@ -133,12 +133,15 @@ function mapContributionToParticipant(contribution: Contribution): ParticipantVi
   const identityName = resolvedName && resolvedName !== "Unknown"
     ? resolvedName
     : contribution.email || "Unknown";
+  // Use composite name+email route key so two contributors sharing the same
+  // email (e.g. grandparent assisted by their child) get distinct dashboard pages.
+  const compositeRouteKey = getContributorRouteKey(contribution);
   const routeKeyFromName = getContributorRouteKeyFromName(getContributionIdentityName(contribution));
   const status = getContributionStatus(contribution);
 
   return {
     id: String(contribution.id),
-    routeKey: routeKeyFromName || String(contribution.id),
+    routeKey: compositeRouteKey || routeKeyFromName || String(contribution.id),
     name: identityName,
     initials: getInitials(identityName || contribution.email || "Unknown"),
     status,
@@ -340,17 +343,23 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
 
   const mappedParticipants = useMemo(() => contributions.map(mapContributionToParticipant), [contributions]);
 
+  useEffect(() => {
+    setParticipants(mappedParticipants);
+  }, [mappedParticipants]);
+
   const handleDragStart = ({ active }: any) => setActiveId(active.id as string);
   const handleDragEnd = ({ active, over }: any) => {
     setActiveId(null);
     if (!over || active.id === over.id) return;
-    const prev = mappedParticipants;
-    const oldIndex = prev.findIndex((p) => p.id === active.id);
-    const newIndex = prev.findIndex((p) => p.id === over.id);
+    const oldIndex = participants.findIndex((p) => p.id === active.id);
+    const newIndex = participants.findIndex((p) => p.id === over.id);
     if (oldIndex < 0 || newIndex < 0) return;
-    const next = arrayMove(prev, oldIndex, newIndex);
+    const next = arrayMove(participants, oldIndex, newIndex);
 
-    // Persist order to server (no optimistic UI mutation)
+    // Update local state immediately for optimistic UI
+    setParticipants(next);
+
+    // Persist order to server
     try {
       const payload: any = { participant_order: next.map((p, i) => ({ participant_id: p.id, participant_number: i + 1 })) };
       updateMutation.mutateAsync(payload).then(() => {
@@ -358,15 +367,22 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
       }).catch((err) => {
         console.error("Failed to persist participant order:", err);
         toast.error(err instanceof Error ? err.message : "Failed to save order");
+        // Rollback to query value on error
+        setParticipants(mappedParticipants);
       });
     } catch (err) {
       console.error(err);
       toast.error("Failed to save participant order");
+      setParticipants(mappedParticipants);
     }
   };
 
+  const hasAnimated = useRef(false);
+
   useEffect(() => {
     if (!mappedParticipants || mappedParticipants.length === 0) return;
+    if (hasAnimated.current) return;
+    hasAnimated.current = true;
 
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
 
@@ -416,12 +432,22 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
 
       {/* HEADER */}
       <div ref={headerRef} className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-        <Link href="/">
-          <div className="flex items-center gap-2">
-            <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
-            <span className="font-semibold text-lg">Mein HerzGeschenk</span>
-          </div>
-        </Link>
+        <div className="flex items-center gap-4">
+          <Link href="/">
+            <div className="flex items-center gap-2">
+              <Image src="/images/logo.jpg" width={28} height={28} alt="logo" />
+              <span className="font-semibold text-lg">Mein HerzGeschenk</span>
+            </div>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className="inline-flex items-center gap-1.5 rounded-full border border-[#e5e7eb] bg-white px-3.5 py-1.5 text-xs font-semibold text-[#6b7280] shadow-sm transition-colors hover:border-[#BF003A] hover:text-[#BF003A]"
+          >
+            <span aria-hidden="true">←</span>
+            Back to dashboard
+          </Link>
+        </div>
 
         <div className="flex gap-3">
           <button
@@ -489,15 +515,15 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
                     Try again
                   </button>
                 </div>
-              ) : mappedParticipants.length === 0 ? (
+              ) : participants.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-gray-200 bg-gray-50 p-4 text-sm text-gray-500">
                   No contributions yet. Invite contributors to get started.
                 </div>
               ) : (
                 <DndContext sensors={sensors} collisionDetection={(closestCenter as any)} onDragStart={handleDragStart} onDragEnd={handleDragEnd} onDragCancel={() => setActiveId(null)}>
-                  <SortableContext items={mappedParticipants.map((p) => p.id)} strategy={verticalListSortingStrategy}>
+                  <SortableContext items={participants.map((p) => p.id)} strategy={verticalListSortingStrategy}>
                     <div className="flex flex-col gap-1">
-                      {mappedParticipants.map((p) => (
+                      {participants.map((p) => (
                         <SortableParticipantRow key={p.id} p={p} bookId={bookId} />
                       ))}
                     </div>

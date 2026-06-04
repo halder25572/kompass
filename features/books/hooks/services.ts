@@ -64,13 +64,14 @@ export function useBooksQuery() {
 	});
 }
 
+
 export function useBookDetailsQuery(bookId: string | number | undefined) {
 	return useQuery<BookDetailResponse, Error>({
 		queryKey: ["book", bookId],
 		queryFn: () => fetchBookDetails(bookId as string | number),
 		enabled: Boolean(bookId),
 		retry: false,
-	});	
+	});
 }
 
 export function useCreateBookMutation() {
@@ -92,15 +93,16 @@ export function useUpdateBookMutation(bookId: string | number | undefined) {
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ["books"] });
 			await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
+			await queryClient.invalidateQueries({ queryKey: ["contributions", bookId] });
 		},
 	});
 }
 
 export function useSendBookInviteMutation(bookId: string | number | undefined) {
-    const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-    return useMutation<SendBookInviteResponse, Error, string, SendBookInviteMutationContext>({
-        mutationFn: (email: string) => inviteByEmail(bookId as string | number, email),
+	return useMutation<SendBookInviteResponse, Error, string, SendBookInviteMutationContext>({
+		mutationFn: (email: string) => inviteByEmail(bookId as string | number, email),
 		onMutate: async (email: string) => {
 			if (!bookId) {
 				return { previousContributions: undefined };
@@ -115,9 +117,15 @@ export function useSendBookInviteMutation(bookId: string | number | undefined) {
 				return { previousContributions };
 			}
 
-			const existingEmails = previousContributions.data.contributions.map((contribution) => contribution.email.trim().toLowerCase());
+			// Build a prospective optimistic contribution so we can compute its
+			// composite identity key (name+email). This lets two people who share
+			// the same email address (e.g. grandparent helped by their child) each
+			// show up as a separate entry in the dashboard.
+			const prospective: Pick<Contribution, "name" | "email"> = { name: "", email: trimmedEmail };
+			const prospectiveKey = getContributionIdentityKey(prospective);
+			const existingKeys = previousContributions.data.contributions.map((c) => getContributionIdentityKey(c));
 
-			if (existingEmails.includes(trimmedEmail.toLowerCase())) {
+			if (existingKeys.includes(prospectiveKey)) {
 				return { previousContributions };
 			}
 
@@ -155,13 +163,13 @@ export function useSendBookInviteMutation(bookId: string | number | undefined) {
 
 			console.error("Invite failed:", error.message);
 		},
-        onSuccess: async () => {
-            await queryClient.invalidateQueries({ queryKey: ["contributions", bookId] });
+		onSuccess: async () => {
+			await queryClient.invalidateQueries({ queryKey: ["contributions", bookId] });
 			await queryClient.refetchQueries({ queryKey: ["contributions", bookId] });
-            await queryClient.invalidateQueries({ queryKey: ["books"] });
-            await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
-        },
-    });
+			await queryClient.invalidateQueries({ queryKey: ["books"] });
+			await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
+		},
+	});
 }
 
 export type BookContributionsSummary = {
@@ -297,7 +305,7 @@ export function useBookContributionsQuery(bookId: string | number | undefined) {
 	// Log contributions shape for debugging inconsistent API responses
 	try {
 		console.log("useBookContributionsQuery contributions:", contributions, "length:", contributions.length);
-	} catch {}
+	} catch { }
 
 	return {
 		...query,

@@ -50,11 +50,11 @@ export default function ProfileSection() {
             return;
         }
 
-        const isValidType = ["image/jpeg", "image/png", "image/webp"].includes(file.type);
+        const isValidType = ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type);
         const maxSizeInBytes = 5 * 1024 * 1024;
 
         if (!isValidType) {
-            toast.error("Please upload JPG, PNG, or WEBP image.");
+            toast.error("Please upload JPG, PNG, WEBP, or GIF image.");
             event.target.value = "";
             return;
         }
@@ -159,7 +159,7 @@ export default function ProfileSection() {
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept="image/png,image/jpeg,image/webp"
+                                accept="image/png,image/jpeg,image/webp,image/gif"
                                 onChange={handleAvatarChange}
                                 className="hidden"
                             />

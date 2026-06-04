@@ -16,7 +16,7 @@ import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/servic
 import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
 import { useCreateBookMutation } from "@/features/books/hooks/services";
 import { useRegisterMutation } from "@/features/auth/components/hooks/services";
-import { updateBookUser } from "@/services/api";
+import { updateBookUser, inviteByEmail } from "@/services/api";
 // DnD removed from Invite Friends step; ordering handled in Participants panel
 
 function renderOccasionIcon(name: string) {
@@ -1540,7 +1540,9 @@ export default function BookCreator() {
             throw new Error("Book title is required.");
         }
 
-        if (createdInviteLink) return;
+        if (createdInviteLink) {
+            return { inviteLink: createdInviteLink, bookId: createBookMutation.data?.data?.id };
+        }
 
         setIsGeneratingInviteLink(true);
         try {
@@ -1589,7 +1591,7 @@ export default function BookCreator() {
             }
 
             setCreatedInviteLink(inviteLink);
-            return inviteLink;
+            return { inviteLink, bookId: result.data?.id };
         } finally {
             setIsGeneratingInviteLink(false);
         }
@@ -1718,7 +1720,20 @@ export default function BookCreator() {
                         if (isLoading) { toast.info("Checking login status..."); return; }
                         if (!isAuthenticated) { return; }
                         try {
-                            await ensureInviteLink();
+                            const result = await ensureInviteLink();
+                            const bookId = result?.bookId;
+
+                            if (bookId !== undefined && bookId !== null) {
+                                const friendsWithEmail = inviteDraft.friends.filter(f => f.email?.trim());
+                                for (const friend of friendsWithEmail) {
+                                    try {
+                                        await inviteByEmail(bookId, friend.email.trim(), friend.name?.trim());
+                                    } catch (e) {
+                                        console.error(`Failed to invite ${friend.email}:`, e);
+                                    }
+                                }
+                            }
+
                             if (typeof window !== "undefined") window.sessionStorage.removeItem(CREATE_WIZARD_STORAGE_KEY);
                             toast.success("Invite link ready");
                             setShowSuccess(true);

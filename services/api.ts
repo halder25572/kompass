@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
     RegisterPayload,
     LoginPayload,
@@ -645,6 +645,7 @@ function buildBookFormData(payload: CreateBookPayload | UpdateBookPayload): Form
 
     Object.entries(payload as unknown as Record<string, unknown>).forEach(([key, value]) => {
         if (key === "questions") return;
+        if (key === "participant_order") return;
         if (key === "sub_occasion_id" && (value === "" || value === 0 || value === null)) return;
         appendBookField(formData, key, value);
     });
@@ -654,6 +655,16 @@ function buildBookFormData(payload: CreateBookPayload | UpdateBookPayload): Form
         questions.forEach((question, index) => {
             if (typeof question === "string" && question.trim()) {
                 formData.append(`questions[${index}]`, question);
+            }
+        });
+    }
+
+    const participantOrder = (payload as any).participant_order;
+    if (Array.isArray(participantOrder)) {
+        participantOrder.forEach((item, index) => {
+            if (item && typeof item === "object") {
+                formData.append(`participant_order[${index}][participant_id]`, String(item.participant_id));
+                formData.append(`participant_order[${index}][participant_number]`, String(item.participant_number));
             }
         });
     }
@@ -725,7 +736,7 @@ export async function updateBookUser(
 }
 
 // invite by email
-export async function inviteByEmail(bookId: string | number, email: string): Promise<SendBookInviteResponse> {
+export async function inviteByEmail(bookId: string | number, email: string, name?: string): Promise<SendBookInviteResponse> {
     if (!bookId && bookId !== 0) throw new Error("Book ID is required.");
     if (!email?.trim()) throw new Error("Email is required.");
 
@@ -736,7 +747,10 @@ export async function inviteByEmail(bookId: string | number, email: string): Pro
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ email: email.trim() }),
+        body: JSON.stringify({
+            email: email.trim(),
+            ...(name?.trim() ? { name: name.trim() } : {}),
+        }),
     });
 
     const result = await safeParseJson<SendBookInviteResponse>(response);

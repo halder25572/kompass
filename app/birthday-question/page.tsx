@@ -16,6 +16,7 @@ export default function ContributorPage() {
   const [userEmail, setUserEmail] = useState("");
   const [checkInError, setCheckInError] = useState<string>("");
   const [hasAttemptedCheckIn, setHasAttemptedCheckIn] = useState(false);
+  const [isAlreadySubmitted, setIsAlreadySubmitted] = useState(false);
   const searchParams = useSearchParams();
 
   const code = searchParams.get("code");
@@ -50,8 +51,10 @@ export default function ContributorPage() {
       }
 
       const resolvedInviterId = response.data.inviter_id;
+      const alreadySubmitted = response.data.is_already_submitted === true;
 
       setInviterId(resolvedInviterId);
+      setIsAlreadySubmitted(alreadySubmitted);
       setStep("questionnaire");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Check-in failed. Please try again.";
@@ -90,5 +93,5 @@ export default function ContributorPage() {
     return <div className="min-h-screen flex items-center justify-center text-sm text-red-600">Unable to load check-in details.</div>;
   }
 
-  return <QuestionnaireStep inviterId={inviterId} name={userName} email={userEmail} bookId={bookId} questions={inviteQuestions} bookTitle={inviteDetails?.data?.book_title} recipientName={recipientName} occasion={inviteDetails?.data?.occasion ?? undefined} />;
+  return <QuestionnaireStep inviterId={inviterId} name={userName} email={userEmail} bookId={bookId} questions={inviteQuestions} bookTitle={inviteDetails?.data?.book_title} recipientName={recipientName} occasion={inviteDetails?.data?.occasion ?? undefined} isAlreadySubmitted={isAlreadySubmitted} />;
 }

@@ -349,9 +349,9 @@ export interface CreateBookResponse {
 }
 
 export interface UpdateBookPayload {
-    book_title: string;
-    book_subtitle: string | null;
-    recipient_name: string;
+    book_title?: string;
+    book_subtitle?: string | null;
+    recipient_name?: string;
     occasion?: string | null;
     sub_occasion?: string | null;
     occasion_id?: number | null;
@@ -360,6 +360,7 @@ export interface UpdateBookPayload {
     cover_page_style_id?: number | null;
     questions?: string[] | null;
     final_pdf_path?: string | null;
+    participant_order?: Array<{ participant_id: string | number; participant_number: number }> | null;
 }
 
 export interface UpdateBookResponse {

@@ -281,7 +281,7 @@ export default function HomePage() {
 
           <div className="flex flex-col sm:flex-row gap-2.5 w-full max-w-115 mt-1">
             <Link href="/create"
-              className="flex-1 inline-flex items-center justify-center gap-2 text-white text-[14px] font-bold py-3.5 px-5 rounded-[10px] no-underline transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+              className="flex-1 inline-flex items-center hover:bg-white justify-center gap-2 text-white text-[14px] font-bold py-3.5 px-5 rounded-[10px] no-underline transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
               style={{ background: "linear-gradient(102deg,#BF003A 0%,#7A1020 100%)", boxShadow: "0 4px 20px rgba(191,0,58,0.30)" }}>
               {heroText.startButton}
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
