@@ -3,10 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { useBookContributionsQuery, useContributionQuery } from "@/features/books/hooks/services";
 import type { Contribution, ContributionDetailResponse } from "@/types/api";
-import { getContributionIdentityKey, getContributorRouteKeyFromName, getContributorRouteKey, getDefaultContributorPhotos, isNumericContributorParam } from "@/lib/contributor";
+import { DEFAULT_CONTRIBUTOR_PHOTOS, getContributionIdentityKey, getContributorRouteKeyFromName, getContributorRouteKey, isNumericContributorParam } from "@/lib/contributor";
 
 const fallbackQuestions = [
   "My life motto:",
@@ -122,9 +123,40 @@ export default function ParticipantPage() {
   const showError = isDetailError && !contribution;
   const participantName = contribution?.name ?? "Participant";
   const answers = contribution?.answers ?? [];
-  const images = contribution?.images?.length ? contribution.images : getDefaultContributorPhotos(2);
+  const images = contribution?.images?.length ? contribution.images : DEFAULT_CONTRIBUTOR_PHOTOS.slice(0, 2);
   const hasDetails = Boolean(contribution && (contribution.name || contribution.email || contribution.answers.length > 0 || contribution.images.length > 0));
   const answerRowCount = Math.max(fallbackQuestions.length, answers.length);
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownloadAllPhotos = async () => {
+    if (images.length === 0) {
+      toast.error("No photos to download");
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      for (let i = 0; i < images.length; i++) {
+        const proxyUrl = `/api/download-image?url=${encodeURIComponent(images[i])}`;
+        const response = await fetch(proxyUrl);
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = objectUrl;
+        a.download = `${participantName}-photo-${i + 1}.jpg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(objectUrl);
+        await new Promise((r) => setTimeout(r, 400));
+      }
+      toast.success("Photos downloaded successfully");
+    } catch {
+      toast.error("Failed to download photos");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f7fb] px-4 py-5 md:px-8">
@@ -253,8 +285,13 @@ export default function ParticipantPage() {
                 </div>
               )}
             </div>
-            <button className="w-full cursor-pointer rounded-lg bg-linear-to-r from-[#BF003A] to-[#59001C] py-2.5 text-sm font-semibold text-white">
-              Download All Photos
+            <button
+              type="button"
+              onClick={() => void handleDownloadAllPhotos()}
+              disabled={isDownloading}
+              className="w-full cursor-pointer rounded-lg bg-linear-to-r from-[#BF003A] to-[#59001C] py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isDownloading ? "Downloading..." : "Download All Photos"}
             </button>
           </div>
         </div>

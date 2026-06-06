@@ -17,7 +17,6 @@ import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/servic
 import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
 import { useCreateBookMutation } from "@/features/books/hooks/services";
 import { useRegisterMutation } from "@/features/auth/components/hooks/services";
-// import { updateBookUser, inviteByEmail } from "@/services/api";
 import { inviteByEmail } from "@/services/api";
 import { getCleanInviteLink } from "@/lib/utils";
 // DnD removed from Invite Friends step; ordering handled in Participants panel
@@ -454,6 +453,7 @@ type BookDraft = {
     bookTitle: string;
     bookSubtitle: string;
     recipientName: string;
+    deadline: string;
     occasion: string;
     subTab: string;
     occasionId: number | null;
@@ -464,6 +464,7 @@ type BookDetailsForm = {
     bookTitle: string;
     bookSubtitle: string;
     recipientName: string;
+    deadline: string;
     selectedOccasion: string | null;
     selectedOccasionId: number | null;
     selectedSubTab: string;
@@ -536,8 +537,11 @@ function Step1({
     const selectedOccasionLabel = selectedOccasionRecord?.name ?? "";
     const selectedItems = selectedOccasionRecord?.sub_occasions ?? [];
 
+    const todayMin = useMemo(() => new Date().toISOString().slice(0, 10), []);
+
     const hasBookTitleError = attemptedContinue && !form.bookTitle.trim();
     const hasRecipientError = attemptedContinue && !form.recipientName.trim();
+    const hasDeadlineError = attemptedContinue && !form.deadline.trim();
     const hasOccasionError = attemptedContinue && !form.selectedOccasion;
     const hasSubTabError = attemptedContinue && !form.selectedSubTab;
 
@@ -564,7 +568,7 @@ function Step1({
     const handleContinue = () => {
         setAttemptedContinue(true);
 
-        if (!form.bookTitle.trim() || !form.recipientName.trim() || !form.selectedOccasion || !form.selectedSubTab) {
+        if (!form.bookTitle.trim() || !form.recipientName.trim() || !form.deadline.trim() || !form.selectedOccasion || !form.selectedSubTab) {
             return;
         }
 
@@ -572,6 +576,7 @@ function Step1({
             bookTitle: form.bookTitle,
             bookSubtitle: form.bookSubtitle,
             recipientName: form.recipientName,
+            deadline: form.deadline,
             occasion: form.selectedOccasion,
             subTab: form.selectedSubTab,
             occasionId: form.selectedOccasionId,
@@ -634,11 +639,22 @@ function Step1({
                         <input value={form.bookSubtitle} onChange={e => onChange({ bookSubtitle: e.target.value })} placeholder={ph.subtitle}
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
                     </div>
-                    <div className="mb-5">
+                    <div className="mb-4">
                         <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Recipient Name</label>
                         <input value={form.recipientName} onChange={e => onChange({ recipientName: e.target.value })} placeholder={ph.recipient}
                             className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all" />
                         {hasRecipientError && <p className="mt-1.5 text-[12px] text-red-500">Recipient name is required.</p>}
+                    </div>
+                    <div className="mb-5">
+                        <label className="text-[14px] font-semibold text-[#374151] block mb-1.5">Deadline</label>
+                        <input
+                            type="date"
+                            min={todayMin}
+                            value={form.deadline}
+                            onChange={(e) => onChange({ deadline: e.target.value })}
+                            className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[14px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                        />
+                        {hasDeadlineError && <p className="mt-1.5 text-[12px] text-red-500">Please set a deadline.</p>}
                     </div>
                 </div>
             </div>
@@ -1617,6 +1633,7 @@ export default function BookCreator() {
         bookTitle: "",
         bookSubtitle: "",
         recipientName: "",
+        deadline: "",
         selectedOccasion: null,
         selectedOccasionId: null,
         selectedSubTab: "Birthday",
@@ -1658,6 +1675,7 @@ export default function BookCreator() {
         bookTitle: bookDetailsForm.bookTitle,
         bookSubtitle: bookDetailsForm.bookSubtitle,
         recipientName: bookDetailsForm.recipientName,
+        deadline: bookDetailsForm.deadline,
         occasion: bookDetailsForm.selectedOccasion ?? "",
         subTab: bookDetailsForm.selectedSubTab,
         occasionId: bookDetailsForm.selectedOccasionId,
@@ -1722,6 +1740,7 @@ export default function BookCreator() {
                 book_title: bookDraft.bookTitle,
                 book_subtitle: bookDraft.bookSubtitle,
                 recipient_name: bookDraft.recipientName,
+                expire_date: bookDraft.deadline,
                 occasion_id: bookDraft.occasionId || null,
                 sub_occasion_id: bookDraft.subOccasionId || null,
                 book_page_style_id: resolvedThemeId,
@@ -1730,7 +1749,9 @@ export default function BookCreator() {
             });
 
             // const inviteLink = getCleanInviteLink(result.data?.invite_link || (result as { invite_link?: string }).invite_link || "");
-            const inviteLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
+            // const inviteLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
+            const rawLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
+            const inviteLink = getCleanInviteLink(rawLink)
 
             if (!inviteLink) {
                 throw new Error("Invite link missing from create book response.");
@@ -1821,6 +1842,7 @@ export default function BookCreator() {
                     bookTitle: parsed.bookDraft.bookTitle ?? "",
                     bookSubtitle: parsed.bookDraft.bookSubtitle ?? "",
                     recipientName: parsed.bookDraft.recipientName ?? "",
+                    deadline: parsed.bookDraft.deadline ?? "",
                     selectedOccasion: parsed.bookDraft.occasion || null,
                     selectedOccasionId: parsed.bookDraft.occasionId ?? null,
                     selectedSubTab: parsed.bookDraft.subTab ?? "Birthday",

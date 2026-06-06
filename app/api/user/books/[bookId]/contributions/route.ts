@@ -28,6 +28,8 @@ export async function GET(request: Request, context: RouteContext) {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            "Accept": "application/json",
+            "User-Agent": "Mozilla/5.0",
             ...(authorization ? { Authorization: authorization } : {}),
         },
     });

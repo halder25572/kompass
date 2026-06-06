@@ -838,7 +838,12 @@ export async function fetchBookContributions(
 export async function joinInviteByCode(code: string, name: string, email: string): Promise<CheckInResponse> {
     if (!code) throw new Error("Check-in code is required.");
 
-    const response = await fetch(`/api/contribute/check-in/${code}`, {
+    const checkInPath = code
+        .split("/")
+        .filter(Boolean)
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+    const response = await fetch(`/api/contribute/check-in/${checkInPath}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -872,7 +877,12 @@ export async function fetchInviteDetails(code: string): Promise<GetInviteRespons
     }
 
     const token = getAuthToken();
-    const response = await fetch(`/api/invite/${code}`, {
+    const invitePath = code
+        .split("/")
+        .filter(Boolean)
+        .map((segment) => encodeURIComponent(segment))
+        .join("/");
+    const response = await fetch(`/api/invite/${invitePath}`, {
         method: "GET",
         headers: {
             "Accept": "application/json",

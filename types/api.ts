@@ -328,6 +328,7 @@ export interface CreateBookPayload {
     sub_occasion_id: number | null;
     book_page_style_id: number | null;
     cover_page_style_id: number | null;
+    expire_date?: string;
     questions?: string[] | null;
 }
 
@@ -358,6 +359,7 @@ export interface UpdateBookPayload {
     sub_occasion_id?: number | null;
     book_page_style_id?: number | null;
     cover_page_style_id?: number | null;
+    expire_date?: string;
     questions?: string[] | null;
     final_pdf_path?: string | null;
     participant_order?: Array<{ participant_id: string | number; participant_number: number }> | null;

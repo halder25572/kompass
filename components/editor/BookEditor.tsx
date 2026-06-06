@@ -10,10 +10,14 @@ import { useParams } from "next/navigation";
 import Konva from "konva";
 import { Theme, Categories } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
-import { useBookStore } from "@/store/useBookStore";
+import { useBookStore, type BookPage } from "@/store/useBookStore";
 import { fetchBookDetails, fetchBookPageStyles, fetchCoverPageStyles } from "@/services/api";
+import { useBookContributionsQuery } from "@/features/books/hooks/services";
+import { getContributionDisplayName } from "@/lib/contributor";
+import type { Contribution } from "@/types/api";
 import CanvasPage from "./CanvasPage";
 import Toolbar from "./Toolbar";
+import { loadBookEditorState, persistBookEditorState } from "./utils/persistEditorState";
 
 // ── Next.js SSR-safe dynamic import (picker uses window) ─────────────────
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
@@ -119,6 +123,65 @@ type BookEditorProps = {
   bookId?: string;
 };
 
+type ActiveContributor = {
+  id: string;
+  name: string;
+};
+
+type EditorPhoto = {
+  id: string;
+  src: string;
+};
+
+function createEditorPhoto(src: string): EditorPhoto {
+  return {
+    id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    src,
+  };
+}
+
+function readImageFiles(files: FileList | File[], onLoad: (src: string, index: number) => void) {
+  Array.from(files)
+    .filter((file) => file.type.startsWith("image/"))
+    .forEach((file, index) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const src = event.target?.result;
+        if (typeof src === "string") onLoad(src, index);
+      };
+      reader.readAsDataURL(file);
+    });
+}
+
+const CONTRIBUTOR_STATUS_STYLE = {
+  Submitted: "bg-green-500 text-white",
+  Pending: "bg-purple-500 text-white",
+  Invited: "bg-gray-200 text-gray-600",
+};
+
+function normalizeContributionStatus(status?: string) {
+  if (!status) return "Pending";
+  const normalized = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  if (normalized === "Invited") return "Invited";
+  if (normalized === "Submitted") return "Submitted";
+  return "Pending";
+}
+
+function getContributorLabel(contribution: Contribution) {
+  const name = getContributionDisplayName(contribution);
+  if (name && name !== "Unknown") return name;
+  return contribution.email || "Unknown";
+}
+
+function findContributorPageId(pages: BookPage[], contributor: ActiveContributor) {
+  const matched = pages.find((page) => {
+    if (page.contributorId != null && String(page.contributorId) === contributor.id) return true;
+    if (page.contributorName && page.contributorName === contributor.name) return true;
+    return false;
+  });
+  return matched?.id ?? null;
+}
+
 export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   const params = useParams();
   const routeParamBookId = typeof params?.id === "string"
@@ -141,11 +204,18 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
     bringForward, sendBackward,
   } = useBookStore();
 
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
-  const [activePanel, setActivePanel] = useState<"upload"|"emoji"|"sticker"|"bg"|"layers"|null>(null);
+  const [uploadedImages, setUploadedImages] = useState<EditorPhoto[]>([]);
+  const [activePanel, setActivePanel] = useState<"upload"|"emoji"|"sticker"|"bg"|"layers"|"contributors"|"content"|null>(null);
+  const [contentTab, setContentTab] = useState<"photo"|"text"|"emoji">("photo");
+  const [addContentText, setAddContentText] = useState("");
+  const [contentPhotos, setContentPhotos] = useState<EditorPhoto[]>([]);
+  const [isPhotoDragOver, setIsPhotoDragOver] = useState(false);
+  const [activeContributor, setActiveContributor] = useState<ActiveContributor | null>(null);
   const [coverStylesList, setCoverStylesList] = useState<any[]>([]);
   const [bookStylesList, setBookStylesList] = useState<any[]>([]);
   const elementSequence = useRef(0);
+
+  const { contributions, isLoading: isContributionsLoading } = useBookContributionsQuery(bookId || undefined);
 
   // ── Format state (per-book, user picks once) ──────────────────────────
   const [bookFormat, setBookFormat] = useState<BookFormat>("a4-landscape");
@@ -154,6 +224,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   const A4_HEIGHT = fmt.height;
 
   const panelFileRef = useRef<HTMLInputElement>(null);
+  const contentFileRef = useRef<HTMLInputElement>(null);
   const stageRefs   = useRef<(Konva.Stage | null)[]>([]);
   const hasHydratedPagesRef = useRef(false);
 
@@ -203,23 +274,12 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
     if (!bookId) return;
 
     if (!hasHydratedPagesRef.current) {
-      const savedBookStateRaw = localStorage.getItem(`book-editor-state:${bookId}`);
-      if (savedBookStateRaw) {
-        try {
-          const savedBookState = JSON.parse(savedBookStateRaw) as {
-            pages?: typeof pages;
-            currentPage?: number;
-          };
-
-          if (Array.isArray(savedBookState.pages) && savedBookState.pages.length > 0) {
-            useBookStore.setState({
-              pages: savedBookState.pages,
-              currentPage: savedBookState.currentPage ?? 1,
-            });
-          }
-        } catch (error) {
-          console.warn("Failed to restore saved book state", error);
-        }
+      const savedBookState = loadBookEditorState(bookId);
+      if (savedBookState) {
+        useBookStore.setState({
+          pages: savedBookState.pages,
+          currentPage: savedBookState.currentPage,
+        });
       }
 
       hasHydratedPagesRef.current = true;
@@ -305,43 +365,70 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   useEffect(() => {
     if (!bookId || !hasHydratedPagesRef.current) return;
 
-    localStorage.setItem(
-      `book-editor-state:${bookId}`,
-      JSON.stringify({
-        pages,
-        currentPage,
-      })
-    );
+    const timeoutId = window.setTimeout(() => {
+      persistBookEditorState(bookId, pages, currentPage);
+    }, 500);
+
+    return () => window.clearTimeout(timeoutId);
   }, [bookId, pages, currentPage]);
 
   const scale       = zoom / 100;
   const totalPages  = pages.length;
   const spreadLabel = `Page ${currentPage} of ${totalPages}`;
   const page        = pages.find((p) => p.id === currentPage);
+  const activeContributorPageId = activeContributor ? findContributorPageId(pages, activeContributor) : null;
+  const isContributorPageHighlighted = activeContributorPageId != null && activeContributorPageId === currentPage;
 
   function togglePanel(name: typeof activePanel) {
     setActivePanel(prev => prev === name ? null : name);
   }
 
   const handlePanelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    Array.from(e.target.files ?? []).forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const src = ev.target?.result as string;
-        setUploadedImages(prev => [src, ...prev]);
-      };
-      reader.readAsDataURL(file);
+    readImageFiles(e.target.files ?? [], (src) => {
+      setUploadedImages((prev) => [createEditorPhoto(src), ...prev]);
     });
     e.target.value = "";
   };
 
-  const handleImageClick = (src: string) => {
+  const addImageToCanvas = (src: string, placementIndex = 0, photoId?: string) => {
+    const spread = placementIndex * 28;
     addElement(currentPage, {
-      id: nextElementId("img"), type: "image", src,
-      x: A4_WIDTH / 2 - 100, y: A4_HEIGHT / 2 - 100,
-      width: 200, height: 200,
-      zIndex: page?.elements.length || 0,
+      id: photoId ? `img-${photoId}` : nextElementId("img"),
+      type: "image",
+      src,
+      x: A4_WIDTH / 2 - 100 + spread,
+      y: A4_HEIGHT / 2 - 100 + spread,
+      width: 200,
+      height: 200,
+      zIndex: (page?.elements.length || 0) + placementIndex,
     });
+  };
+
+  const handleImageClick = (src: string) => {
+    addImageToCanvas(src);
+  };
+
+  const handleContentPhotoFiles = (files: FileList | File[]) => {
+    readImageFiles(files, (src, index) => {
+      const photo = createEditorPhoto(src);
+      setContentPhotos((prev) => [photo, ...prev]);
+      addImageToCanvas(src, index, photo.id);
+    });
+  };
+
+  const removeUploadedPhoto = (photoId: string) => {
+    setUploadedImages((prev) => prev.filter((photo) => photo.id !== photoId));
+  };
+
+  const removeContentPhoto = (photoId: string) => {
+    setContentPhotos((prev) => prev.filter((photo) => photo.id !== photoId));
+    const elementId = `img-${photoId}`;
+    const hasElement = useBookStore.getState().pages
+      .find((bookPage) => bookPage.id === currentPage)
+      ?.elements.some((element) => element.id === elementId);
+    if (hasElement) {
+      deleteElement(currentPage, elementId);
+    }
   };
 
   const handleAddText = () => {
@@ -353,6 +440,31 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
       width: 200, textAlign: "center",
       zIndex: page?.elements.length || 0,
     });
+  };
+
+  const handleAddContentText = () => {
+    const textValue = addContentText.trim() || "Click to edit text";
+    addElement(currentPage, {
+      id: nextElementId("text"), type: "text",
+      text: textValue,
+      x: A4_WIDTH / 2 - 100, y: A4_HEIGHT / 2 - 20,
+      fontSize: 32, fontFamily: "Arial", fill: "#000000",
+      width: 200, textAlign: "center",
+      zIndex: page?.elements.length || 0,
+    });
+    setAddContentText("");
+  };
+
+  const handleSelectContributor = (contribution: Contribution) => {
+    const contributor = {
+      id: String(contribution.id),
+      name: getContributorLabel(contribution),
+    };
+    setActiveContributor(contributor);
+    const matchedPageId = findContributorPageId(pages, contributor);
+    if (matchedPageId != null) {
+      setCurrentPage(matchedPageId);
+    }
   };
 
   const emojiToTwemojiUrl = (emoji: string) => {
@@ -477,17 +589,11 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                   <input ref={panelFileRef} type="file" accept="image/*" multiple className="hidden" onChange={handlePanelUpload} />
                 </div>
                 <div className="flex-1 overflow-y-auto px-3 pb-3">
-                  {uploadedImages.length === 0
-                    ? <EmptyPhotos />
-                    : <div className="grid grid-cols-2 gap-1.5">
-                        {uploadedImages.map((src, i) => (
-                          <button key={i} type="button" onClick={() => handleImageClick(src)}
-                            className="relative aspect-square rounded-lg overflow-hidden cursor-pointer border-0 p-0 bg-[#eeeceb] hover:opacity-90 hover:ring-2 hover:ring-[#b5192c]">
-                            <Image src={src} alt="" fill className="object-cover" />
-                          </button>
-                        ))}
-                      </div>
-                  }
+                  <PhotoThumbnailGrid
+                    photos={uploadedImages}
+                    onAdd={handleImageClick}
+                    onRemove={removeUploadedPhoto}
+                  />
                 </div>
               </>}
 
@@ -607,6 +713,134 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                   )}
                 </div>
               </>}
+
+              {/* Contributor Pages */}
+              {activePanel === "contributors" && <>
+                <PanelHeader title="Contributor Pages" onClose={() => setActivePanel(null)} />
+                <div className="flex-1 overflow-y-auto p-2">
+                  {isContributionsLoading ? (
+                    <p className="text-center text-[12px] text-[#ccc] mt-10">Loading contributors...</p>
+                  ) : contributions.length === 0 ? (
+                    <p className="text-center text-[12px] text-[#ccc] mt-10">No contributors yet</p>
+                  ) : (
+                    contributions.map((contribution) => {
+                      const label = getContributorLabel(contribution);
+                      const status = normalizeContributionStatus(contribution.status);
+                      const isActive = activeContributor?.id === String(contribution.id);
+                      return (
+                        <button
+                          key={contribution.id}
+                          type="button"
+                          onClick={() => handleSelectContributor(contribution)}
+                          className={`mb-1 flex w-full items-center justify-between gap-2 rounded-lg border px-2 py-2 text-left transition-all cursor-pointer ${
+                            isActive
+                              ? "border-[#b5192c] bg-[#fff0f0]"
+                              : "border-transparent hover:bg-[#f5f4f2]"
+                          }`}
+                        >
+                          <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#333]">{label}</span>
+                          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${CONTRIBUTOR_STATUS_STYLE[status as keyof typeof CONTRIBUTOR_STATUS_STYLE]}`}>
+                            {status}
+                          </span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              </>}
+
+              {/* Add Content */}
+              {activePanel === "content" && <>
+                <PanelHeader title="Add Content" onClose={() => setActivePanel(null)} />
+                <div className="flex shrink-0 gap-1 border-b border-black/6 px-2 py-2">
+                  {(["photo", "text", "emoji"] as const).map((tab) => (
+                    <button
+                      key={tab}
+                      type="button"
+                      onClick={() => setContentTab(tab)}
+                      className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold capitalize transition-all cursor-pointer ${
+                        contentTab === tab
+                          ? "bg-[#fff0f0] text-[#b5192c]"
+                          : "text-[#888] hover:bg-[#f5f4f2]"
+                      }`}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex-1 overflow-y-auto p-3">
+                  {contentTab === "photo" && (
+                    <div className="space-y-3">
+                      <div
+                        onDragOver={(event) => {
+                          event.preventDefault();
+                          setIsPhotoDragOver(true);
+                        }}
+                        onDragLeave={() => setIsPhotoDragOver(false)}
+                        onDrop={(event) => {
+                          event.preventDefault();
+                          event.stopPropagation();
+                          setIsPhotoDragOver(false);
+                          if (event.dataTransfer.files?.length) {
+                            handleContentPhotoFiles(event.dataTransfer.files);
+                          }
+                        }}
+                        className={`flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all ${
+                          isPhotoDragOver
+                            ? "border-[#b5192c] bg-[#fff0f0]"
+                            : "border-black/10 bg-[#fafafa] hover:border-[#b5192c]/40"
+                        }`}
+                        onClick={() => contentFileRef.current?.click()}
+                      >
+                        <UploadSvg />
+                        <p className="mt-2 text-[12px] font-medium text-[#333]">Drop images here</p>
+                        <p className="mt-1 text-[10px] text-[#999]">Multiple files supported</p>
+                        <input
+                          ref={contentFileRef}
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          className="hidden"
+                          onChange={(event) => {
+                            if (event.target.files?.length) {
+                              handleContentPhotoFiles(event.target.files);
+                            }
+                            event.target.value = "";
+                          }}
+                        />
+                      </div>
+                      <PhotoThumbnailGrid
+                        photos={contentPhotos}
+                        onAdd={handleImageClick}
+                        onRemove={removeContentPhoto}
+                      />
+                    </div>
+                  )}
+
+                  {contentTab === "text" && (
+                    <div className="space-y-3">
+                      <textarea
+                        value={addContentText}
+                        onChange={(event) => setAddContentText(event.target.value)}
+                        placeholder="Enter text to add to the page..."
+                        rows={5}
+                        className="w-full resize-none rounded-xl border border-black/10 px-3 py-2 text-[13px] text-[#333] outline-none focus:border-[#b5192c]"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleAddContentText}
+                        className="w-full cursor-pointer rounded-xl bg-[#b5192c] py-2.5 text-[13px] font-semibold text-white transition-all hover:bg-[#9e1626]"
+                      >
+                        Add Text
+                      </button>
+                    </div>
+                  )}
+
+                  {contentTab === "emoji" && (
+                    <p className="text-center text-[12px] text-[#ccc] mt-10">Emoji content coming soon</p>
+                  )}
+                </div>
+              </>}
             </div>
           </div>
 
@@ -627,7 +861,9 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                 {/* Safe-area overlay (visible guideline, non-blocking) */}
                 <div className="relative" style={{ width: `${A4_WIDTH}px`, height: `${A4_HEIGHT}px`, transform: `scale(${scale})`, transformOrigin: "center" }}>
                   <div
-                    className="shadow-[0_2px_20px_rgba(0,0,0,0.15)] transition-transform duration-200 origin-center w-full h-full"
+                    className={`shadow-[0_2px_20px_rgba(0,0,0,0.15)] transition-transform duration-200 origin-center w-full h-full ${
+                      isContributorPageHighlighted ? "ring-4 ring-[#b5192c]/50" : ""
+                    }`}
                     style={{ background: page?.background ?? "#ffffff" }}
                   >
                     <CanvasPage
@@ -710,6 +946,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
           {/* ── Right sidebar ── */}
           <div className="shrink-0 w-18 flex flex-col gap-3 py-3 px-2 bg-white rounded-2xl border border-black/6">
+            <SidebarBtn icon={<ContributorsSvg />} label="Pages" onClick={() => togglePanel("contributors")} active={activePanel === "contributors"} />
+            <SidebarBtn icon={<PlusContentSvg />} label="Content" onClick={() => togglePanel("content")} active={activePanel === "content"} />
             <SidebarBtn icon={<UploadSvg />}  label="Uploads"  onClick={() => togglePanel("upload")}  active={activePanel === "upload"} />
             <SidebarBtn icon={<TextSvg />}    label="Add Text" onClick={handleAddText} />
             <SidebarBtn icon={<EmojiSvg />}   label="Emoji"    onClick={() => togglePanel("emoji")}   active={activePanel === "emoji"} />
@@ -827,6 +1065,45 @@ function EmptyPhotos() {
   );
 }
 
+function PhotoThumbnailGrid({
+  photos,
+  onAdd,
+  onRemove,
+}: {
+  photos: EditorPhoto[];
+  onAdd: (src: string) => void;
+  onRemove: (photoId: string) => void;
+}) {
+  if (photos.length === 0) return <EmptyPhotos />;
+
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      {photos.map((photo) => (
+        <div key={photo.id} className="group relative aspect-square overflow-hidden rounded-lg bg-[#eeeceb]">
+          <button
+            type="button"
+            onClick={() => onAdd(photo.src)}
+            className="relative h-full w-full cursor-pointer border-0 p-0 hover:opacity-90 hover:ring-2 hover:ring-[#b5192c]"
+          >
+            <Image src={photo.src} alt="" fill className="object-cover" />
+          </button>
+          <button
+            type="button"
+            onClick={(event) => {
+              event.stopPropagation();
+              onRemove(photo.id);
+            }}
+            className="absolute top-1 right-1 flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-black/60 text-[11px] font-bold text-white transition-colors hover:bg-[#b5192c]"
+            aria-label="Remove photo"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function PillBtn({ onClick, title, children }: { onClick: () => void; title: string; children: React.ReactNode }) {
   return (
     <button type="button" onClick={onClick} title={title}
@@ -856,6 +1133,8 @@ function SidebarBtn({ icon, label, onClick, danger = false, active = false }: {
 // ── Icons ─────────────────────────────────────────────────────────────────
 const IC = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.65, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 const UploadSvg   = () => <svg {...IC}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
+const ContributorsSvg = () => <svg {...IC}><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>;
+const PlusContentSvg = () => <svg {...IC}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>;
 const TextSvg     = () => <svg {...IC}><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>;
 const EmojiSvg    = () => <svg {...IC}><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>;
 const StickerSvg  = () => <svg {...IC}><path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10A10 10 0 012 12c0-2.76 1.12-5.26 2.93-7.07"/><path d="M12 2v10l7.07 7.07"/></svg>;

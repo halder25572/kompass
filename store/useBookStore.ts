@@ -325,6 +325,8 @@ export interface BookPage {
   elements: BookElement[];
   background: string; // color OR gradient string
   isCover?: boolean;  // page 1 = cover
+  contributorId?: string | number;
+  contributorName?: string;
 }
 
 // Backwards-compatible aliases

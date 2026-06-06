@@ -290,11 +290,20 @@ function normalizeContributionsSummary(
 }
 
 export function useBookContributionsQuery(bookId: string | number | undefined) {
+	// const { data: session } = useSession();
+	// const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	// const query = useQuery<ContributionsListResponse, Error, BookContributionsSummary>({
+	// 	queryKey: ["contributions", bookId],
+	// 	queryFn: () => fetchBookContributions(bookId as string | number, sessionToken),
 	const { data: session } = useSession();
 	const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	const localToken = typeof window !== "undefined"
+		? (localStorage.getItem("authToken") || localStorage.getItem("token") || "")
+		: "";
+	const token = sessionToken || localToken;
 	const query = useQuery<ContributionsListResponse, Error, BookContributionsSummary>({
-		queryKey: ["contributions", bookId],
-		queryFn: () => fetchBookContributions(bookId as string | number, sessionToken),
+		queryKey: ["contributions", bookId, token],
+		queryFn: () => fetchBookContributions(bookId as string | number, token || null),
 		enabled: Boolean(bookId),
 		retry: false,
 		select: (response) => normalizeContributionsSummary(response, bookId),

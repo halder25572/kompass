@@ -1,4 +1,4 @@
-/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
@@ -128,7 +128,7 @@ function mapContributionToParticipant(contribution: Contribution): ParticipantVi
   // Log the raw contribution object so we can see the backend shape in the console.
   try {
     console.log("Raw contribution object:", contribution);
-  } catch {}
+  } catch { }
 
   const resolvedName = getContributionDisplayName(contribution);
   const identityName = resolvedName && resolvedName !== "Unknown"
@@ -179,6 +179,16 @@ function formatProgress(progress: number | string | null | undefined) {
 
 function getWhatsAppShareUrl(inviteLink: string) {
   return `https://wa.me/?text=${encodeURIComponent(`Join my memory book: ${inviteLink}`)}`;
+}
+
+function getOccasionDisplayValue(occasion: unknown) {
+  if (typeof occasion === "string") return occasion;
+  return (occasion as { name?: string } | null | undefined)?.name ?? "";
+}
+
+function toDateInputValue(expireDate: string | undefined) {
+  if (!expireDate) return "";
+  return expireDate.slice(0, 10);
 }
 
 const previewPages = [
@@ -317,6 +327,10 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   const settingsRef = useRef<HTMLDivElement>(null);
   const inviteRef = useRef<HTMLDivElement>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showSettingsPanel, setShowSettingsPanel] = useState(false);
+  const [settingsBookTitle, setSettingsBookTitle] = useState("");
+  const [settingsBookSubtitle, setSettingsBookSubtitle] = useState("");
+  const [settingsDeadline, setSettingsDeadline] = useState("");
   const [participants, setParticipants] = useState<ParticipantView[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const { data: bookDetails } = useBookDetailsQuery(bookId);
@@ -335,9 +349,74 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   );
 
   const updateMutation = useUpdateBookMutation(bookId);
-  const inviteLink = getCleanInviteLink(bookDetails?.data.book_details.invite_link ?? "");
+  const book = bookDetails?.data?.book_details;
+  const [recipientNameDraft, setRecipientNameDraft] = useState("");
+  const [occasionDraft, setOccasionDraft] = useState("");
+  const skipNextAutoSaveRef = useRef(true);
+
+  useEffect(() => {
+    if (!book) return;
+    setRecipientNameDraft(book.recipient_name ?? "");
+    setOccasionDraft(getOccasionDisplayValue(book.occasion));
+    skipNextAutoSaveRef.current = true;
+  }, [book?.id]);
+
+  useEffect(() => {
+    if (!book) return;
+    if (skipNextAutoSaveRef.current) {
+      skipNextAutoSaveRef.current = false;
+      return;
+    }
+
+    const nextRecipient = recipientNameDraft.trim();
+    const nextOccasion = occasionDraft.trim();
+    const currentRecipient = (book.recipient_name ?? "").trim();
+    const currentOccasion = getOccasionDisplayValue(book.occasion).trim();
+
+    if (nextRecipient === currentRecipient && nextOccasion === currentOccasion) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(() => {
+      void updateMutation
+        .mutateAsync({
+          book_title: book.book_title,
+          book_subtitle: book.book_subtitle || null,
+          recipient_name: nextRecipient,
+          occasion: nextOccasion || null,
+          sub_occasion: book.sub_occasion || null,
+          questions: book.questions ?? null,
+        })
+        .catch((err) => {
+          toast.error(err instanceof Error ? err.message : "Failed to save settings");
+        });
+    }, 600);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [recipientNameDraft, occasionDraft, book, updateMutation]);
+
+  const inviteLink = getCleanInviteLink(book?.invite_link ?? "");
+  const deadline = book?.expire_date
+    ? new Date(book.expire_date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
+    : undefined;
   const progressValue = getProgressPercent(statistics?.progress);
   const participantTotal = statistics?.total ?? contributions.length;
+  const bookWithPageMeta = book as typeof book & {
+    page_count?: number;
+    pages_count?: number;
+    total_pages?: number;
+    min_page_count?: number;
+  };
+  const currentPages =
+    bookWithPageMeta?.page_count ??
+    bookWithPageMeta?.pages_count ??
+    bookWithPageMeta?.total_pages ??
+    contributions.length;
+  const minPages = bookWithPageMeta?.min_page_count ?? 24;
   const contributionParticipantKey = contributions
     .map((contribution) => `${contribution.id}:${contribution.name ?? ""}:${contribution.status ?? ""}`)
     .join("|");
@@ -428,6 +507,29 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
     gsap.to(e.currentTarget, { scale: 1, duration: 0.18, ease: "power2.inOut" });
   };
 
+  const handleOpenSettingsPanel = () => {
+    if (!showSettingsPanel && book) {
+      setSettingsBookTitle(book.book_title ?? "");
+      setSettingsBookSubtitle(book.book_subtitle ?? "");
+      setSettingsDeadline(toDateInputValue(book.expire_date));
+    }
+    setShowSettingsPanel((prev) => !prev);
+  };
+
+  const handleSaveSettingsPanel = async () => {
+    try {
+      await updateMutation.mutateAsync({
+        book_title: settingsBookTitle.trim(),
+        book_subtitle: settingsBookSubtitle.trim() || null,
+        expire_date: settingsDeadline,
+      });
+      toast.success("Settings saved");
+      setShowSettingsPanel(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save settings");
+    }
+  };
+
   return (
     <div className="min-h-screen max-w-7xl mx-auto p-4 md:p-8">
 
@@ -458,6 +560,13 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
           >
             Preview
           </button>
+          <Link
+            href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
+            onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
+            className="px-4 cursor-pointer py-2 text-sm border rounded-lg bg-white"
+          >
+            Open Editor
+          </Link>
           <button
             onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
             className="px-4 cursor-pointer py-2 text-sm rounded-lg bg-[#8B0A2A] text-white"
@@ -542,21 +651,62 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
           <div ref={settingsRef} className="bg-white rounded-xl p-5 shadow-sm">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-sm font-medium">Book Settings</h2>
-              <Link
-                href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
-                onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] text-white"
-              >
-                Edit
-              </Link>
+              <div className="flex gap-2">
+                <Link
+                  href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
+                  onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
+                  className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] text-white"
+                >
+                  Edit Book
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleOpenSettingsPanel}
+                  onMouseEnter={onBtnEnter}
+                  onMouseLeave={onBtnLeave}
+                  className="text-[14px] cursor-pointer px-3 py-1 rounded-md border border-[#e5e7eb] bg-white text-[#374151]"
+                >
+                  Settings
+                </button>
+              </div>
             </div>
 
             <div className="space-y-3 text-sm">
-              <Row label="Recipient Name" value="Jack" />
-              <Row label="Occasion" value="Birthday" />
-              <Row label="Deadline" value="Mar 20, 2026" />
+              <EditableRow label="Recipient Name" value={recipientNameDraft} onChange={setRecipientNameDraft} />
+              <EditableRow label="Occasion" value={occasionDraft} onChange={setOccasionDraft} />
+              <Row label="Deadline" value={deadline || "—"} />
               <Row label="Contributors" value={String(participantTotal)} />
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-500">Pages</span>
+                <span className={currentPages >= minPages ? "text-green-600 font-medium" : "text-amber-600 font-medium"}>
+                  {currentPages}/{minPages} pages
+                  {currentPages >= minPages ? " — Ready!" : ` — ${minPages - currentPages} more needed`}
+                </span>
+              </div>
             </div>
+
+            {showSettingsPanel && (
+              <div className="mt-4 space-y-3 border-t border-gray-100 pt-4 text-sm">
+                <SettingsField label="Book Title" value={settingsBookTitle} onChange={setSettingsBookTitle} />
+                <SettingsField label="Book Subtitle" value={settingsBookSubtitle} onChange={setSettingsBookSubtitle} />
+                <SettingsField
+                  label="Deadline"
+                  type="date"
+                  value={settingsDeadline}
+                  onChange={setSettingsDeadline}
+                />
+                <button
+                  type="button"
+                  onClick={() => void handleSaveSettingsPanel()}
+                  disabled={updateMutation.isPending}
+                  onMouseEnter={onBtnEnter}
+                  onMouseLeave={onBtnLeave}
+                  className="w-full cursor-pointer rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] px-3 py-2 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* INVITE */}
@@ -567,20 +717,20 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch border rounded-lg overflow-hidden mb-3">
               <input
                 className="flex-1 p-2 text-xs outline-none min-w-0"
-                  value={inviteLink || "Invite link will appear here"}
+                value={inviteLink || "Invite link will appear here"}
                 readOnly
               />
               <div className="flex items-stretch gap-2 border-t border-[#f0edf1] bg-white p-2 sm:border-t-0 sm:border-l sm:p-1.5">
                 <button
-                    type="button"
-                    disabled={!inviteLink}
-                    onClick={async () => {
-                      if (!inviteLink || typeof navigator === "undefined") return;
-                      await navigator.clipboard.writeText(inviteLink);
-                      toast.success("Invite link copied");
-                    }}
+                  type="button"
+                  disabled={!inviteLink}
+                  onClick={async () => {
+                    if (!inviteLink || typeof navigator === "undefined") return;
+                    await navigator.clipboard.writeText(inviteLink);
+                    toast.success("Invite link copied");
+                  }}
                   onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                    className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-[#BF003A] to-[#59001C] px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-xl bg-linear-to-r from-[#BF003A] to-[#59001C] px-3 py-2 text-white disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <Copy size={14} />
                 </button>
@@ -617,7 +767,52 @@ function Row({ label, value }: { label: string; value: string }) {
       <span>{value}</span>
     </div>
   );
-};
+}
+
+function EditableRow({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="shrink-0 text-gray-500">{label}</span>
+      <input
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full max-w-40 rounded-md border border-gray-200 px-2 py-1 text-right text-sm outline-none focus:border-[#BF003A]"
+      />
+    </div>
+  );
+}
+
+function SettingsField({
+  label,
+  value,
+  onChange,
+  type = "text",
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+}) {
+  return (
+    <div>
+      <label className="mb-1 block text-gray-500">{label}</label>
+      <input
+        type={type}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="w-full rounded-md border border-gray-200 px-2 py-1 text-sm outline-none focus:border-[#BF003A]"
+      />
+    </div>
+  );
+}
 
 function Stat({ number, label }: { number: string; label: string }) {
   return (
