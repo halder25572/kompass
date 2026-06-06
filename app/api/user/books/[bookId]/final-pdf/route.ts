@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
 
 type RouteContext = {
-    params: Promise<{ id: string }>;
+    params: Promise<{ bookId: string }>;
 };
 
 export async function POST(request: Request, context: RouteContext) {
@@ -15,7 +15,7 @@ export async function POST(request: Request, context: RouteContext) {
         );
     }
 
-    const { id } = await context.params;
+    const { bookId } = await context.params;
     const authorization = request.headers.get("authorization") || "";
     const incomingForm = await request.formData();
     const forwardForm = new FormData();
@@ -28,7 +28,7 @@ export async function POST(request: Request, context: RouteContext) {
         }
     }
 
-    const response = await fetch(`${BASE_URL}/user/books/${id}/finalize`, {
+    const response = await fetch(`${BASE_URL}/user/books/${bookId}/finalize`, {
         method: "POST",
         headers: {
             Accept: "application/json",
@@ -44,21 +44,18 @@ export async function POST(request: Request, context: RouteContext) {
         try {
             result = JSON.parse(responseText);
         } catch {
-            // If backend sends HTML (e.g., login page), just indicate failure without hardcoded message
-            const looksLikeHtml = /<\!doctype html>|<html[\s>]/i.test(responseText);
             result = {
                 success: false,
-                message: "", // Let backend message come through, empty if none provided
+                message: "",
                 data: null,
                 meta: {},
                 code: response.status,
             };
         }
     } else {
-        // Empty response - backend decides what to send, don't add our own message
         result = {
             success: response.ok,
-            message: "", // Empty - no hardcoded message
+            message: "",
             data: null,
             meta: {},
             code: response.status,

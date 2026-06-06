@@ -37,7 +37,7 @@ import {
     ContributionsListResponse,
     ContributionDetailResponse,
     SubmitContributionResponse,
-    
+
     LegalInformationResponse,
     PrivacyPoliciesResponse,
     TermsConditionsResponse,
@@ -138,6 +138,7 @@ function getAuthToken() {
         localStorage.getItem("authToken") ||
         localStorage.getItem("token") ||
         localStorage.getItem("accessToken") ||
+        localStorage.getItem("google-auth-exchanged-for") ||
         ""
     );
 }
@@ -795,7 +796,7 @@ export async function fetchBookContributions(
         method: "GET",
         headers: {
             "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...(token ? { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } : {}),
         },
     });
 
@@ -1154,7 +1155,7 @@ export async function createStripePaymentIntent(payload: { amount: number; curre
     const text = await response.text();
     if (!response.ok) {
         let parsed: any = null;
-        try { parsed = text ? JSON.parse(text) : null; } catch {}
+        try { parsed = text ? JSON.parse(text) : null; } catch { }
         throw new Error(parsed?.message || `Server error (HTTP ${response.status}) creating payment intent`);
     }
 
@@ -1166,7 +1167,7 @@ export async function createStripePaymentIntent(payload: { amount: number; curre
 }
 
 // Update order status — backend should support updating order by id
-export async function updateOrderStatus(orderId: string | number, payload: { status: string; [k: string]: any }): Promise<any> {
+export async function updateOrderStatus(orderId: string | number, payload: { status: string;[k: string]: any }): Promise<any> {
     if (!BASE_URL) throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
     if (!orderId && orderId !== 0) throw new Error("Order ID is required.");
 
@@ -1183,53 +1184,6 @@ export async function updateOrderStatus(orderId: string | number, payload: { sta
     const result = await safeParseJson<any>(response);
     if (!response.ok) {
         throw new Error(result?.message || `Failed to update order (HTTP ${response.status})`);
-    }
-
-    return result;
-}
-
-// Contributions APIs
-export async function fetchContributions(bookId: string | number): Promise<ContributionsListResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-    }
-
-    if (!bookId && bookId !== 0) {
-        throw new Error("Book ID is required.");
-    }
-
-    const token = getAuthToken();
-    const response = await fetch(`${BASE_URL}/user/books/${bookId}/contributions`, {
-        method: "GET",
-        headers: {
-            "Content-Type": "application/json",
-            ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-    });
-
-    const result = await safeParseJson<ContributionsListResponse>(response);
-
-    if (!response.ok) {
-        throw new Error(result ? getApiErrorMessage(result, result.message || `Server error (HTTP ${response.status}).`) : `Server error (HTTP ${response.status}).`);
-    }
-
-    if (!result) {
-        return {
-            success: true,
-            message: "",
-            data: {
-                book_id: Number(bookId),
-                book_title: "",
-                statistics: { total: 0, invited: 0, pending: 0, submitted: 0, progress: "0%" },
-                contributions: [],
-            },
-            meta: {},
-            code: 200,
-        };
-    }
-
-    if (!result.success) {
-        throw new Error(getApiErrorMessage(result, result.message || "Failed to load contributions"));
     }
 
     return result;
@@ -1273,7 +1227,7 @@ export async function fetchContribution(contributionId: string | number): Promis
     }
 
     const token = getAuthToken();
-    
+
     const response = await fetch(`/api/user/books/contribution/${contributionId}`, {
         method: "GET",
         headers: {

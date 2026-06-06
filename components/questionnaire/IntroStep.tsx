@@ -46,9 +46,6 @@ export default function IntroStep({ onContinue, recipientName, isSubmitting = fa
                             your contribution for{" "}
                             <span className="uppercase">{recipientName || "the recipient"}.</span>
                         </p>
-                        <p className="mt-2 text-[12px] leading-5 text-gray-400">
-                            We have already made some suggestions for the questions. But all questions can easily be edited, removed or rewritten — even in any language you want. You can also add extra questions.
-                        </p>
                     </div>
 
                     {/* Form */}

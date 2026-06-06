@@ -1,11 +1,12 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable react-hooks/set-state-in-effect */
 // /* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import gsap from "gsap";
 import { JSX } from "react/jsx-runtime";
@@ -16,7 +17,9 @@ import { useBookPageStylesQuery } from "@/features/book-page-styles/hooks/servic
 import { useCoverPageStylesQuery } from "@/features/cover-page/hooks/services";
 import { useCreateBookMutation } from "@/features/books/hooks/services";
 import { useRegisterMutation } from "@/features/auth/components/hooks/services";
-import { updateBookUser, inviteByEmail } from "@/services/api";
+// import { updateBookUser, inviteByEmail } from "@/services/api";
+import { inviteByEmail } from "@/services/api";
+import { getCleanInviteLink } from "@/lib/utils";
 // DnD removed from Invite Friends step; ordering handled in Participants panel
 
 function renderOccasionIcon(name: string) {
@@ -420,7 +423,7 @@ function BottomNav({
     const onNextLeave = () => gsap.to(nextRef.current, { scale: 1, duration: 0.18, ease: "power2.inOut" });
 
     return (
-        <div className="sticky bottom-0 backdrop-blur-sm border-t border-[#f0edf1] px-4 sm:px-6 py-4">
+        <div className="sticky bottom-0 bg-white/90 backdrop-blur-md border-t border-[#f0edf1] px-4 sm:px-6 py-4 z-20">
             <div className="max-w-4xl mx-auto flex gap-3">
                 {showBack && onBack && (
                     <button ref={backRef} onClick={onBack} onMouseEnter={onBackEnter} onMouseLeave={onBackLeave}
@@ -714,7 +717,7 @@ function Step2({ onNext, onBack, subTab, questions, onQuestionsChange }: {
 
     const currentQuestions = questions[subTab] ?? [];
     const handleAddQuestion = () => {
-        const newQ = { id: Date.now(), question: "New question:", placeholder: "Your answer..." };
+        const newQ = { id: Date.now(), question: "", placeholder: "Your answer..." };
         onQuestionsChange({ ...questions, [subTab]: [...(questions[subTab] ?? []), newQ] });
     };
     const handleUpdateQuestion = (id: number, value: string) => {
@@ -726,7 +729,7 @@ function Step2({ onNext, onBack, subTab, questions, onQuestionsChange }: {
 
     return (
         <>
-            <div className="flex-1 px-4 sm:px-6 py-6 max-w-4xl mx-auto w-full">
+            <div className="flex-1 px-4 sm:px-6 py-6 pb-24 max-w-4xl mx-auto w-full">
                 <div ref={headingRef} className="flex items-center gap-2 mb-1">
                     <div className="w-5 h-5 border-2 border-[#B91C1C] rounded flex items-center justify-center shrink-0">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -956,8 +959,8 @@ function Step4({
     );
 }
 
-// ── Step 5: Review Setup ─────────────────────────
-function Step5({ onNext, onBack, coverId, bookDraft, isAuthenticated }: { onNext: () => void; onBack: () => void; coverId: number; bookDraft: BookDraft | null; isAuthenticated: boolean }) {
+// // ── Step 5: Review Setup ─────────────────────────
+function Step5({ onNext, onBack, coverId, bookDraft, isAuthenticated, themeId: _themeId, selectedThemeName }: { onNext: () => void; onBack: () => void; coverId: number; bookDraft: BookDraft | null; isAuthenticated: boolean; themeId: number; selectedThemeName: string; }) {
     const headingRef = useRef<HTMLDivElement>(null);
     const previewRef = useRef<HTMLDivElement>(null);
     const { data: coverPageStylesResponse, isLoading } = useCoverPageStylesQuery();
@@ -1000,6 +1003,12 @@ function Step5({ onNext, onBack, coverId, bookDraft, isAuthenticated }: { onNext
                             <h2 className="text-[16px] font-semibold text-[#1a1a2e]">Book Preview</h2>
                             <p className="text-[13px] text-[#6b7280] mt-1">This is the current cover and setup that will be used for your new book.</p>
                             <ul className="mt-4 space-y-2 text-[13px] text-[#4b5563]">
+                                {selectedThemeName && (
+                                    <li className="flex items-center gap-2">
+                                        <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
+                                        Theme: {selectedThemeName}
+                                    </li>
+                                )}
                                 {selectedCover && <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />Cover: {selectedCover.name}</li>}
                                 <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />Questionnaire Type: {bookDraft?.subTab ?? "Not selected"}</li>
                                 <li className="flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />Status: Ready to create</li>
@@ -1049,6 +1058,135 @@ function Step5({ onNext, onBack, coverId, bookDraft, isAuthenticated }: { onNext
     );
 }
 
+// ── Step 5: Review Setup ────────
+// function Step5({
+//     onNext,
+//     onBack,
+//     coverId,
+//     bookDraft,
+//     isAuthenticated,
+//     themeId,
+//     selectedThemeName,
+// }: {
+//     onNext: () => void;
+//     onBack: () => void;
+//     coverId: number;
+//     bookDraft: BookDraft | null;
+//     isAuthenticated: boolean;
+//     themeId: number;
+//     selectedThemeName: string;
+// }) {
+//     const headingRef = useRef<HTMLDivElement>(null);
+//     const previewRef = useRef<HTMLDivElement>(null);
+//     const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
+//     const coversFromApi = coverPageStylesResponse?.data?.map(mapStyleCard) ?? [];
+
+//     const fallbackCovers: StyleCard[] = [
+//         { id: 2001, name: "Solid Color", description: "A bold, single-color cover that puts your title front and center.", image: "/icon/11.jpg", occasionName: "General", subOccasionName: "" },
+//         { id: 2002, name: "Soft Pattern", description: "Delicate repeating patterns add warmth and personality.", image: "/icon/12.jpg", occasionName: "General", subOccasionName: "" },
+//         { id: 2003, name: "Full Photo", description: "Let a single stunning photograph fill the entire cover.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
+//         { id: 2004, name: "Split / Duo-Tone", description: "Two contrasting tones divided across the cover for editorial look.", image: "/icon/14.jpg", occasionName: "General", subOccasionName: "" },
+//         { id: 2005, name: "Framed Photo", description: "Your photo set inside an elegant frame — classic and polished.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
+//     ];
+
+//     const covers = coversFromApi.length > 0 ? coversFromApi : fallbackCovers;
+//     const selectedCover = covers.find((c) => c.id === coverId) ?? covers[0];
+
+//     useEffect(() => {
+//         gsap.set([headingRef.current, previewRef.current], { opacity: 0, y: 22 });
+//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 })
+//             .to(previewRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.25");
+//     }, []);
+
+//     return (
+//         <>
+//             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
+//                 <div ref={headingRef} className="mb-6">
+//                     <h1 className="text-[22px] font-bold text-[#1a1a2e]">Review Setup</h1>
+//                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Review your selected setup before creating the book.</p>
+//                 </div>
+//                 <div ref={previewRef} className="rounded-2xl border border-[#f0edf1] bg-white p-5">
+//                     <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-5 items-start">
+//                         <div className="relative w-full max-w-55 mx-auto sm:mx-0 aspect-3/4 rounded-xl overflow-hidden border border-[#e5e7eb] bg-[#f7f7f7]">
+//                             {selectedCover
+//                                 ? <Image src={selectedCover.image} alt={selectedCover.name} fill className="" />
+//                                 : <div className="flex h-full w-full items-center justify-center text-[13px] text-[#9CA3AF]">No cover selected</div>
+//                             }
+//                         </div>
+//                         <div>
+//                             <h2 className="text-[16px] font-semibold text-[#1a1a2e]">Book Preview</h2>
+//                             <p className="text-[13px] text-[#6b7280] mt-1">This is the current cover and setup that will be used for your new book.</p>
+//                             <ul className="mt-4 space-y-2 text-[13px] text-[#4b5563]">
+//                                 {/* ✅ Bug #5 Fix: Theme এখন দেখাবে */}
+//                                 {selectedThemeName && (
+//                                     <li className="flex items-center gap-2">
+//                                         <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
+//                                         Theme: {selectedThemeName}
+//                                     </li>
+//                                 )}
+//                                 {selectedCover && (
+//                                     <li className="flex items-center gap-2">
+//                                         <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
+//                                         Cover: {selectedCover.name}
+//                                     </li>
+//                                 )}
+//                                 <li className="flex items-center gap-2">
+//                                     <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
+//                                     Questionnaire Type: {bookDraft?.subTab ?? "Not selected"}
+//                                 </li>
+//                                 <li className="flex items-center gap-2">
+//                                     <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />
+//                                     Status: Ready to create
+//                                 </li>
+//                             </ul>
+//                         </div>
+//                     </div>
+
+//                     {/* Draft section — অপরিবর্তিত */}
+//                     <div className="mt-5 rounded-2xl border border-[#f0edf1] bg-[#fafafa] p-4">
+//                         <div className="flex items-center justify-between gap-3">
+//                             <div>
+//                                 <h3 className="text-[14px] font-semibold text-[#1a1a2e]">Current draft</h3>
+//                                 <p className="text-[12px] text-[#9CA3AF]">This draft will be submitted to POST /user/books.</p>
+//                             </div>
+//                             <span className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#BF003A] border border-[#f3d4db]">Ready</span>
+//                         </div>
+//                         <div className="mt-3 space-y-2">
+//                             {bookDraft ? (
+//                                 <div className="rounded-xl border border-[#ece7ea] bg-white px-3 py-2.5">
+//                                     <div className="flex items-start justify-between gap-3">
+//                                         <div className="min-w-0">
+//                                             <p className="truncate text-[13px] font-semibold text-[#1a1a2e]">{bookDraft.bookTitle || "Untitled book"}</p>
+//                                             <p className="mt-0.5 text-[12px] text-[#6b7280]">{bookDraft.recipientName ? `Recipient: ${bookDraft.recipientName}` : "Recipient not set"}</p>
+//                                         </div>
+//                                         <div className="shrink-0 text-right">
+//                                             <p className="text-[11px] font-semibold text-[#BF003A]">{bookDraft.occasion || "No occasion selected"}</p>
+//                                             <p className="text-[11px] text-[#9CA3AF]">{bookDraft.bookSubtitle || "No subtitle provided"}</p>
+//                                         </div>
+//                                     </div>
+//                                 </div>
+//                             ) : (
+//                                 <div className="rounded-xl border border-dashed border-[#e5e7eb] bg-white px-3 py-5 text-center text-[13px] text-[#9CA3AF]">
+//                                     No draft found yet. Go back and fill in the book details.
+//                                 </div>
+//                             )}
+//                         </div>
+//                     </div>
+//                 </div>
+//             </div>
+//             <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 pb-2">
+//                 <p className="text-[12px] text-[#9CA3AF]">
+//                     {isAuthenticated
+//                         ? "You are already signed in. Continue to the invite step."
+//                         : "Next you'll create your account before inviting friends."}
+//                 </p>
+//             </div>
+//             <BottomNav onBack={onBack} onNext={onNext} nextLabel={isAuthenticated ? "Invite Friends" : "Create Account"} />
+//         </>
+//     );
+// }
+
 // ── Step 6: Create Account Gate ───────────────────────────
 function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, onAccountDraftChange, isAuthenticated }: {
     onBack: () => void;
@@ -1064,6 +1202,7 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, o
     const headingRef = useRef<HTMLDivElement>(null);
     const formRef = useRef<HTMLDivElement>(null);
     const autoAdvancedRef = useRef(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         gsap.set([headingRef.current, formRef.current], { opacity: 0, y: 20 });
@@ -1148,15 +1287,25 @@ function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, o
 
                         <div>
                             <label className="text-[13px] font-semibold text-[#374151] block mb-1.5">Password</label>
-                            <input
-                                type="password"
-                                value={accountDraft.password}
-                                onChange={(event) => onAccountDraftChange({ password: event.target.value })}
-                                placeholder="••••••••"
-                                className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
-                                autoComplete="new-password"
-                                required
-                            />
+                            <div className="relative">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    value={accountDraft.password}
+                                    onChange={(event) => onAccountDraftChange({ password: event.target.value })}
+                                    placeholder="••••••••"
+                                    className="w-full border bg-white border-[#e5e7eb] rounded-xl px-4 py-2.5 pr-10 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/30 focus:border-[#B91C1C] transition-all"
+                                    autoComplete="new-password"
+                                    required
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword((prev) => !prev)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#B91C1C] transition-colors"
+                                    aria-label={showPassword ? "Hide password" : "Show password"}
+                                >
+                                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                                </button>
+                            </div>
                         </div>
 
                         {accountDraft.error ? <p className="text-[13px] text-red-600">{accountDraft.error}</p> : null}
@@ -1216,6 +1365,7 @@ function Step7({
     const headingRef = useRef<HTMLDivElement>(null);
     const emailSectionRef = useRef<HTMLDivElement>(null);
     const friendsSectionRef = useRef<HTMLDivElement>(null);
+    const hasCalledRef = useRef(false);
 
     useEffect(() => {
         gsap.set([headingRef.current, emailSectionRef.current, friendsSectionRef.current], { opacity: 0, y: 20 });
@@ -1225,12 +1375,20 @@ function Step7({
             .to(friendsSectionRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.25");
     }, []);
 
+    // useEffect(() => {
+    //     if (!isAuthenticated) return;
+    //     if (!inviteLink && !isGeneratingInviteLink) {
+    //         void onEnsureInviteLink();
+    //     }
+    // }, [isAuthenticated, inviteLink, isGeneratingInviteLink, onEnsureInviteLink]);
+
     useEffect(() => {
         if (!isAuthenticated) return;
-        if (!inviteLink && !isGeneratingInviteLink) {
-            void onEnsureInviteLink();
-        }
-    }, [isAuthenticated, inviteLink, isGeneratingInviteLink, onEnsureInviteLink]);
+        if (inviteLink) return;
+        if (hasCalledRef.current) return;
+        hasCalledRef.current = true;
+        void onEnsureInviteLink();
+    }, [isAuthenticated, inviteLink]);
 
     // Invite step uses a simple list; ordering moved to Participants panel
 
@@ -1571,24 +1729,25 @@ export default function BookCreator() {
                 questions: selectedQuestions,
             });
 
+            // const inviteLink = getCleanInviteLink(result.data?.invite_link || (result as { invite_link?: string }).invite_link || "");
             const inviteLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
 
             if (!inviteLink) {
                 throw new Error("Invite link missing from create book response.");
             }
 
-            if (result.data?.id !== undefined && result.data?.id !== null) {
-                await updateBookUser(result.data.id, {
-                    book_title: bookDraft.bookTitle,
-                    book_subtitle: bookDraft.bookSubtitle || null,
-                    recipient_name: bookDraft.recipientName,
-                    occasion_id: bookDraft.occasionId || null,
-                    sub_occasion_id: bookDraft.subOccasionId || null,
-                    cover_page_style_id: resolvedCoverId,
-                    book_page_style_id: resolvedThemeId,
-                    questions: selectedQuestions,
-                });
-            }
+            // if (result.data?.id !== undefined && result.data?.id !== null) {
+            //     await updateBookUser(result.data.id, {
+            //         book_title: bookDraft.bookTitle,
+            //         book_subtitle: bookDraft.bookSubtitle || null,
+            //         recipient_name: bookDraft.recipientName,
+            //         occasion_id: bookDraft.occasionId || null,
+            //         sub_occasion_id: bookDraft.subOccasionId || null,
+            //         cover_page_style_id: resolvedCoverId,
+            //         book_page_style_id: resolvedThemeId,
+            //         questions: selectedQuestions,
+            //     });
+            // }
 
             setCreatedInviteLink(inviteLink);
             return { inviteLink, bookId: result.data?.id };
@@ -1691,7 +1850,32 @@ export default function BookCreator() {
             {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} selectedThemeId={selectedThemeId} onSelectedThemeIdChange={setSelectedThemeId} />}
             {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} selectedCoverId={selectedCoverId} onSelectedCoverIdChange={setSelectedCoverId} />}
             {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={bookDetailsForm.selectedSubTab} questions={questionsBySubOccasion} onQuestionsChange={setQuestionsBySubOccasion} />}
-            {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} isAuthenticated={isAuthenticated} />}
+            {/* {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} isAuthenticated={isAuthenticated} themeId={0} selectedThemeName={""} />} */}
+            {step === 5 && (() => {
+                const themesFromApi = bookPageStylesResponse?.data?.map(mapStyleCard) ?? [];
+                const fallbackTemplates: StyleCard[] = [
+                    { id: 1001, name: "Warm & Nostalgic", description: "", image: "/icon/1.jpg", occasionName: "General", subOccasionName: "" },
+                    { id: 1002, name: "Modern Minimal", description: "", image: "/icon/2.jpg", occasionName: "General", subOccasionName: "" },
+                    { id: 1003, name: "Floral Romance", description: "", image: "/icon/3.jpg", occasionName: "General", subOccasionName: "" },
+                    { id: 1004, name: "Celestial Dream", description: "", image: "/icon/4.jpg", occasionName: "General", subOccasionName: "" },
+                    { id: 1005, name: "Tropical Escape", description: "", image: "/icon/5.jpg", occasionName: "General", subOccasionName: "" },
+                    { id: 1006, name: "Elegant Marble", description: "", image: "/icon/6.jpg", occasionName: "General", subOccasionName: "" },
+                ];
+                const allThemes = themesFromApi.length > 0 ? themesFromApi : fallbackTemplates;
+                const resolvedThemeName = allThemes.find(t => t.id === selectedThemeId)?.name ?? "";
+
+                return (
+                    <Step5
+                        onNext={() => setStep(6)}
+                        onBack={() => setStep(4)}
+                        coverId={selectedCoverId}
+                        bookDraft={bookDraft}
+                        isAuthenticated={isAuthenticated}
+                        themeId={selectedThemeId}
+                        selectedThemeName={resolvedThemeName}
+                    />
+                );
+            })()}
             {step === 6 && (
                 <Step6
                     onBack={() => setStep(5)}
@@ -1705,7 +1889,7 @@ export default function BookCreator() {
             )}
             {step === 7 && (
                 <Step7
-                    onBack={() => setStep(6)}
+                    onBack={() => setStep(isAuthenticated ? 5 : 6)}
                     isAuthenticated={isAuthenticated}
                     inviteLink={createdInviteLink}
                     isGeneratingInviteLink={isGeneratingInviteLink}
@@ -1758,8 +1942,8 @@ function FriendRow({ friend, index, canRemove, onUpdate, onRemove }: {
     return (
         <div className={`flex flex-col sm:flex-row gap-2 items-end rounded-xl p-2 border border-transparent hover:border-[#f0edf1] hover:bg-[#fafafa]`}>
             <div className="flex-1 w-full">
-                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Name</label>}
-                <input value={friend.name} onChange={e => onUpdate(friend.id, "name", e.target.value)} placeholder="Friend's name"
+                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Full Name</label>}
+                <input value={friend.name} onChange={e => onUpdate(friend.id, "name", e.target.value)} placeholder="Friend's full name"
                     className="w-full border border-[#e5e7eb] bg-white rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/20 focus:border-[#B91C1C] transition-all" />
             </div>
             <div className="flex-1 w-full">

@@ -14,6 +14,7 @@ import { SortableContext, useSortable, arrayMove, verticalListSortingStrategy, s
 import { CSS } from "@dnd-kit/utilities";
 import { useBookContributionsQuery, useBookDetailsQuery, useSendBookInviteMutation, useUpdateBookMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
+import { getCleanInviteLink } from "@/lib/utils";
 import type { Contribution } from "@/types/api";
 import { getContributionDisplayName, getContributionIdentityName, getContributorRouteKeyFromName, getContributorRouteKey } from "@/lib/contributor";
 
@@ -334,7 +335,7 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
   );
 
   const updateMutation = useUpdateBookMutation(bookId);
-  const inviteLink = bookDetails?.data.book_details.invite_link ?? "";
+  const inviteLink = getCleanInviteLink(bookDetails?.data.book_details.invite_link ?? "");
   const progressValue = getProgressPercent(statistics?.progress);
   const participantTotal = statistics?.total ?? contributions.length;
   const contributionParticipantKey = contributions

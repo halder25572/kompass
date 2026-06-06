@@ -25,6 +25,8 @@ export default function ResetPasswordPage() {
       sendingOtp: "OTP wird gesendet...",
       sendOtp: "OTP senden",
       backToLogin: "<- Zurueck zur Anmeldung",
+      helperText: "Wir senden dir ein Einmalpasswort, wenn deine E-Mail-Adresse registriert ist.",
+      spamNote: "Bitte ueberpruefe deinen SPAM-Ordner.",
     }
     : {
       leftTitle: "Recover your account",
@@ -35,6 +37,8 @@ export default function ResetPasswordPage() {
       sendingOtp: "Sending OTP...",
       sendOtp: "Send OTP",
       backToLogin: "<- Back to login",
+      helperText: "We will send a one-time password if your email address is registered.",
+      spamNote: "Please check your SPAM folder.",
     };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -128,6 +132,15 @@ export default function ResetPasswordPage() {
                 className="w-full mt-1 px-4 py-2.5 rounded-lg bg-gray-200 outline-none text-sm"
                 required
               />
+            </div>
+
+            <div className="mb-4 space-y-1 text-center">
+              <p className="text-xs text-gray-500 leading-relaxed">
+                {text.helperText}
+              </p>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {text.spamNote}
+              </p>
             </div>
 
             {error ? <p className="text-sm text-red-600">{error}</p> : null}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
+// const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : '');
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.PUBLIC_URL || '';
 
 export async function GET(
     request: NextRequest,
@@ -18,7 +19,8 @@ export async function GET(
         const inviteCode = Array.isArray(code) ? code.join("/") : code;
         const authHeader = request.headers.get("authorization");
 
-        const response = await fetch(`${BASE_URL}/invite/${inviteCode}`, {
+        const backendUrl = `${BASE_URL ? `${BASE_URL}` : ''}/invite/${encodeURIComponent(inviteCode)}`;
+        const response = await fetch(backendUrl, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

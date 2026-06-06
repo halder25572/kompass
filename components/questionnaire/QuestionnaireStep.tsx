@@ -247,9 +247,6 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
                     <h1 className="text-[20px] sm:text-[22px] font-extrabold text-[#1A1A2E] tracking-tight">
                         Questionnaire <span className="uppercase">Birthday</span>
                     </h1>
-                    <p className="mt-2 max-w-3xl text-[12px] leading-5 text-gray-400">
-                        We have already made some suggestions for the questions. But all questions can easily be edited, removed or rewritten — even in any language you want. You can also add extra questions.
-                    </p>
                 </div>
                 <p className="text-[13px] text-gray-400 mb-6 ml-7.25">
                     Your contribution for{" "}

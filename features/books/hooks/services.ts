@@ -302,11 +302,6 @@ export function useBookContributionsQuery(bookId: string | number | undefined) {
 
 	const contributions = query.data?.contributions ?? EMPTY_CONTRIBUTIONS;
 
-	// Log contributions shape for debugging inconsistent API responses
-	try {
-		console.log("useBookContributionsQuery contributions:", contributions, "length:", contributions.length);
-	} catch { }
-
 	return {
 		...query,
 		contributions,

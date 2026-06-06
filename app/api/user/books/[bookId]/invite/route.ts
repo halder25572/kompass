@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
 
 type RouteContext = {
-    params: Promise<{ id: string }>;
+    params: Promise<{ bookId: string }>;
 };
 
 export async function POST(request: Request, context: RouteContext) {
@@ -14,53 +14,30 @@ export async function POST(request: Request, context: RouteContext) {
         );
     }
 
-    const { id } = await context.params;
+    const { bookId } = await context.params;
     const authorization = request.headers.get("authorization") || "";
-    const csrf = request.headers.get("x-csrf-token") || "";
-    
-    
-    
-    if (!authorization) {
-        console.warn("⚠️  No Authorization header received at proxy");
-    }
-    
-    const incomingForm = await request.formData();
-    const forwardForm = new FormData();
+    const bodyText = await request.text();
 
-    for (const [key, value] of incomingForm.entries()) {
-        if (typeof value === "string") {
-            forwardForm.append(key, value);
-        } else {
-            forwardForm.append(key, value, (value as File).name || "final-book.pdf");
-        }
-    }
-
-    const backendBaseUrl = BASE_URL.replace(/\/api\/?$/, "");
-
-    
-
-    const response = await fetch(`${backendBaseUrl}/user/books/${id}/finalize`, {
+    const response = await fetch(`${BASE_URL}/user/books/${bookId}/invite`, {
         method: "POST",
         headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
             ...(authorization ? { Authorization: authorization } : {}),
-            ...(csrf ? { "X-CSRF-TOKEN": csrf } : {}),
         },
-        body: forwardForm,
+        body: bodyText || undefined,
     });
-
-    
 
     const responseText = await response.text();
     let result: unknown;
 
     if (responseText) {
-            try {
+        try {
             result = JSON.parse(responseText);
         } catch {
-            console.warn("⚠️  Backend returned non-JSON (likely HTML - possible auth failure)");
             result = {
                 success: response.ok,
-                message: responseText.substring(0, 100) + (responseText.length > 100 ? "..." : ""),
+                message: responseText,
                 data: null,
                 meta: {},
                 code: response.status,
@@ -69,7 +46,7 @@ export async function POST(request: Request, context: RouteContext) {
     } else {
         result = {
             success: response.ok,
-            message: response.ok ? "PDF uploaded successfully" : "PDF upload failed",
+            message: response.ok ? "Invitation sent successfully" : "Failed to send invitation",
             data: null,
             meta: {},
             code: response.status,

@@ -60,7 +60,7 @@ function AuthSync() {
             window.localStorage.setItem("token", token);
             window.dispatchEvent(new Event("auth-token-updated"));
           }
-        } catch {}
+        } catch { }
       }
 
       if (session?.user) {
@@ -72,7 +72,7 @@ function AuthSync() {
             avatar: session.user.image ?? null,
           };
           window.localStorage.setItem("user", JSON.stringify(userObj));
-        } catch {}
+        } catch { }
       }
     }
 
@@ -80,7 +80,7 @@ function AuthSync() {
       try {
         // window.localStorage.removeItem("token");
         window.localStorage.removeItem("google-auth-exchanged-for");
-      } catch {}
+      } catch { }
     }
 
     return () => {

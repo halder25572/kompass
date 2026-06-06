@@ -9,6 +9,7 @@ import { useBookDetailsQuery } from "@/features/books/hooks/services";
 import { useUpdateBookMutation } from "@/features/books/hooks/services";
 import { useSendBookInviteMutation } from "@/features/books/hooks/services";
 import { toast } from "sonner";
+import { getCleanInviteLink } from "@/lib/utils";
 // DnD moved to Participants panel component (Progress.tsx)
 
 // ── Types ─────────────────────────────────────────────────
@@ -107,7 +108,7 @@ export default function DashboardPage({ params }: Props) {
                 <div className="mt-4 space-y-3">
                   <InviteButton bookId={bookId} />
                   <a
-                    href={book.invite_link}
+                    href={getCleanInviteLink(book.invite_link)}
                     target="_blank"
                     rel="noreferrer"
                     className="flex w-full items-center justify-center rounded-full bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] px-5 py-3 text-sm font-semibold text-white hover:opacity-90"
@@ -199,7 +200,7 @@ function BookEditSection({
           </div>
           <div className="mt-5 rounded-2xl border border-[#f0edf1] bg-[#fafafa] p-4">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#9CA3AF]">Invite link</p>
-            <p className="mt-2 break-all text-sm text-[#374151]">{book.invite_link}</p>
+            <p className="mt-2 break-all text-sm text-[#374151]">{getCleanInviteLink(book.invite_link)}</p>
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <button

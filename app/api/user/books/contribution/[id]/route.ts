@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
 
 type RouteContext = {
+    // params: Promise<{ bookId: string }>;
     params: Promise<{ id: string }>;
 };
 
@@ -14,6 +15,7 @@ export async function GET(request: Request, context: RouteContext) {
         );
     }
 
+    // const { id } = await context.params;
     const { id } = await context.params;
     const authorization = request.headers.get("authorization") || "";
 
