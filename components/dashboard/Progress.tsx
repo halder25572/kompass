@@ -560,13 +560,6 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
           >
             Preview
           </button>
-          <Link
-            href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
-            onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-            className="px-4 cursor-pointer py-2 text-sm border rounded-lg bg-white"
-          >
-            Open Editor
-          </Link>
           <button
             onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
             className="px-4 cursor-pointer py-2 text-sm rounded-lg bg-[#8B0A2A] text-white"
@@ -654,8 +647,22 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
               <div className="flex gap-2">
                 <Link
                   href={bookId ? `/dashboard/${bookId}/editor-book` : "/dashboard"}
-                  onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-                  className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r from-[#BF003A] to-[#59001C] text-white"
+                  onMouseEnter={onBtnEnter}
+                  onMouseLeave={onBtnLeave}
+                  className="text-[14px] cursor-pointer px-3 py-1 rounded-md bg-linear-to-r
+                  from-[#BF003A]
+                  to-[#59001C]
+                  text-white
+                  border
+                  border-transparent
+                  hover:from-white
+                  hover:to-white
+                  hover:text-black
+                  hover:border-gray-300
+                  transition-all
+                  duration-500
+                  ease-in-out
+  "
                 >
                   Edit Book
                 </Link>
@@ -664,7 +671,26 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
                   onClick={handleOpenSettingsPanel}
                   onMouseEnter={onBtnEnter}
                   onMouseLeave={onBtnLeave}
-                  className="text-[14px] cursor-pointer px-3 py-1 rounded-md border border-[#e5e7eb] bg-white text-[#374151]"
+                  className="
+                    text-[14px]
+                    cursor-pointer
+                    px-3 py-1
+                    rounded-md
+                    border
+                    border-[#e5e7eb]
+                    bg-white
+                    text-[#374151]
+                    bg-linear-to-r
+                    hover:from-[#BF003A]
+                    hover:to-[#59001C]
+                    hover:text-white
+                    hover:border-[#BF003A]
+                    hover:scale-105
+                    transform
+                    transition-all
+                    duration-500
+                    ease-in-out
+  "
                 >
                   Settings
                 </button>
@@ -847,7 +873,12 @@ function SortableParticipantRow({ p, bookId }: { p: any; bookId: string }) {
         <button type="button" {...attributes} {...listeners} className="mb-px h-9 w-9 shrink-0 rounded-lg border border-[#e5e7eb] bg-white text-[#6b7280] flex items-center justify-center">
           <DragHandleIcon />
         </button>
-        {p.avatar ? (
+        {/* {p.avatar ? (
+          <Image src={p.avatar} alt={p.name} width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
+        ) : (
+          <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">{p.initials}</div>
+        )} */}
+        {p.avatar && !p.avatar.includes("No_profile") ? (
           <Image src={p.avatar} alt={p.name} width={36} height={36} className="h-9 w-9 rounded-full object-cover" />
         ) : (
           <div className="w-9 h-9 rounded-full bg-purple-500 text-white flex items-center justify-center text-xs font-semibold">{p.initials}</div>
@@ -863,7 +894,69 @@ function SortableParticipantRow({ p, bookId }: { p: any; bookId: string }) {
   );
 }
 
+// function InviteContributors({ bookId }: { bookId: string }) {
+//   const [email, setEmail] = useState("");
+//   const [isMounted, setIsMounted] = useState(false);
+//   const inviteMutation = useSendBookInviteMutation(bookId);
+
+//   useEffect(() => {
+//     setIsMounted(true);
+//   }, []);
+
+//   const handleSend = async () => {
+//     if (!email.trim()) {
+//       toast.error("Please enter an email address");
+//       return;
+//     }
+//     try {
+//       const response = await inviteMutation.mutateAsync(email);
+//       toast.success(response.message || "Invitation sent successfully");
+//       setEmail("");
+//     } catch (error) {
+//       const message = error instanceof Error ? error.message : "Failed to send invitation";
+//       toast.error(message);
+//     }
+//   };
+
+//   return (
+//     <div className="space-y-2">
+//       {isMounted ? (
+//         <div className="flex items-center border rounded-lg overflow-hidden">
+//           <input
+//             type="email"
+//             value={email}
+//             onChange={(e) => setEmail(e.target.value)}
+//             className="flex-1 p-2 text-xs outline-none"
+//             placeholder="email@example.com"
+//           />
+//           <button
+//             onClick={() => void handleSend()}
+//             disabled={inviteMutation.isPending}
+//             className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
+//           >
+//             <Plus size={14} />
+//           </button>
+//         </div>
+//       ) : (
+//         <div className="flex h-9 items-center rounded-lg border border-dashed border-[#e5e7eb] px-3 text-xs text-[#9CA3AF]">
+//           Loading invite input...
+//         </div>
+//       )}
+
+//       <button
+//         onClick={() => void handleSend()}
+//         disabled={inviteMutation.isPending || !email.trim()}
+//         className="w-full cursor-pointer bg-linear-to-r from-[#BF003A] to-[#59001C] text-white py-2 rounded-lg text-sm disabled:opacity-60"
+//       >
+//         {inviteMutation.isPending ? "Sending..." : "Send Invites"}
+//       </button>
+//     </div>
+//   );
+// }
+
+
 function InviteContributors({ bookId }: { bookId: string }) {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [isMounted, setIsMounted] = useState(false);
   const inviteMutation = useSendBookInviteMutation(bookId);
@@ -881,6 +974,7 @@ function InviteContributors({ bookId }: { bookId: string }) {
       const response = await inviteMutation.mutateAsync(email);
       toast.success(response.message || "Invitation sent successfully");
       setEmail("");
+      setName("");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to send invitation";
       toast.error(message);
@@ -890,21 +984,30 @@ function InviteContributors({ bookId }: { bookId: string }) {
   return (
     <div className="space-y-2">
       {isMounted ? (
-        <div className="flex items-center border rounded-lg overflow-hidden">
+        <div className="space-y-2">
           <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="flex-1 p-2 text-xs outline-none"
-            placeholder="email@example.com"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full border rounded-lg p-2 text-xs outline-none focus:border-[#BF003A]"
+            placeholder="Full name"
           />
-          <button
-            onClick={() => void handleSend()}
-            disabled={inviteMutation.isPending}
-            className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
-          >
-            <Plus size={14} />
-          </button>
+          <div className="flex items-center border rounded-lg overflow-hidden">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="flex-1 p-2 text-xs outline-none"
+              placeholder="email@example.com"
+            />
+            <button
+              onClick={() => void handleSend()}
+              disabled={inviteMutation.isPending}
+              className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
+            >
+              <Plus size={14} />
+            </button>
+          </div>
         </div>
       ) : (
         <div className="flex h-9 items-center rounded-lg border border-dashed border-[#e5e7eb] px-3 text-xs text-[#9CA3AF]">

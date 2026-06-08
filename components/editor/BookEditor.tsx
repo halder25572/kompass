@@ -60,24 +60,24 @@ export const FORMATS: Record<BookFormat, FormatConfig> = {
 
 // ── Background presets ────────────────────────────────────────────────────
 const BG_SOLID = [
-  "#ffffff","#FAF6F0","#FFF5F7","#F0F5FF","#F5FFF0","#FFFDF0",
-  "#F5F0FF","#FFF0F0","#F0FFFF","#F5F5F5","#1a1a1a","#2d1b33",
-  "#0f172a","#1e293b","#fdf4ff","#fff1f2","#f0fdf4","#eff6ff",
+  "#ffffff", "#FAF6F0", "#FFF5F7", "#F0F5FF", "#F5FFF0", "#FFFDF0",
+  "#F5F0FF", "#FFF0F0", "#F0FFFF", "#F5F5F5", "#1a1a1a", "#2d1b33",
+  "#0f172a", "#1e293b", "#fdf4ff", "#fff1f2", "#f0fdf4", "#eff6ff",
 ];
 
 const BG_GRADIENTS = [
-  { label: "Sunset",   value: "linear-gradient(135deg, #ff6b6b, #feca57, #ff9ff3)" },
-  { label: "Ocean",    value: "linear-gradient(135deg, #667eea, #764ba2)" },
-  { label: "Peach",    value: "linear-gradient(135deg, #ffecd2, #fcb69f)" },
-  { label: "Mint",     value: "linear-gradient(135deg, #a8edea, #fed6e3)" },
-  { label: "Rose",     value: "linear-gradient(135deg, #fccb90, #d57eeb)" },
-  { label: "Sky",      value: "linear-gradient(135deg, #a1c4fd, #c2e9fb)" },
+  { label: "Sunset", value: "linear-gradient(135deg, #ff6b6b, #feca57, #ff9ff3)" },
+  { label: "Ocean", value: "linear-gradient(135deg, #667eea, #764ba2)" },
+  { label: "Peach", value: "linear-gradient(135deg, #ffecd2, #fcb69f)" },
+  { label: "Mint", value: "linear-gradient(135deg, #a8edea, #fed6e3)" },
+  { label: "Rose", value: "linear-gradient(135deg, #fccb90, #d57eeb)" },
+  { label: "Sky", value: "linear-gradient(135deg, #a1c4fd, #c2e9fb)" },
   { label: "Lavender", value: "linear-gradient(135deg, #e0c3fc, #8ec5fc)" },
-  { label: "Gold",     value: "linear-gradient(135deg, #f6d365, #fda085)" },
-  { label: "Forest",   value: "linear-gradient(135deg, #134e5e, #71b280)" },
-  { label: "Night",    value: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)" },
-  { label: "Cherry",   value: "linear-gradient(135deg, #eb3349, #f45c43)" },
-  { label: "Spring",   value: "linear-gradient(135deg, #f9d29d, #ffd3a5)" },
+  { label: "Gold", value: "linear-gradient(135deg, #f6d365, #fda085)" },
+  { label: "Forest", value: "linear-gradient(135deg, #134e5e, #71b280)" },
+  { label: "Night", value: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)" },
+  { label: "Cherry", value: "linear-gradient(135deg, #eb3349, #f45c43)" },
+  { label: "Spring", value: "linear-gradient(135deg, #f9d29d, #ffd3a5)" },
 ];
 
 const STICKER_CATS = [
@@ -205,8 +205,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   } = useBookStore();
 
   const [uploadedImages, setUploadedImages] = useState<EditorPhoto[]>([]);
-  const [activePanel, setActivePanel] = useState<"upload"|"emoji"|"sticker"|"bg"|"layers"|"contributors"|"content"|null>(null);
-  const [contentTab, setContentTab] = useState<"photo"|"text"|"emoji">("photo");
+  const [activePanel, setActivePanel] = useState<"upload" | "emoji" | "sticker" | "bg" | "layers" | "contributors" | "content" | null>(null);
+  const [contentTab, setContentTab] = useState<"photo" | "text" | "emoji">("photo");
   const [addContentText, setAddContentText] = useState("");
   const [contentPhotos, setContentPhotos] = useState<EditorPhoto[]>([]);
   const [isPhotoDragOver, setIsPhotoDragOver] = useState(false);
@@ -220,12 +220,12 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   // ── Format state (per-book, user picks once) ──────────────────────────
   const [bookFormat, setBookFormat] = useState<BookFormat>("a4-landscape");
   const fmt = FORMATS[bookFormat];
-  const A4_WIDTH  = fmt.width;
+  const A4_WIDTH = fmt.width;
   const A4_HEIGHT = fmt.height;
 
   const panelFileRef = useRef<HTMLInputElement>(null);
   const contentFileRef = useRef<HTMLInputElement>(null);
-  const stageRefs   = useRef<(Konva.Stage | null)[]>([]);
+  const stageRefs = useRef<(Konva.Stage | null)[]>([]);
   const hasHydratedPagesRef = useRef(false);
 
   const nextElementId = (prefix: string) => {
@@ -313,7 +313,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
 
     const loadBookStyles = async () => {
       try {
-      const bookDetailsResponse = await fetchBookDetails(bookId);
+        const bookDetailsResponse = await fetchBookDetails(bookId);
 
         const book = bookDetailsResponse.data.book_details as {
           cover_style?: { id?: number | null; name?: string; image?: string[] } | null;
@@ -325,11 +325,11 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
         const coverImageUrl = book.cover_style?.image?.[0] ?? null;
         const pageImageUrl = book.page_style?.image?.[0] ?? null;
 
-        
+
 
         if (!isActive) return;
 
-        
+
 
         useBookStore.setState({
           bookTitle: book.book_title ?? "",
@@ -372,10 +372,10 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
     return () => window.clearTimeout(timeoutId);
   }, [bookId, pages, currentPage]);
 
-  const scale       = zoom / 100;
-  const totalPages  = pages.length;
+  const scale = zoom / 100;
+  const totalPages = pages.length;
   const spreadLabel = `Page ${currentPage} of ${totalPages}`;
-  const page        = pages.find((p) => p.id === currentPage);
+  const page = pages.find((p) => p.id === currentPage);
   const activeContributorPageId = activeContributor ? findContributorPageId(pages, activeContributor) : null;
   const isContributorPageHighlighted = activeContributorPageId != null && activeContributorPageId === currentPage;
 
@@ -542,11 +542,10 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                   type="button"
                   onClick={() => setBookFormat(key)}
                   title={config.sublabel}
-                  className={`flex items-center cursor-pointer gap-1.5 px-3 py-1.5 rounded-[10px] text-[11px] font-semibold transition-all ${
-                    bookFormat === key
+                  className={`flex items-center cursor-pointer gap-1.5 px-3 py-1.5 rounded-[10px] text-[11px] font-semibold transition-all ${bookFormat === key
                       ? "bg-white text-[#b5192c] shadow-sm"
                       : "text-black hover:bg-white/10"
-                  }`}
+                    }`}
                 >
                   {/* Mini aspect-ratio icon */}
                   <FormatIcon format={key} active={bookFormat === key} />
@@ -692,11 +691,10 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                   {page && [...page.elements].sort((a, b) => b.zIndex - a.zIndex).map(el => (
                     <div key={el.id}
                       onClick={() => useBookStore.getState().setSelectedElement(el.id)}
-                      className={`flex items-center gap-2 px-2 py-2 rounded-lg mb-1 cursor-pointer transition-all ${
-                        el.id === selectedElementId
+                      className={`flex items-center gap-2 px-2 py-2 rounded-lg mb-1 cursor-pointer transition-all ${el.id === selectedElementId
                           ? "bg-[#fff0f0] border border-[#f5c0c0]"
                           : "hover:bg-[#f5f4f2] border border-transparent"
-                      }`}>
+                        }`}>
                       <span className="text-base w-5 text-center">
                         {el.type === "image" ? "🖼" : el.type === "text" ? "T" : "◻"}
                       </span>
@@ -732,11 +730,10 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                           key={contribution.id}
                           type="button"
                           onClick={() => handleSelectContributor(contribution)}
-                          className={`mb-1 flex w-full items-center justify-between gap-2 rounded-lg border px-2 py-2 text-left transition-all cursor-pointer ${
-                            isActive
+                          className={`mb-1 flex w-full items-center justify-between gap-2 rounded-lg border px-2 py-2 text-left transition-all cursor-pointer ${isActive
                               ? "border-[#b5192c] bg-[#fff0f0]"
                               : "border-transparent hover:bg-[#f5f4f2]"
-                          }`}
+                            }`}
                         >
                           <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#333]">{label}</span>
                           <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ${CONTRIBUTOR_STATUS_STYLE[status as keyof typeof CONTRIBUTOR_STATUS_STYLE]}`}>
@@ -758,11 +755,10 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                       key={tab}
                       type="button"
                       onClick={() => setContentTab(tab)}
-                      className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold capitalize transition-all cursor-pointer ${
-                        contentTab === tab
+                      className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold capitalize transition-all cursor-pointer ${contentTab === tab
                           ? "bg-[#fff0f0] text-[#b5192c]"
                           : "text-[#888] hover:bg-[#f5f4f2]"
-                      }`}
+                        }`}
                     >
                       {tab}
                     </button>
@@ -785,11 +781,10 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                             handleContentPhotoFiles(event.dataTransfer.files);
                           }
                         }}
-                        className={`flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all ${
-                          isPhotoDragOver
+                        className={`flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all ${isPhotoDragOver
                             ? "border-[#b5192c] bg-[#fff0f0]"
                             : "border-black/10 bg-[#fafafa] hover:border-[#b5192c]/40"
-                        }`}
+                          }`}
                         onClick={() => contentFileRef.current?.click()}
                       >
                         <UploadSvg />
@@ -854,16 +849,15 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
               <div
                 className="flex items-center justify-center p-8 min-h-full"
                 style={{
-                  minWidth:  `${A4_WIDTH  * scale + 64}px`,
+                  minWidth: `${A4_WIDTH * scale + 64}px`,
                   minHeight: `${A4_HEIGHT * scale + 64}px`,
                 }}
               >
                 {/* Safe-area overlay (visible guideline, non-blocking) */}
                 <div className="relative" style={{ width: `${A4_WIDTH}px`, height: `${A4_HEIGHT}px`, transform: `scale(${scale})`, transformOrigin: "center" }}>
                   <div
-                    className={`shadow-[0_2px_20px_rgba(0,0,0,0.15)] transition-transform duration-200 origin-center w-full h-full ${
-                      isContributorPageHighlighted ? "ring-4 ring-[#b5192c]/50" : ""
-                    }`}
+                    className={`shadow-[0_2px_20px_rgba(0,0,0,0.15)] transition-transform duration-200 origin-center w-full h-full ${isContributorPageHighlighted ? "ring-4 ring-[#b5192c]/50" : ""
+                      }`}
                     style={{ background: page?.background ?? "#ffffff" }}
                   >
                     <CanvasPage
@@ -921,24 +915,37 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 shrink-0">
               <div className="flex items-center gap-1.5 bg-white rounded-full px-4 py-2 shadow-lg border border-black/10">
                 <PillBtn onClick={() => setZoom(Math.max(25, zoom - 10))} title="Zoom out">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35M8 11h6"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35M8 11h6" /></svg>
                 </PillBtn>
                 <span className="text-[13px] font-medium text-[#1a1a1a] min-w-9 text-center tabular-nums">{zoom}%</span>
                 <PillBtn onClick={() => setZoom(Math.min(200, zoom + 10))} title="Zoom in">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="M21 21l-4.35-4.35M11 8v6M8 11h6" /></svg>
                 </PillBtn>
                 <span className="w-px h-4 bg-black/20 mx-2" />
                 <PillBtn onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} title="Previous page">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6" /></svg>
                 </PillBtn>
                 <span className="text-[13px] font-medium text-[#1a1a1a] whitespace-nowrap px-2">{spreadLabel}</span>
                 <PillBtn onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))} title="Next page">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6" /></svg>
                 </PillBtn>
                 <span className="w-px h-4 bg-black/20 mx-2" />
+                {/* <button onClick={addPage}
+                  className="text-xs font-semibold bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full text-gray-800 transition-colors">
+                  + Add Page
+                </button> */}
                 <button onClick={addPage}
                   className="text-xs font-semibold bg-gray-100 hover:bg-gray-200 px-3 py-1 rounded-full text-gray-800 transition-colors">
                   + Add Page
+                </button>
+                <button
+                  onClick={() => {
+                    addPage();
+                    togglePanel("content");
+                    setContentTab("photo");
+                  }}
+                  className="text-xs font-semibold bg-[#fff0f0] hover:bg-[#ffe0e0] px-3 py-1 rounded-full text-[#b5192c] transition-colors">
+                  + Add Photo Page
                 </button>
               </div>
             </div>
@@ -948,12 +955,12 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
           <div className="shrink-0 w-18 flex flex-col gap-3 py-3 px-2 bg-white rounded-2xl border border-black/6">
             <SidebarBtn icon={<ContributorsSvg />} label="Pages" onClick={() => togglePanel("contributors")} active={activePanel === "contributors"} />
             <SidebarBtn icon={<PlusContentSvg />} label="Content" onClick={() => togglePanel("content")} active={activePanel === "content"} />
-            <SidebarBtn icon={<UploadSvg />}  label="Uploads"  onClick={() => togglePanel("upload")}  active={activePanel === "upload"} />
-            <SidebarBtn icon={<TextSvg />}    label="Add Text" onClick={handleAddText} />
-            <SidebarBtn icon={<EmojiSvg />}   label="Emoji"    onClick={() => togglePanel("emoji")}   active={activePanel === "emoji"} />
+            <SidebarBtn icon={<UploadSvg />} label="Uploads" onClick={() => togglePanel("upload")} active={activePanel === "upload"} />
+            <SidebarBtn icon={<TextSvg />} label="Add Text" onClick={handleAddText} />
+            <SidebarBtn icon={<EmojiSvg />} label="Emoji" onClick={() => togglePanel("emoji")} active={activePanel === "emoji"} />
             <SidebarBtn icon={<StickerSvg />} label="Stickers" onClick={() => togglePanel("sticker")} active={activePanel === "sticker"} />
-            <SidebarBtn icon={<BgSvg />}      label="BG Color" onClick={() => togglePanel("bg")}      active={activePanel === "bg"} />
-            <SidebarBtn icon={<LayersSvg />}  label="Layers"   onClick={() => togglePanel("layers")}  active={activePanel === "layers"} />
+            <SidebarBtn icon={<BgSvg />} label="BG Color" onClick={() => togglePanel("bg")} active={activePanel === "bg"} />
+            <SidebarBtn icon={<LayersSvg />} label="Layers" onClick={() => togglePanel("layers")} active={activePanel === "layers"} />
 
             <div className="w-full h-px bg-black/6 my-0.5" />
 
@@ -984,7 +991,7 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                 className="text-[10px] border border-black/10 rounded-lg px-0.5 py-0.5 w-full text-center bg-white cursor-pointer"
                 title="Stroke Width"
               >
-                {[1,2,3,4,6,8,12,16,20].map(w => <option key={w} value={w}>{w}px</option>)}
+                {[1, 2, 3, 4, 6, 8, 12, 16, 20].map(w => <option key={w} value={w}>{w}px</option>)}
               </select>
               <span className="text-[9px] text-[#888]">Width</span>
             </div>
@@ -994,11 +1001,11 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
               <div className="w-full h-px bg-black/6 my-0.5" />
               <SidebarBtn icon={<DuplicateSvg />} label="Copy"
                 onClick={() => duplicateElement(currentPage, selectedElementId)} />
-              <SidebarBtn icon={<ForwardSvg />}   label="Forward"
+              <SidebarBtn icon={<ForwardSvg />} label="Forward"
                 onClick={() => bringForward(currentPage, selectedElementId)} />
-              <SidebarBtn icon={<BackwardSvg />}  label="Back"
+              <SidebarBtn icon={<BackwardSvg />} label="Back"
                 onClick={() => sendBackward(currentPage, selectedElementId)} />
-              <SidebarBtn icon={<DeleteSvg />}    label="Delete" danger
+              <SidebarBtn icon={<DeleteSvg />} label="Delete" danger
                 onClick={() => deleteElement(currentPage, selectedElementId)} />
             </>}
           </div>
@@ -1056,9 +1063,9 @@ function EmptyPhotos() {
   return (
     <div className="flex flex-col items-center justify-center h-32 text-[12px] text-[#c0bbb7] text-center gap-2">
       <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d0cbc7" strokeWidth="1.4">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <circle cx="8.5" cy="8.5" r="1.5"/>
-        <path d="M21 15l-5-5L5 21"/>
+        <rect x="3" y="3" width="18" height="18" rx="2" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M21 15l-5-5L5 21" />
       </svg>
       No photos yet
     </div>
@@ -1118,13 +1125,12 @@ function SidebarBtn({ icon, label, onClick, danger = false, active = false }: {
 }) {
   return (
     <button type="button" onClick={onClick}
-      className={`flex flex-col items-center justify-center gap-1 w-full rounded-xl py-2 px-1 border text-[9px] font-medium cursor-pointer transition-all active:scale-95 ${
-        active
+      className={`flex flex-col items-center justify-center gap-1 w-full rounded-xl py-2 px-1 border text-[9px] font-medium cursor-pointer transition-all active:scale-95 ${active
           ? "bg-[#fff0f0] border-[#f5c0c0] text-[#c0392b]"
           : danger
-          ? "bg-white border-black/6 text-[#c0392b] hover:bg-[#fff3f2]"
-          : "bg-white border-black/6 text-[#888] hover:bg-[#f5f4f2]"
-      }`}>
+            ? "bg-white border-black/6 text-[#c0392b] hover:bg-[#fff3f2]"
+            : "bg-white border-black/6 text-[#888] hover:bg-[#f5f4f2]"
+        }`}>
       {icon}<span>{label}</span>
     </button>
   );
@@ -1132,17 +1138,17 @@ function SidebarBtn({ icon, label, onClick, danger = false, active = false }: {
 
 // ── Icons ─────────────────────────────────────────────────────────────────
 const IC = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.65, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-const UploadSvg   = () => <svg {...IC}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
-const ContributorsSvg = () => <svg {...IC}><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>;
-const PlusContentSvg = () => <svg {...IC}><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>;
-const TextSvg     = () => <svg {...IC}><path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/></svg>;
-const EmojiSvg    = () => <svg {...IC}><circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>;
-const StickerSvg  = () => <svg {...IC}><path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10A10 10 0 012 12c0-2.76 1.12-5.26 2.93-7.07"/><path d="M12 2v10l7.07 7.07"/></svg>;
-const BgSvg       = () => <svg {...IC}><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 000 20"/><path d="M2 12h20"/></svg>;
-const LayersSvg   = () => <svg {...IC}><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>;
-const UndoSvg     = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 7v6h6"/><path d="M3 13C5.5 8 11 6 17 8s8 8 4 13"/></svg>;
-const RedoSvg     = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 7v6h-6"/><path d="M21 13C18.5 8 13 6 7 8S-1 16 3 21"/></svg>;
-const DuplicateSvg= () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>;
-const DeleteSvg   = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>;
-const ForwardSvg  = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><rect x="3" y="8" width="13" height="13" rx="2"/><path d="M8 8V5a2 2 0 012-2h9a2 2 0 012 2v9a2 2 0 01-2 2h-3"/></svg>;
-const BackwardSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><rect x="8" y="3" width="13" height="13" rx="2"/><path d="M16 16v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2h3"/></svg>;
+const UploadSvg = () => <svg {...IC}><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>;
+const ContributorsSvg = () => <svg {...IC}><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>;
+const PlusContentSvg = () => <svg {...IC}><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M12 8v8M8 12h8" /></svg>;
+const TextSvg = () => <svg {...IC}><path d="M4 7V4h16v3" /><path d="M9 20h6" /><path d="M12 4v16" /></svg>;
+const EmojiSvg = () => <svg {...IC}><circle cx="12" cy="12" r="10" /><path d="M8 13s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>;
+const StickerSvg = () => <svg {...IC}><path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10A10 10 0 012 12c0-2.76 1.12-5.26 2.93-7.07" /><path d="M12 2v10l7.07 7.07" /></svg>;
+const BgSvg = () => <svg {...IC}><circle cx="12" cy="12" r="10" /><path d="M12 2a10 10 0 000 20" /><path d="M2 12h20" /></svg>;
+const LayersSvg = () => <svg {...IC}><polygon points="12 2 2 7 12 12 22 7 12 2" /><polyline points="2 17 12 22 22 17" /><polyline points="2 12 12 17 22 12" /></svg>;
+const UndoSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 7v6h6" /><path d="M3 13C5.5 8 11 6 17 8s8 8 4 13" /></svg>;
+const RedoSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 7v6h-6" /><path d="M21 13C18.5 8 13 6 7 8S-1 16 3 21" /></svg>;
+const DuplicateSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><rect x="8" y="8" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" /></svg>;
+const DeleteSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" /></svg>;
+const ForwardSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><rect x="3" y="8" width="13" height="13" rx="2" /><path d="M8 8V5a2 2 0 012-2h9a2 2 0 012 2v9a2 2 0 01-2 2h-3" /></svg>;
+const BackwardSvg = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.65" strokeLinecap="round"><rect x="8" y="3" width="13" height="13" rx="2" /><path d="M16 16v3a2 2 0 01-2 2H5a2 2 0 01-2-2v-9a2 2 0 012-2h3" /></svg>;

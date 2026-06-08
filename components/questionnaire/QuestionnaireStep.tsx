@@ -328,7 +328,7 @@ export default function QuestionnaireStep({ inviterId, name, email, bookId, ques
                                 <div key={i} className="aspect-square rounded-xl overflow-hidden bg-gray-100 border border-gray-200 flex items-center justify-center relative">
                                     {photoPreviews[i] ? (
                                         <>
-                                            <Image src={photoPreviews[i]} alt={`Photo ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
+                                            <Image src={photoPreviews[i]} alt={`Photo ${i + 1}`} fill className="object-cover" />
                                             <button onClick={() => setPhotos(prev => prev.filter((_, idx) => idx !== i))} className="absolute top-1.5 right-1.5 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center hover:bg-black/70 transition-colors">
                                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round"><path d="M18 6L6 18M6 6l12 12" /></svg>
                                             </button>
