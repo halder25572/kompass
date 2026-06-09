@@ -481,6 +481,7 @@ export interface SubmitContributionResponse {
     success: boolean;
     message: string;
     data: {
+        message: string;
         id: number;
         name: string;
         participant_name?: string;
