@@ -1,5 +1,4 @@
 import CheckoutPayment from "@/components/payment/checkoutPayment";
-// import { CheckoutSummary } from "@/components/payment/CheckoutSummary";
 
 const CheckoutPage = () => {
     return (

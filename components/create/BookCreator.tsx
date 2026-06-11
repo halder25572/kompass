@@ -1112,45 +1112,45 @@ function Step1({
             </div>
 
             {isOccasionModalOpen && selectedOccasion && (
-                <div ref={modalOverlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-                    <div ref={modalCardRef} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[#f0edf1] bg-white shadow-2xl">
-                        <div className="flex items-start justify-between gap-4 border-b border-[#f5f2f3] px-5 py-4 sm:px-6">
-                            <div>
-                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Sub Occasion</p>
-                                <h2 className="mt-1 text-[20px] font-bold text-[#1a1a2e]">{selectedOccasionLabel}</h2>
-                            </div>
-                            <button type="button" onClick={() => setIsOccasionModalOpen(false)}
-                                className="flex h-9 w-9 items-center justify-center cursor-pointer rounded-full border border-[#e5e7eb] text-[#9CA3AF] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                                </svg>
-                            </button>
+            <div ref={modalOverlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                <div ref={modalCardRef} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[#f0edf1] bg-white shadow-2xl">
+                    <div className="flex items-start justify-between gap-4 border-b border-[#f5f2f3] px-5 py-4 sm:px-6">
+                        <div>
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Sub Occasion</p>
+                            <h2 className="mt-1 text-[20px] font-bold text-[#1a1a2e]">{selectedOccasionLabel}</h2>
                         </div>
-                        <div className="p-5 sm:p-6">
-                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                {selectedItems.map((tab) => {
-                                    const isSelected = form.selectedSubTab === tab.name;
-                                    return (
-                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
-                                            className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
-                                            <div className="flex items-center justify-between gap-3">
-                                                <span className="text-[14px] font-semibold">{tab.name}</span>
-                                                {isSelected && (
-                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                        <polyline points="20 6 9 17 4 12" />
-                                                    </svg>
-                                                )}
-                                            </div>
-                                            <p className={`mt-1 text-[12px] ${isSelected ? "text-[#B91C1C]/80" : "text-[#9CA3AF]"}`}>
-                                                Select this item to continue.
-                                            </p>
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                        <button type="button" onClick={() => setIsOccasionModalOpen(false)}
+                            className="flex h-9 w-9 items-center justify-center cursor-pointer rounded-full border border-[#e5e7eb] text-[#9CA3AF] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div className="p-5 sm:p-6">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            {selectedItems.map((tab) => {
+                                const isSelected = form.selectedSubTab === tab.name;
+                                return (
+                                    <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
+                                        className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-[14px] font-semibold">{tab.name}</span>
+                                            {isSelected && (
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                    <polyline points="20 6 9 17 4 12" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                        <p className={`mt-1 text-[12px] ${isSelected ? "text-[#B91C1C]/80" : "text-[#9CA3AF]"}`}>
+                                            Select this item to continue.
+                                        </p>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
+            </div>
             )}
 
             <BottomNav
@@ -1255,7 +1255,7 @@ function Step2({ onNext, onBack, subTab, questions, onQuestionsChange }: {
     );
 }
 
-// ── Step 3: Choose Theme ──────────────────────────────────
+// ── Step 3: Choose Theme ──────────────
 function Step3({
     onNext,
     onBack,
@@ -2198,6 +2198,7 @@ export default function BookCreator() {
                 book_page_style_id: resolvedThemeId,
                 cover_page_style_id: resolvedCoverId,
                 questions: selectedQuestions,
+                pages_per_contributor: 2,
             });
 
             // const inviteLink = getCleanInviteLink(result.data?.invite_link || (result as { invite_link?: string }).invite_link || "");
@@ -2266,13 +2267,11 @@ export default function BookCreator() {
                 selectedThemeId?: number;
                 selectedCoverId?: number;
                 bookDraft?: BookDraft | null;
-                questionsBySubOccasion?: QuestionnaireMap;
                 accountDraft?: AccountDraft;
                 inviteDraft?: InviteDraft;
             };
             if (typeof parsed.selectedThemeId === "number") setSelectedThemeId(parsed.selectedThemeId);
             if (typeof parsed.selectedCoverId === "number") setSelectedCoverId(parsed.selectedCoverId);
-            if (parsed.questionsBySubOccasion) setQuestionsBySubOccasion(parsed.questionsBySubOccasion);
             if (parsed.accountDraft) {
                 setAccountDraft({
                     name: parsed.accountDraft.name ?? "",

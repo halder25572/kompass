@@ -330,6 +330,7 @@ export interface CreateBookPayload {
     cover_page_style_id: number | null;
     expire_date?: string;
     questions?: string[] | null;
+    pages_per_contributor?: number;
 }
 
 export interface CreateBookResponse {
