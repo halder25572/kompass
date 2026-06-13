@@ -3,9 +3,15 @@
 
 import { memo, useRef, useEffect, useState, lazy, Suspense } from "react";
 
+import { usePlaceOrder } from "@/features/checkout/hooks/usePlaceOrder";
+import { useStripeSession } from "@/features/checkout/hooks/useStripeSession";
+import { toast } from "sonner";
+import { PlaceOrderPayload } from "@/types/api";
+
 interface PaymentModalProps {
     onClose: () => void;
     amount?: number;
+    checkoutData?: PlaceOrderPayload;
 }
 
 const PAYMENT_METHODS = [
@@ -27,11 +33,15 @@ const PAYMENT_METHODS = [
 
 const StripeForm = lazy(() => import("./StripeForm").then((m) => ({ default: m.StripeForm })));
 
-export const PaymentModal = memo(function PaymentModal({ onClose, amount }: PaymentModalProps & { amount?: number }) {
+export const PaymentModal = memo(function PaymentModal({ onClose, amount, checkoutData }: PaymentModalProps) {
     const overlayRef = useRef<HTMLDivElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
     const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
-    const [showStripe, setShowStripe] = useState(false);
+    
+    const { mutateAsync: placeOrder, isPending: isPlacingOrder } = usePlaceOrder();
+    const { mutateAsync: createSession, isPending: isCreatingSession } = useStripeSession();
+    
+    const isProcessing = isPlacingOrder || isCreatingSession;
 
     useEffect(() => {
         const overlay = overlayRef.current;
@@ -105,9 +115,8 @@ export const PaymentModal = memo(function PaymentModal({ onClose, amount }: Paym
                 <div className="px-5 py-4 flex flex-col gap-2.5">
                     <p className="text-[12px] font-semibold text-gray-500 mb-1">Payment Method</p>
 
-                    {!showStripe ? (
-                        PAYMENT_METHODS.map((method) => (
-                            <label
+                    {PAYMENT_METHODS.map((method) => (
+                        <label
                                 key={method.id}
                                 className={`flex items-center gap-3 px-3.5 py-3 rounded-xl border cursor-pointer hover:border-gray-300 transition-colors ${selectedMethod === method.id ? 'border-[#BF003A] bg-[#FFF8F9]' : ''}`}
                                 onClick={() => setSelectedMethod(method.id)}
@@ -123,46 +132,59 @@ export const PaymentModal = memo(function PaymentModal({ onClose, amount }: Paym
                                     <p className="text-[13px] font-semibold text-[#1A1A2E]">{method.label}</p>
                                     <p className="text-[11px] text-gray-400">{method.sub}</p>
                                 </div>
-                                <input type="radio" name="payment" value={method.id} className="sr-only" checked={selectedMethod === method.id} readOnly />
-                            </label>
-                        ))
-                    ) : (
-                        <Suspense fallback={<div className="py-6">Loading payment form…</div>}>
-                            <StripeForm amount={amount ?? 0} onSuccess={() => onClose()} onCancel={() => setShowStripe(false)} />
-                        </Suspense>
-                    )}
+                        <input type="radio" name="payment" value={method.id} className="sr-only" checked={selectedMethod === method.id} readOnly />
+                    </label>
+                ))}
                 </div>
 
                 {/* CTA */}
                 <div className="px-5 pb-5">
                     <div>
-                        {!showStripe ? (
-                            <button
-                                onClick={() => {
-                                    if (selectedMethod === 'stripe') {
-                                        setShowStripe(true);
-                                    } else if (selectedMethod === 'paypal') {
-                                        // Will implement PayPal next
-                                        window.alert('PayPal flow will open (coming next)');
-                                    } else {
-                                        window.alert('Please select a payment method');
+                        <button
+                            disabled={isProcessing}
+                            onClick={async () => {
+                                if (selectedMethod === 'stripe') {
+                                    if (!checkoutData) {
+                                        toast.error("Missing checkout details.");
+                                        return;
                                     }
-                                }}
-                                className="w-full cursor-pointer py-3.5 rounded-xl text-white text-[14px] font-bold hover:opacity-90 active:scale-95 transition-all"
-                                style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
-                            >
-                                Continue
-                            </button>
-                        ) : (
-                            <div className="py-2">
-                                <button
-                                    onClick={() => setShowStripe(false)}
-                                    className="w-full py-3.5 rounded-xl border font-semibold text-[14px]"
-                                >
-                                    Cancel
-                                </button>
-                            </div>
-                        )}
+                                    if (!checkoutData.book_id) {
+                                        toast.error("Book ID is missing. Please select a book to order.");
+                                        return;
+                                    }
+                                    if (!checkoutData.email) {
+                                        toast.error("Email is required.");
+                                        return;
+                                    }
+                                    try {
+                                        // 1. Place the order
+                                        const orderResponse = await placeOrder(checkoutData);
+                                        const orderId = orderResponse.data.id;
+
+                                        // 2. Create Stripe Session
+                                        const sessionResponse = await createSession({ order_id: orderId });
+                                        
+                                        // 3. Redirect to Stripe Checkout
+                                        if (sessionResponse.data?.checkout_url) {
+                                            window.location.href = sessionResponse.data.checkout_url;
+                                        } else {
+                                            toast.error("Failed to get checkout URL from Stripe.");
+                                        }
+                                    } catch (error: any) {
+                                        console.error("Payment flow error:", error);
+                                        toast.error(error.message || "Failed to process payment");
+                                    }
+                                } else if (selectedMethod === 'paypal') {
+                                    window.alert('PayPal flow will open (coming next)');
+                                } else {
+                                    window.alert('Please select a payment method');
+                                }
+                            }}
+                            className="w-full cursor-pointer py-3.5 rounded-xl text-white text-[14px] font-bold hover:opacity-90 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                            style={{ background: "linear-gradient(to right, #BF003A, #59001C)" }}
+                        >
+                            {isProcessing ? "Processing..." : "Continue"}
+                        </button>
                     </div>
                     <div className="flex items-center justify-center gap-1.5 mt-3">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2">

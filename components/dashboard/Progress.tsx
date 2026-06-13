@@ -560,12 +560,14 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
           >
             Preview
           </button>
-          <button
-            onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
-            className="px-4 cursor-pointer py-2 text-sm rounded-lg bg-[#8B0A2A] text-white"
-          >
-            Confirm Order
-          </button>
+          <Link href={`/checkout?bookId=${bookId}`}>
+            <button
+              onMouseEnter={onBtnEnter} onMouseLeave={onBtnLeave}
+              className="px-4 cursor-pointer py-2 text-sm rounded-lg bg-[#8B0A2A] text-white transition-colors hover:bg-[#59001C]"
+            >
+              Confirm Order
+            </button>
+          </Link>
         </div>
       </div>
 

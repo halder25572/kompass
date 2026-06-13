@@ -6,18 +6,20 @@ import { useRef, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import dynamic from "next/dynamic";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Konva from "konva";
 import { Theme, Categories } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
-import { useBookStore, type BookPage } from "@/store/useBookStore";
-import { fetchBookDetails, fetchBookPageStyles, fetchCoverPageStyles } from "@/services/api";
+import { useBookStore, type BookPage, OCCASION_THEMES } from "@/store/useBookStore";
+import { fetchBookDetails, fetchBookPageStyles, fetchCoverPageStyles, uploadFinalPdf } from "@/services/api";
 import { useBookContributionsQuery } from "@/features/books/hooks/services";
 import { getContributionDisplayName } from "@/lib/contributor";
 import type { Contribution } from "@/types/api";
 import CanvasPage from "./CanvasPage";
 import Toolbar from "./Toolbar";
 import { loadBookEditorState, persistBookEditorState } from "./utils/persistEditorState";
+import { exportBookToPdfBlob } from "./utils/exportPdf";
+import { toast } from "sonner";
 
 // ── Next.js SSR-safe dynamic import (picker uses window) ─────────────────
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
@@ -222,6 +224,35 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   const fmt = FORMATS[bookFormat];
   const A4_WIDTH = fmt.width;
   const A4_HEIGHT = fmt.height;
+
+  const router = useRouter();
+  const [isFinalizing, setIsFinalizing] = useState(false);
+
+  const handleFinalizeBook = async () => {
+    if (isFinalizing) return;
+    setIsFinalizing(true);
+    const toastId = toast.loading("Generating PDF and finalizing book...");
+    try {
+      const { pages, occasion, subOccasion } = useBookStore.getState();
+      const theme = (subOccasion && OCCASION_THEMES[subOccasion]) || (occasion && OCCASION_THEMES[occasion]) || null;
+      
+      const blob = await exportBookToPdfBlob(pages, A4_WIDTH, A4_HEIGHT, theme);
+      
+      const res = await uploadFinalPdf(bookId, blob);
+      
+      if (res.success) {
+        toast.success("Book finalized and saved successfully!", { id: toastId });
+        router.push("/dashboard");
+      } else {
+        throw new Error(res.message || "Failed to finalize book");
+      }
+    } catch (error: any) {
+      console.error("Failed to finalize book:", error);
+      toast.error(error?.message || "An error occurred while finalizing the book.", { id: toastId });
+    } finally {
+      setIsFinalizing(false);
+    }
+  };
 
   const panelFileRef = useRef<HTMLInputElement>(null);
   const contentFileRef = useRef<HTMLInputElement>(null);
@@ -564,6 +595,16 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
             <button onClick={redo} title="Redo (Ctrl+Y)"
               className="flex items-center cursor-pointer justify-center w-8 h-8 rounded-lg bg-white/20 hover:bg-white/30 text-black transition-all">
               <RedoSvg />
+            </button>
+
+            <span className="w-px h-5 bg-white/30 mx-1" />
+
+            <button
+              onClick={handleFinalizeBook}
+              disabled={isFinalizing}
+              className="flex items-center cursor-pointer gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white hover:opacity-90 active:scale-95 font-semibold text-[13px] rounded-xl py-1.5 px-4 transition-all disabled:opacity-60 disabled:cursor-not-allowed h-8 shadow-md"
+            >
+              {isFinalizing ? "Finalizing..." : "Finalize Book"}
             </button>
           </div>
         </header>

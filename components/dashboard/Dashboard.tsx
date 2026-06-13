@@ -98,22 +98,33 @@ const DashboardPageMain: FC = () => {
       ? book.pages
       : typeof book.page_count === "number"
         ? book.page_count
-        : 0;
+        : typeof (book as any).pages_count === "number"
+          ? (book as any).pages_count
+          : 0;
 
-    const submitted = typeof (book as any).submitted === "number" ? (book as any).submitted : undefined;
-    const totalPages = typeof book.page_count === "number" ? book.page_count : (typeof book.pages === "number" ? book.pages : undefined);
+    const submitted = typeof (book as any).submitted === "number" 
+      ? (book as any).submitted 
+      : typeof (book as any).pages_count === "number"
+        ? (book as any).pages_count
+        : undefined;
 
-    const dueDate = typeof book.dueDate === "string"
-      ? book.dueDate
-      : typeof book.due_date === "string"
-        ? book.due_date
-        : typeof book.updated_at === "string"
-          ? new Date(book.updated_at).toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-          })
-          : "No due date";
+    const totalPages = typeof book.page_count === "number" 
+      ? book.page_count 
+      : typeof book.pages === "number" 
+        ? book.pages 
+        : typeof (book as any).min_page_count === "number"
+          ? (book as any).min_page_count
+          : undefined;
+
+    const dueDate = typeof book.expire_date === "string" && book.expire_date.trim() !== ""
+      ? new Date(book.expire_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      : typeof book.dueDate === "string"
+        ? book.dueDate
+        : typeof book.due_date === "string"
+          ? book.due_date
+          : typeof book.created_at === "string"
+            ? new Date(book.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+            : "No due date";
 
     const progress = typeof book.progress === "number"
       ? book.progress

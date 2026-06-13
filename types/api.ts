@@ -691,9 +691,10 @@ export interface DeliveryTypesResponse {
 
 // ── Order Preview Interfaces ─────────────────────────────────────────────────
 export interface OrderPreviewPayload {
-    // Add fields based on your backend requirements
-    // Common fields might include: book_id, delivery_type_id, country_code, etc.
-    [key: string]: unknown;
+    book_id: number;
+    delivery_type_id: number;
+    country_code?: string;
+    coupon_code?: string;
 }
 
 export interface OrderPreviewData {
@@ -709,6 +710,75 @@ export interface OrderPreviewResponse {
     success: boolean;
     message: string;
     data: OrderPreviewData;
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+// ── Place Order Interfaces ────────────────────────────────────────────────────
+export interface PlaceOrderPayload {
+    book_id: number;
+    delivery_type_id: number;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone?: string;
+    street_house_number: string;
+    postal_code: string;
+    city: string;
+    country_name: string;
+    coupon_code?: string;
+}
+
+export interface PlaceOrderData {
+    id: number;
+    order_number: string;
+    total_amount: number;
+    currency: string;
+    payment_method: string | null;
+    status: string;
+}
+
+export interface PlaceOrderResponse {
+    success: boolean;
+    message: string;
+    data: PlaceOrderData;
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+// ── Stripe Payment Interfaces ────────────────────────────────────────────────
+export interface CreateStripeSessionPayload {
+    order_id: string | number;
+}
+
+export interface StripeSessionData {
+    session_id: string;
+    checkout_url: string;
+}
+
+export interface CreateStripeSessionResponse {
+    success: boolean;
+    message: string;
+    data: StripeSessionData;
+    meta: Record<string, unknown>;
+    code: number;
+}
+
+export interface VerifyStripeSessionPayload {
+    session_id: string;
+}
+
+export interface VerifyStripeSessionData {
+    order_number: string;
+    total_amount: string | number;
+    payment_method: string;
+    receipt_email: string;
+}
+
+export interface VerifyStripeSessionResponse {
+    success: boolean;
+    message: string;
+    data: VerifyStripeSessionData;
     meta: Record<string, unknown>;
     code: number;
 }

@@ -1,4 +1,5 @@
 import CheckoutPayment from "@/components/payment/checkoutPayment";
+import { Suspense } from "react";
 
 const CheckoutPage = () => {
     return (
@@ -7,7 +8,9 @@ const CheckoutPage = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Payment Section */}
                     <div className="lg:col-span-2">
-                        <CheckoutPayment />
+                        <Suspense fallback={<div>Loading checkout...</div>}>
+                            <CheckoutPayment />
+                        </Suspense>
                     </div>
                 </div>
             </div>

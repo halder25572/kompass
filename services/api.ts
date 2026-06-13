@@ -49,6 +49,12 @@ import {
     DeliveryTypesResponse,
     OrderPreviewPayload,
     OrderPreviewResponse,
+    PlaceOrderPayload,
+    PlaceOrderResponse,
+    CreateStripeSessionPayload,
+    CreateStripeSessionResponse,
+    VerifyStripeSessionPayload,
+    VerifyStripeSessionResponse,
 } from "@/types/api";
 // ContributionsResponse type remains in types for other modules; not imported here.
 
@@ -100,6 +106,12 @@ export type {
     DeliveryTypesResponse,
     OrderPreviewPayload,
     OrderPreviewResponse,
+    PlaceOrderPayload,
+    PlaceOrderResponse,
+    CreateStripeSessionPayload,
+    CreateStripeSessionResponse,
+    VerifyStripeSessionPayload,
+    VerifyStripeSessionResponse,
 };
 
 type ApiErrorShape = {
@@ -107,6 +119,7 @@ type ApiErrorShape = {
     errors?: Record<string, string[] | string>;
 };
 
+// helper function to get api error message
 function getApiErrorMessage(result: unknown, fallback: string): string {
     const parsed = result as ApiErrorShape | null;
 
@@ -127,6 +140,7 @@ function getApiErrorMessage(result: unknown, fallback: string): string {
     return fallback;
 }
 
+// get base url from env
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_PUBLIC_URL || "";
 
 function getAuthToken() {
@@ -430,10 +444,6 @@ export async function updateProfileUser(
 export async function updateLanguageUser(
     payload: UpdateLanguagePayload
 ): Promise<UpdateLanguageResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-    }
-
     const token = getAuthToken();
     if (!token) {
         throw new Error("Authentication token is missing.");
@@ -461,7 +471,7 @@ export async function updateLanguageUser(
     let lastError = "Failed to update language";
 
     for (const attempt of attempts) {
-        const response = await fetch(`${BASE_URL}/user/update_language`, {
+        const response = await fetch(`/api/user/update_language`, {
             method: "POST",
             cache: "no-store",
             headers: attempt.headers,
@@ -532,29 +542,6 @@ export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
     return result;
 }
 
-// New
-// export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
-//     if (!BASE_URL) {
-//         throw new Error("Base URL is missing.");
-//     }
-//     const token = getAuthToken();
-
-//     const response = await fetch(`/api/user/book-page-styles`, {
-//         method: "GET",
-//         headers: {
-//             "Content-Type": "application/json",
-//             ...(token ? { Authorization: `Bearer ${token}` } : {}),
-//         },
-//     });
-
-//     const result = (await response.json()) as BookPageStylesResponse;
-
-//     if (!response.ok || !result.success) {
-//         return { success: false, message: result?.message ?? "", data: [], meta: {}, code: response.status };
-//     }
-
-//     return result;
-// }
 
 export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
     const token = getAuthToken();
@@ -580,35 +567,13 @@ export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
     return result;
 }
 
-// New
-// export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
-//     if (!BASE_URL) {
-//         throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-//     }
-//     const token = getAuthToken();
 
-//     const response = await fetch(`/api/user/cover-page`, {
-//         method: "GET",
-//         headers: {
-//             "Content-Type": "application/json",
-//             ...(token ? { Authorization: `Bearer ${token}` } : {}),
-//         },
-//     });
-
-//     const result = (await response.json()) as CoverPageStylesResponse;
-
-//     if (!response.ok || !result.success) {
-//         throw new Error(result?.message || "Failed to load cover page styles");
-//     }
-
-//     return result;
-// }
 
 // New
 export async function fetchBooks(): Promise<BooksResponse> {
     const token = getAuthToken();
 
-    const response = await fetch(`${BASE_URL}/user/books`, {
+    const response = await fetch(`/api/user/books`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -1076,13 +1041,9 @@ export async function submitContactMessage(payload: ContactPayload): Promise<Con
 
 // Apply Coupon API (used in order preview page) - throws on failure so UI can show error message
 export async function applyCoupon(payload: ApplyCouponPayload): Promise<AppliedCouponResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-    }
-
     const token = getAuthToken();
 
-    const response = await fetch(`${BASE_URL}/coupons/apply`, {
+    const response = await fetch(`/api/coupons/apply`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -1124,13 +1085,9 @@ export async function fetchDeliveryTypes(countryCode: string): Promise<DeliveryT
 
 // Order Preview API
 export async function fetchOrderPreview(payload: OrderPreviewPayload): Promise<OrderPreviewResponse> {
-    if (!BASE_URL) {
-        throw new Error("Base URL is missing. Set NEXT_PUBLIC_BASE_URL in .env");
-    }
-
     const token = getAuthToken();
 
-    const response = await fetch(`${BASE_URL}/user/orders/preview`, {
+    const response = await fetch(`/api/user/orders/preview`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -1307,4 +1264,118 @@ export async function uploadFinalPdf(bookId: string | number, file: Blob): Promi
     const finalPdfPath = result?.data?.final_pdf_path ?? result?.data?.url ?? result?.url ?? result?.path ?? "";
 
     return { success: result.success ?? true, message: result.message, url: finalPdfPath, data: result?.data ?? result, code: result?.code ?? response.status };
+}
+
+// Place Order API — creates a new order on the backend
+export async function placeOrder(payload: PlaceOrderPayload): Promise<PlaceOrderResponse> {
+    if (!payload.book_id) throw new Error("Book ID is required.");
+    if (!payload.delivery_type_id) throw new Error("Delivery type is required.");
+
+    const token = getAuthToken();
+    if (!token) throw new Error("Authentication token is missing. Please log in again.");
+
+    // Build as form-data to match what the backend expects
+    const formData = new FormData();
+    (Object.keys(payload) as Array<keyof PlaceOrderPayload>).forEach((key) => {
+        const value = payload[key];
+        if (value !== undefined && value !== null && value !== "") {
+            formData.append(key, String(value));
+        }
+    });
+
+    const response = await fetch(`/api/user/orders`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const result = await safeParseJson<PlaceOrderResponse>(response);
+
+    if (!response.ok) {
+        throw new Error(
+            result ? getApiErrorMessage(result, result.message || `Failed to place order (HTTP ${response.status})`) : `Failed to place order (HTTP ${response.status})`
+        );
+    }
+
+    if (!result) throw new Error("Server returned an empty response when placing order.");
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to place order"));
+    }
+
+    return result;
+}
+
+// Create Stripe Checkout Session API
+export async function createStripeSession(payload: CreateStripeSessionPayload): Promise<CreateStripeSessionResponse> {
+    if (!payload.order_id) throw new Error("Order ID is required.");
+
+    const token = getAuthToken();
+    if (!token) throw new Error("Authentication token is missing. Please log in again.");
+
+    // Build as form-data to match what the backend expects
+    const formData = new FormData();
+    formData.append("order_id", String(payload.order_id));
+
+    const response = await fetch(`/api/user/payment/stripe/session`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const result = await safeParseJson<CreateStripeSessionResponse>(response);
+
+    if (!response.ok) {
+        throw new Error(
+            result ? getApiErrorMessage(result, result.message || `Failed to create Stripe session (HTTP ${response.status})`) : `Failed to create Stripe session (HTTP ${response.status})`
+        );
+    }
+
+    if (!result) throw new Error("Server returned an empty response when creating Stripe session.");
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to create Stripe session"));
+    }
+
+    return result;
+}
+
+// Verify Stripe Checkout Session API
+export async function verifyStripeSession(payload: VerifyStripeSessionPayload): Promise<VerifyStripeSessionResponse> {
+    if (!payload.session_id) throw new Error("Session ID is required.");
+
+    const token = getAuthToken();
+    if (!token) throw new Error("Authentication token is missing. Please log in again.");
+
+    // Build as form-data to match what the backend expects
+    const formData = new FormData();
+    formData.append("session_id", String(payload.session_id));
+
+    const response = await fetch(`/api/user/payment/stripe/verify`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+    });
+
+    const result = await safeParseJson<VerifyStripeSessionResponse>(response);
+
+    if (!response.ok) {
+        throw new Error(
+            result ? getApiErrorMessage(result, result.message || `Failed to verify payment (HTTP ${response.status})`) : `Failed to verify payment (HTTP ${response.status})`
+        );
+    }
+
+    if (!result) throw new Error("Server returned an empty response when verifying payment.");
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to verify payment"));
+    }
+
+    return result;
 }

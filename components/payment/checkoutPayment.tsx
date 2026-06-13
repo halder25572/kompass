@@ -3,6 +3,7 @@
 import { useState, memo, lazy, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 // Lazy load payment modal for faster initial load
 const PaymentModal = lazy(() => import('./PaymentModal').then(m => ({ default: m.PaymentModal })));
@@ -15,12 +16,14 @@ const ShippingForm = memo(function ShippingForm({
     postalCode,
     city,
     country,
+    email,
     onFirstNameChange,
     onLastNameChange,
     onStreetChange,
     onPostalCodeChange,
     onCityChange,
     onCountryChange,
+    onEmailChange,
 }: {
     firstName: string;
     lastName: string;
@@ -28,12 +31,14 @@ const ShippingForm = memo(function ShippingForm({
     postalCode: string;
     city: string;
     country: string;
+    email: string;
     onFirstNameChange: (v: string) => void;
     onLastNameChange: (v: string) => void;
     onStreetChange: (v: string) => void;
     onPostalCodeChange: (v: string) => void;
     onCityChange: (v: string) => void;
     onCountryChange: (v: string) => void;
+    onEmailChange: (v: string) => void;
 }) {
     const InputClass = 'w-full border border-gray-200 rounded-lg px-3 py-2.5 text-[14px] text-gray-800 outline-none focus:border-[#BF003A] focus:ring-1 focus:ring-[#BF003A]/20 transition-all bg-white placeholder-gray-400';
 
@@ -69,6 +74,17 @@ const ShippingForm = memo(function ShippingForm({
                     onChange={(e) => onStreetChange(e.target.value)}
                     className={InputClass}
                     placeholder="Street + House Number"
+                />
+            </div>
+
+            <div className="mb-4">
+                <label className="block text-[12px] font-medium text-gray-500 mb-1.5">Email</label>
+                <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => onEmailChange(e.target.value)}
+                    className={InputClass}
+                    placeholder="Email Address"
                 />
             </div>
 
@@ -169,8 +185,12 @@ const DeliveryOption = memo(function DeliveryOption({
 });
 
 export default function CheckoutPayment() {
+    const searchParams = useSearchParams();
+    const bookId = searchParams.get('bookId');
+
     const [firstName, setFirstName] = useState('Jane');
     const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
     const [street, setStreet] = useState('Musterstraße 123');
     const [postalCode, setPostalCode] = useState('10115');
     const [city, setCity] = useState('Berlin');
@@ -210,12 +230,14 @@ export default function CheckoutPayment() {
                             postalCode={postalCode}
                             city={city}
                             country={country}
+                            email={email}
                             onFirstNameChange={setFirstName}
                             onLastNameChange={setLastName}
                             onStreetChange={setStreet}
                             onPostalCodeChange={setPostalCode}
                             onCityChange={setCity}
                             onCountryChange={setCountry}
+                            onEmailChange={setEmail}
                         />
                         <DeliveryOption delivery={delivery} onDeliveryChange={setDelivery} />
                     </div>
@@ -290,7 +312,22 @@ export default function CheckoutPayment() {
 
             {showPayment && (
                 <Suspense fallback={<div className="fixed inset-0 z-50 bg-black/45" />}>
-                    <PaymentModal amount={total} onClose={() => setShowPayment(false)} />
+                    <PaymentModal 
+                        amount={total} 
+                        onClose={() => setShowPayment(false)} 
+                        checkoutData={{
+                            book_id: Number(bookId),
+                            delivery_type_id: delivery === 'express' ? 2 : 1,
+                            first_name: firstName,
+                            last_name: lastName,
+                            email,
+                            street_house_number: street,
+                            postal_code: postalCode,
+                            city,
+                            country_name: country,
+                            coupon_code: coupon || undefined,
+                        }}
+                    />
                 </Suspense>
             )}
             <style>{`

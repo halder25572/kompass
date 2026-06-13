@@ -335,395 +335,395 @@ const questionnairesBySubOccasion: Record<
     string,
     { id: number; question: string; placeholder: string; checked?: boolean }[]
 > = {
- 
+
     // ── 1. BIRTHDAY ──────────────────────────────────────────
     Birthday: [
-        { id: 1,  question: "My favorite memory with you:",                                                              placeholder: "Share one moment that always makes you smile." },
-        { id: 2,  question: "A moment when we laughed (or cried) the hardest together:",                                 placeholder: "What made it unforgettable?" },
-        { id: 3,  question: "Something I truly admire about you:",                                                       placeholder: "A quality or habit that inspires me." },
-        { id: 4,  question: "Something you taught me without realizing it:",                                             placeholder: "A lesson I'm grateful for." },
-        { id: 5,  question: "Three words that describe you perfectly:",                                                  placeholder: "Choose the words that capture your essence." },
-        { id: 6,  question: "A challenge you handled in a way I found impressive:",                                      placeholder: "Why it inspired me." },
-        { id: 7,  question: "Something I hope you continue doing, because it suits you:",                                placeholder: "What makes you uniquely you." },
-        { id: 8,  question: "If we could explore any city together with no time limits, I would pick… because…",         placeholder: "Your dream travel moment." },
-        { id: 9,  question: "A moment I would love to relive with you:",                                                 placeholder: "And why I would choose it again." },
-        { id: 10, question: "The best invention ever — and why:",                                                        placeholder: "A fun and creative question." },
-        { id: 11, question: "If I had to choose a theme song for you, it would be… because…",                           placeholder: "What song matches your personality?" },
-        { id: 12, question: "If we could spend one day together in any moment in history, I would choose… because…",    placeholder: "A time travel memory." },
-        { id: 13, question: "If you were a season of the year, I would say you are… because…",                          placeholder: "Your energy and vibe." },
-        { id: 14, question: "Something I would love to do with you in the next years:",                                  placeholder: "A wish for the future." },
-        { id: 15, question: "If we had dinner together, this is what I would choose for you:",                           placeholder: "Your ideal meal, drink, or setting." },
-        { id: 16, question: "My personal birthday message to you:",                                                      placeholder: "A heartfelt closing wish.", checked: true },
+        { id: 1, question: "My favorite memory with you:", placeholder: "Share one moment that always makes you smile." },
+        { id: 2, question: "A moment when we laughed (or cried) the hardest together:", placeholder: "What made it unforgettable?" },
+        { id: 3, question: "Something I truly admire about you:", placeholder: "A quality or habit that inspires me." },
+        { id: 4, question: "Something you taught me without realizing it:", placeholder: "A lesson I'm grateful for." },
+        { id: 5, question: "Three words that describe you perfectly:", placeholder: "Choose the words that capture your essence." },
+        { id: 6, question: "A challenge you handled in a way I found impressive:", placeholder: "Why it inspired me." },
+        { id: 7, question: "Something I hope you continue doing, because it suits you:", placeholder: "What makes you uniquely you." },
+        { id: 8, question: "If we could explore any city together with no time limits, I would pick… because…", placeholder: "Your dream travel moment." },
+        { id: 9, question: "A moment I would love to relive with you:", placeholder: "And why I would choose it again." },
+        { id: 10, question: "The best invention ever — and why:", placeholder: "A fun and creative question." },
+        { id: 11, question: "If I had to choose a theme song for you, it would be… because…", placeholder: "What song matches your personality?" },
+        { id: 12, question: "If we could spend one day together in any moment in history, I would choose… because…", placeholder: "A time travel memory." },
+        { id: 13, question: "If you were a season of the year, I would say you are… because…", placeholder: "Your energy and vibe." },
+        { id: 14, question: "Something I would love to do with you in the next years:", placeholder: "A wish for the future." },
+        { id: 15, question: "If we had dinner together, this is what I would choose for you:", placeholder: "Your ideal meal, drink, or setting." },
+        { id: 16, question: "My personal birthday message to you:", placeholder: "A heartfelt closing wish.", checked: true },
     ],
- 
+
     // ── 2. SCHOOL ────────────────────────────────────────────
- 
+
     // School Yearbook  (was "Class Book" — kept both keys below)
     "School Yearbook": [
-        { id: 1,  question: "My favorite memory from this school year:",                      placeholder: "A moment that always brings a smile when I think back." },
-        { id: 2,  question: "A moment in class I will never forget:",                         placeholder: "Something funny, unexpected, or meaningful that stayed with me." },
-        { id: 3,  question: "Something that made our class unique this year:",                placeholder: "A habit, a vibe, or a shared moment that stood out." },
-        { id: 4,  question: "A teacher who made a positive impact on me:",                    placeholder: "And what they did that made a difference." },
-        { id: 5,  question: "Something I learned this year that surprised me:",               placeholder: "Either in school or about myself." },
-        { id: 6,  question: "A challenge I overcame or something I improved at:",             placeholder: "A moment of growth I'm proud of." },
-        { id: 7,  question: "A moment I felt proud of myself this year:",                     placeholder: "Big or small — anything that mattered to you." },
-        { id: 8,  question: "A project or activity I really enjoyed:",                        placeholder: "And why it stood out from the rest." },
-        { id: 9,  question: "A funny moment we experienced as a class:",                      placeholder: "Something that still makes me laugh." },
-        { id: 10, question: "A moment that showed how well our class worked together:",       placeholder: "A time when teamwork really mattered." },
-        { id: 11, question: "A friendship that became important to me this year:",            placeholder: "And what it meant to me." },
-        { id: 12, question: "Three words that describe this school year for me:",             placeholder: "Choose the ones that fit best." },
-        { id: 13, question: "Something I hope for next school year:",                         placeholder: "A wish, a goal, or a dream." },
-        { id: 14, question: "A message to my future self (or next year's class):",           placeholder: "Something I want to remember when I look back." },
-        { id: 15, question: "The best invention ever — and why:",                             placeholder: "A fun one to end with." },
+        { id: 1, question: "My favorite memory from this school year:", placeholder: "A moment that always brings a smile when I think back." },
+        { id: 2, question: "A moment in class I will never forget:", placeholder: "Something funny, unexpected, or meaningful that stayed with me." },
+        { id: 3, question: "Something that made our class unique this year:", placeholder: "A habit, a vibe, or a shared moment that stood out." },
+        { id: 4, question: "A teacher who made a positive impact on me:", placeholder: "And what they did that made a difference." },
+        { id: 5, question: "Something I learned this year that surprised me:", placeholder: "Either in school or about myself." },
+        { id: 6, question: "A challenge I overcame or something I improved at:", placeholder: "A moment of growth I'm proud of." },
+        { id: 7, question: "A moment I felt proud of myself this year:", placeholder: "Big or small — anything that mattered to you." },
+        { id: 8, question: "A project or activity I really enjoyed:", placeholder: "And why it stood out from the rest." },
+        { id: 9, question: "A funny moment we experienced as a class:", placeholder: "Something that still makes me laugh." },
+        { id: 10, question: "A moment that showed how well our class worked together:", placeholder: "A time when teamwork really mattered." },
+        { id: 11, question: "A friendship that became important to me this year:", placeholder: "And what it meant to me." },
+        { id: 12, question: "Three words that describe this school year for me:", placeholder: "Choose the ones that fit best." },
+        { id: 13, question: "Something I hope for next school year:", placeholder: "A wish, a goal, or a dream." },
+        { id: 14, question: "A message to my future self (or next year's class):", placeholder: "Something I want to remember when I look back." },
+        { id: 15, question: "The best invention ever — and why:", placeholder: "A fun one to end with." },
     ],
- 
+
     // Keep old key "Class Book" pointing to the same questions
     "Class Book": [
-        { id: 1,  question: "My favorite memory from this school year:",                      placeholder: "A moment that always brings a smile when I think back." },
-        { id: 2,  question: "A moment in class I will never forget:",                         placeholder: "Something funny, unexpected, or meaningful that stayed with me." },
-        { id: 3,  question: "Something that made our class unique this year:",                placeholder: "A habit, a vibe, or a shared moment that stood out." },
-        { id: 4,  question: "A teacher who made a positive impact on me:",                    placeholder: "And what they did that made a difference." },
-        { id: 5,  question: "Something I learned this year that surprised me:",               placeholder: "Either in school or about myself." },
-        { id: 6,  question: "A challenge I overcame or something I improved at:",             placeholder: "A moment of growth I'm proud of." },
-        { id: 7,  question: "A moment I felt proud of myself this year:",                     placeholder: "Big or small — anything that mattered to you." },
-        { id: 8,  question: "A project or activity I really enjoyed:",                        placeholder: "And why it stood out from the rest." },
-        { id: 9,  question: "A funny moment we experienced as a class:",                      placeholder: "Something that still makes me laugh." },
-        { id: 10, question: "A moment that showed how well our class worked together:",       placeholder: "A time when teamwork really mattered." },
-        { id: 11, question: "A friendship that became important to me this year:",            placeholder: "And what it meant to me." },
-        { id: 12, question: "Three words that describe this school year for me:",             placeholder: "Choose the ones that fit best." },
-        { id: 13, question: "Something I hope for next school year:",                         placeholder: "A wish, a goal, or a dream." },
-        { id: 14, question: "A message to my future self (or next year's class):",           placeholder: "Something I want to remember when I look back." },
-        { id: 15, question: "The best invention ever — and why:",                             placeholder: "A fun one to end with." },
+        { id: 1, question: "My favorite memory from this school year:", placeholder: "A moment that always brings a smile when I think back." },
+        { id: 2, question: "A moment in class I will never forget:", placeholder: "Something funny, unexpected, or meaningful that stayed with me." },
+        { id: 3, question: "Something that made our class unique this year:", placeholder: "A habit, a vibe, or a shared moment that stood out." },
+        { id: 4, question: "A teacher who made a positive impact on me:", placeholder: "And what they did that made a difference." },
+        { id: 5, question: "Something I learned this year that surprised me:", placeholder: "Either in school or about myself." },
+        { id: 6, question: "A challenge I overcame or something I improved at:", placeholder: "A moment of growth I'm proud of." },
+        { id: 7, question: "A moment I felt proud of myself this year:", placeholder: "Big or small — anything that mattered to you." },
+        { id: 8, question: "A project or activity I really enjoyed:", placeholder: "And why it stood out from the rest." },
+        { id: 9, question: "A funny moment we experienced as a class:", placeholder: "Something that still makes me laugh." },
+        { id: 10, question: "A moment that showed how well our class worked together:", placeholder: "A time when teamwork really mattered." },
+        { id: 11, question: "A friendship that became important to me this year:", placeholder: "And what it meant to me." },
+        { id: 12, question: "Three words that describe this school year for me:", placeholder: "Choose the ones that fit best." },
+        { id: 13, question: "Something I hope for next school year:", placeholder: "A wish, a goal, or a dream." },
+        { id: 14, question: "A message to my future self (or next year's class):", placeholder: "Something I want to remember when I look back." },
+        { id: 15, question: "The best invention ever — and why:", placeholder: "A fun one to end with." },
     ],
- 
+
     // Farewell Teacher
     "Farewell Teacher": [
-        { id: 1,  question: "My favorite memory from your lessons:",                          placeholder: "A moment that made class feel special." },
-        { id: 2,  question: "Something you explained in a way I will always remember:",       placeholder: "A lesson that truly stayed with me." },
-        { id: 3,  question: "A moment when learning became enjoyable because of you:",        placeholder: "What made it inspiring or fun." },
-        { id: 4,  question: "Something you helped me improve this year:",                     placeholder: "A change you encouraged without even noticing." },
-        { id: 5,  question: "A lesson from you that I will carry into the future:",           placeholder: "Something meaningful you taught me." },
-        { id: 6,  question: "A moment that showed your patience or kindness:",                placeholder: "A small but important gesture." },
-        { id: 7,  question: "A time when our whole class smiled because of you:",             placeholder: "A moment worth remembering." },
-        { id: 8,  question: "Something about your teaching style I appreciate:",              placeholder: "A quality that made you a great teacher." },
-        { id: 9,  question: "A moment when I felt seen or supported by you:",                 placeholder: "Something that made a difference to me." },
-        { id: 10, question: "What I think our class will always remember about you:",         placeholder: "A signature trait or memory." },
-        { id: 11, question: "Three words that describe you as a teacher:",                    placeholder: "Your essence in three words." },
-        { id: 12, question: "What I wish for you in your next chapter:",                      placeholder: "A hope for your future." },
-        { id: 13, question: "Something I want to thank you for:",                             placeholder: "From the heart." },
-        { id: 14, question: "My personal farewell message to you:",                           placeholder: "A message for your next adventure.", checked: true },
+        { id: 1, question: "My favorite memory from your lessons:", placeholder: "A moment that made class feel special." },
+        { id: 2, question: "Something you explained in a way I will always remember:", placeholder: "A lesson that truly stayed with me." },
+        { id: 3, question: "A moment when learning became enjoyable because of you:", placeholder: "What made it inspiring or fun." },
+        { id: 4, question: "Something you helped me improve this year:", placeholder: "A change you encouraged without even noticing." },
+        { id: 5, question: "A lesson from you that I will carry into the future:", placeholder: "Something meaningful you taught me." },
+        { id: 6, question: "A moment that showed your patience or kindness:", placeholder: "A small but important gesture." },
+        { id: 7, question: "A time when our whole class smiled because of you:", placeholder: "A moment worth remembering." },
+        { id: 8, question: "Something about your teaching style I appreciate:", placeholder: "A quality that made you a great teacher." },
+        { id: 9, question: "A moment when I felt seen or supported by you:", placeholder: "Something that made a difference to me." },
+        { id: 10, question: "What I think our class will always remember about you:", placeholder: "A signature trait or memory." },
+        { id: 11, question: "Three words that describe you as a teacher:", placeholder: "Your essence in three words." },
+        { id: 12, question: "What I wish for you in your next chapter:", placeholder: "A hope for your future." },
+        { id: 13, question: "Something I want to thank you for:", placeholder: "From the heart." },
+        { id: 14, question: "My personal farewell message to you:", placeholder: "A message for your next adventure.", checked: true },
     ],
- 
+
     // Graduation Yearbook  (NEW)
     "Graduation Yearbook": [
-        { id: 1,  question: "My favorite memory from this graduation year:",                  placeholder: "Something unforgettable." },
-        { id: 2,  question: "A moment that made this year truly special:",                    placeholder: "Why it mattered to you." },
-        { id: 3,  question: "Something I achieved that makes me proud:",                      placeholder: "A personal victory." },
-        { id: 4,  question: "A teacher or classmate who inspired me:",                        placeholder: "And why." },
-        { id: 5,  question: "A challenge I overcame this year:",                              placeholder: "A moment of growth." },
-        { id: 6,  question: "Something important I learned about myself:",                    placeholder: "A discovery that changed me." },
-        { id: 7,  question: "A moment of teamwork that stood out:",                           placeholder: "When we worked as one." },
-        { id: 8,  question: "A funny or unexpected moment from this year:",                   placeholder: "Something we'll always laugh about." },
-        { id: 9,  question: "Three words that describe this final year:",                     placeholder: "Choose the best match." },
-        { id: 10, question: "Something I will always remember about our class:",              placeholder: "What made us unique." },
-        { id: 11, question: "A moment when I felt excited about the future:",                 placeholder: "A spark of motivation." },
-        { id: 12, question: "What I hope to achieve in my next chapter:",                     placeholder: "Dreams for the path ahead." },
-        { id: 13, question: "A message I want to leave for my classmates:",                   placeholder: "A wish or a piece of advice." },
-        { id: 14, question: "A message to my future self:",                                   placeholder: "For when I look back someday.", checked: true },
+        { id: 1, question: "My favorite memory from this graduation year:", placeholder: "Something unforgettable." },
+        { id: 2, question: "A moment that made this year truly special:", placeholder: "Why it mattered to you." },
+        { id: 3, question: "Something I achieved that makes me proud:", placeholder: "A personal victory." },
+        { id: 4, question: "A teacher or classmate who inspired me:", placeholder: "And why." },
+        { id: 5, question: "A challenge I overcame this year:", placeholder: "A moment of growth." },
+        { id: 6, question: "Something important I learned about myself:", placeholder: "A discovery that changed me." },
+        { id: 7, question: "A moment of teamwork that stood out:", placeholder: "When we worked as one." },
+        { id: 8, question: "A funny or unexpected moment from this year:", placeholder: "Something we'll always laugh about." },
+        { id: 9, question: "Three words that describe this final year:", placeholder: "Choose the best match." },
+        { id: 10, question: "Something I will always remember about our class:", placeholder: "What made us unique." },
+        { id: 11, question: "A moment when I felt excited about the future:", placeholder: "A spark of motivation." },
+        { id: 12, question: "What I hope to achieve in my next chapter:", placeholder: "Dreams for the path ahead." },
+        { id: 13, question: "A message I want to leave for my classmates:", placeholder: "A wish or a piece of advice." },
+        { id: 14, question: "A message to my future self:", placeholder: "For when I look back someday.", checked: true },
     ],
- 
+
     // Kindergarten  (unchanged — not in Senay's file)
     Kindergarten: [
-        { id: 1, question: "My favourite game:",                       placeholder: "Hide and seek, painting..." },
-        { id: 2, question: "My best friend:",                          placeholder: "Who do you love playing with?" },
-        { id: 3, question: "What I want to be when I grow up:",        placeholder: "A superhero? A chef?" },
+        { id: 1, question: "My favourite game:", placeholder: "Hide and seek, painting..." },
+        { id: 2, question: "My best friend:", placeholder: "Who do you love playing with?" },
+        { id: 3, question: "What I want to be when I grow up:", placeholder: "A superhero? A chef?" },
     ],
- 
+
     // End-of-Year Book  (unchanged — not in Senay's file)
     "End-of-Year Book": [
-        { id: 1, question: "My highlight of this school year:",        placeholder: "A trip, a project..." },
-        { id: 2, question: "What I learned:",                          placeholder: "Skills or lessons..." },
-        { id: 3, question: "My goals for next year:",                  placeholder: "What I want to achieve..." },
+        { id: 1, question: "My highlight of this school year:", placeholder: "A trip, a project..." },
+        { id: 2, question: "What I learned:", placeholder: "Skills or lessons..." },
+        { id: 3, question: "My goals for next year:", placeholder: "What I want to achieve..." },
     ],
- 
+
     // ── 3. WORK ──────────────────────────────────────────────
- 
+
     // Farewell Colleague  (NEW)
     "Farewell Colleague": [
-        { id: 1,  question: "My favorite memory of working with you:",                        placeholder: "A moment that stands out." },
-        { id: 2,  question: "A time when you supported or encouraged me:",                    placeholder: "Something meaningful." },
-        { id: 3,  question: "Something you taught me that I still use today:",                placeholder: "A lasting lesson." },
-        { id: 4,  question: "A project where you truly made a difference:",                   placeholder: "Your impact." },
-        { id: 5,  question: "A work moment that still makes me smile:",                       placeholder: "Something fun or unexpected." },
-        { id: 6,  question: "Something I admire about your way of working:",                  placeholder: "A professional quality." },
-        { id: 7,  question: "Three words that describe you as a colleague:",                  placeholder: "Your workplace essence." },
-        { id: 8,  question: "A challenge we handled together:",                               placeholder: "A memory of teamwork." },
-        { id: 9,  question: "A moment I realized how much I appreciate you:",                 placeholder: "Personal insight." },
-        { id: 10, question: "What I will miss most about you at work:",                       placeholder: "Your presence." },
-        { id: 11, question: "Something you always did that made our team better:",            placeholder: "A unique contribution." },
-        { id: 12, question: "What I wish for you in your next chapter:",                      placeholder: "A hopeful message." },
-        { id: 13, question: "Something I hope you take with you from this team:",             placeholder: "A reminder from us." },
-        { id: 14, question: "My personal farewell message to you:",                           placeholder: "From the heart.", checked: true },
+        { id: 1, question: "My favorite memory of working with you:", placeholder: "A moment that stands out." },
+        { id: 2, question: "A time when you supported or encouraged me:", placeholder: "Something meaningful." },
+        { id: 3, question: "Something you taught me that I still use today:", placeholder: "A lasting lesson." },
+        { id: 4, question: "A project where you truly made a difference:", placeholder: "Your impact." },
+        { id: 5, question: "A work moment that still makes me smile:", placeholder: "Something fun or unexpected." },
+        { id: 6, question: "Something I admire about your way of working:", placeholder: "A professional quality." },
+        { id: 7, question: "Three words that describe you as a colleague:", placeholder: "Your workplace essence." },
+        { id: 8, question: "A challenge we handled together:", placeholder: "A memory of teamwork." },
+        { id: 9, question: "A moment I realized how much I appreciate you:", placeholder: "Personal insight." },
+        { id: 10, question: "What I will miss most about you at work:", placeholder: "Your presence." },
+        { id: 11, question: "Something you always did that made our team better:", placeholder: "A unique contribution." },
+        { id: 12, question: "What I wish for you in your next chapter:", placeholder: "A hopeful message." },
+        { id: 13, question: "Something I hope you take with you from this team:", placeholder: "A reminder from us." },
+        { id: 14, question: "My personal farewell message to you:", placeholder: "From the heart.", checked: true },
     ],
- 
+
     // Retirement
     Retirement: [
-        { id: 1,  question: "Something from your career that inspires me:",                   placeholder: "A moment of excellence." },
-        { id: 2,  question: "A time when your experience truly helped me:",                   placeholder: "Wisdom in action." },
-        { id: 3,  question: "Something you taught me that I'll always remember:",             placeholder: "A meaningful lesson." },
-        { id: 4,  question: "A story or memory that shows your dedication:",                  placeholder: "What defines you." },
-        { id: 5,  question: "Something I appreciate about how you treated others:",           placeholder: "A human quality." },
-        { id: 6,  question: "A moment that made the whole team smile:",                       placeholder: "A joyful memory." },
-        { id: 7,  question: "Three words that describe you:",                                 placeholder: "Your essence." },
-        { id: 8,  question: "Something you can be proud of:",                                 placeholder: "A lasting contribution." },
-        { id: 9,  question: "A moment when your wisdom made a big difference:",              placeholder: "A turning point." },
-        { id: 10, question: "What I hope you enjoy most in retirement:",                      placeholder: "Your reward." },
-        { id: 11, question: "Something you truly deserve after your hard work:",              placeholder: "A wish for your rest." },
-        { id: 12, question: "What I will remember most about you:",                           placeholder: "Your legacy." },
-        { id: 13, question: "A wish for your next chapter in life:",                          placeholder: "For your future." },
-        { id: 14, question: "My personal message to you as you retire:",                      placeholder: "Warm and heartfelt.", checked: true },
+        { id: 1, question: "Something from your career that inspires me:", placeholder: "A moment of excellence." },
+        { id: 2, question: "A time when your experience truly helped me:", placeholder: "Wisdom in action." },
+        { id: 3, question: "Something you taught me that I'll always remember:", placeholder: "A meaningful lesson." },
+        { id: 4, question: "A story or memory that shows your dedication:", placeholder: "What defines you." },
+        { id: 5, question: "Something I appreciate about how you treated others:", placeholder: "A human quality." },
+        { id: 6, question: "A moment that made the whole team smile:", placeholder: "A joyful memory." },
+        { id: 7, question: "Three words that describe you:", placeholder: "Your essence." },
+        { id: 8, question: "Something you can be proud of:", placeholder: "A lasting contribution." },
+        { id: 9, question: "A moment when your wisdom made a big difference:", placeholder: "A turning point." },
+        { id: 10, question: "What I hope you enjoy most in retirement:", placeholder: "Your reward." },
+        { id: 11, question: "Something you truly deserve after your hard work:", placeholder: "A wish for your rest." },
+        { id: 12, question: "What I will remember most about you:", placeholder: "Your legacy." },
+        { id: 13, question: "A wish for your next chapter in life:", placeholder: "For your future." },
+        { id: 14, question: "My personal message to you as you retire:", placeholder: "Warm and heartfelt.", checked: true },
     ],
- 
+
     // Team Memory Book
     "Team Memory Book": [
-        { id: 1,  question: "My favorite team moment from this year:",                        placeholder: "A shared success." },
-        { id: 2,  question: "A project where our teamwork stood out:",                        placeholder: "True collaboration." },
-        { id: 3,  question: "Something our team is particularly good at:",                    placeholder: "A shared strength." },
-        { id: 4,  question: "A moment when someone in the team inspired me:",                 placeholder: "Recognition." },
-        { id: 5,  question: "Something we achieved together that makes me proud:",            placeholder: "A highlight." },
-        { id: 6,  question: "A challenge we overcame as a group:",                            placeholder: "A team victory." },
-        { id: 7,  question: "Three words that describe our team spirit:",                     placeholder: "Our vibe." },
-        { id: 8,  question: "A funny or unexpected moment from our time together:",           placeholder: "A moment of joy." },
-        { id: 9,  question: "Something I learned from working with this team:",               placeholder: "A lesson." },
-        { id: 10, question: "A moment when we celebrated each other:",                        placeholder: "Team appreciation." },
-        { id: 11, question: "Something I will always remember about this team:",              placeholder: "Our identity." },
-        { id: 12, question: "A moment that showed our strength as a team:",                   placeholder: "Unity." },
-        { id: 13, question: "What I hope for the team in the future:",                        placeholder: "A vision." },
-        { id: 14, question: "My message to the team:",                                        placeholder: "A closing note.", checked: true },
+        { id: 1, question: "My favorite team moment from this year:", placeholder: "A shared success." },
+        { id: 2, question: "A project where our teamwork stood out:", placeholder: "True collaboration." },
+        { id: 3, question: "Something our team is particularly good at:", placeholder: "A shared strength." },
+        { id: 4, question: "A moment when someone in the team inspired me:", placeholder: "Recognition." },
+        { id: 5, question: "Something we achieved together that makes me proud:", placeholder: "A highlight." },
+        { id: 6, question: "A challenge we overcame as a group:", placeholder: "A team victory." },
+        { id: 7, question: "Three words that describe our team spirit:", placeholder: "Our vibe." },
+        { id: 8, question: "A funny or unexpected moment from our time together:", placeholder: "A moment of joy." },
+        { id: 9, question: "Something I learned from working with this team:", placeholder: "A lesson." },
+        { id: 10, question: "A moment when we celebrated each other:", placeholder: "Team appreciation." },
+        { id: 11, question: "Something I will always remember about this team:", placeholder: "Our identity." },
+        { id: 12, question: "A moment that showed our strength as a team:", placeholder: "Unity." },
+        { id: 13, question: "What I hope for the team in the future:", placeholder: "A vision." },
+        { id: 14, question: "My message to the team:", placeholder: "A closing note.", checked: true },
     ],
- 
+
     // ── 4. LOVE ──────────────────────────────────────────────
- 
+
     // Wedding
     Wedding: [
-        { id: 1,  question: "My favorite memory with you as a couple:",                       placeholder: "A moment that shows who you are." },
-        { id: 2,  question: "A moment that perfectly reflects your love:",                    placeholder: "Why it touched me." },
-        { id: 3,  question: "Something I admire about your relationship:",                    placeholder: "A strength you share." },
-        { id: 4,  question: "When I first realized you belong together:",                     placeholder: "How I knew." },
-        { id: 5,  question: "A funny or sweet moment we shared:",                             placeholder: "Something special." },
-        { id: 6,  question: "Three words that describe you as a couple:",                     placeholder: "Your essence together." },
-        { id: 7,  question: "My wish for your future:",                                       placeholder: "For the years ahead." },
-        { id: 8,  question: "A lesson about love I see in you:",                              placeholder: "What your relationship teaches others." },
-        { id: 9,  question: "A moment I look forward to sharing with you:",                   placeholder: "Something in the future." },
-        { id: 10, question: "Something I think will make your marriage strong:",              placeholder: "A foundation." },
-        { id: 11, question: "A moment you should never forget:",                              placeholder: "A memory to hold onto." },
-        { id: 12, question: "A hope I have for your married life:",                           placeholder: "A blessing." },
-        { id: 13, question: "My personal wedding message to you:",                            placeholder: "From the heart.", checked: true },
+        { id: 1, question: "My favorite memory with you as a couple:", placeholder: "A moment that shows who you are." },
+        { id: 2, question: "A moment that perfectly reflects your love:", placeholder: "Why it touched me." },
+        { id: 3, question: "Something I admire about your relationship:", placeholder: "A strength you share." },
+        { id: 4, question: "When I first realized you belong together:", placeholder: "How I knew." },
+        { id: 5, question: "A funny or sweet moment we shared:", placeholder: "Something special." },
+        { id: 6, question: "Three words that describe you as a couple:", placeholder: "Your essence together." },
+        { id: 7, question: "My wish for your future:", placeholder: "For the years ahead." },
+        { id: 8, question: "A lesson about love I see in you:", placeholder: "What your relationship teaches others." },
+        { id: 9, question: "A moment I look forward to sharing with you:", placeholder: "Something in the future." },
+        { id: 10, question: "Something I think will make your marriage strong:", placeholder: "A foundation." },
+        { id: 11, question: "A moment you should never forget:", placeholder: "A memory to hold onto." },
+        { id: 12, question: "A hope I have for your married life:", placeholder: "A blessing." },
+        { id: 13, question: "My personal wedding message to you:", placeholder: "From the heart.", checked: true },
     ],
- 
+
     // Bachelorette Party (JGA)
     "Bachelorette Party (JGA)": [
-        { id: 1,  question: "How I first met the bride-to-be:",                               placeholder: "A memory that started it all." },
-        { id: 2,  question: "My favorite memory with you:",                                   placeholder: "A special moment." },
-        { id: 3,  question: "Something that always makes you laugh:",                         placeholder: "Your spark." },
-        { id: 4,  question: "A quality I love about you:",                                    placeholder: "A trait that defines you." },
-        { id: 5,  question: "Three words that describe you:",                                 placeholder: "Your essence." },
-        { id: 6,  question: "A funny or unexpected moment we shared:",                        placeholder: "A joyful memory." },
-        { id: 7,  question: "Something I admire about your personality:",                     placeholder: "Your strength or softness." },
-        { id: 8,  question: "What I hope you remember from today:",                           placeholder: "A moment to treasure." },
-        { id: 9,  question: "A wish I have for your marriage:",                               placeholder: "For your love story." },
-        { id: 10, question: "A moment from our friendship that means a lot to me:",           placeholder: "Why it matters." },
-        { id: 11, question: "Something you absolutely deserve in life:",                      placeholder: "A blessing." },
-        { id: 12, question: "A moment I'm excited to experience with you in the future:",     placeholder: "Looking forward." },
-        { id: 13, question: "A wish for your next chapter:",                                  placeholder: "Hope." },
-        { id: 14, question: "My personal message to you:",                                    placeholder: "From the heart.", checked: true },
+        { id: 1, question: "How I first met the bride-to-be:", placeholder: "A memory that started it all." },
+        { id: 2, question: "My favorite memory with you:", placeholder: "A special moment." },
+        { id: 3, question: "Something that always makes you laugh:", placeholder: "Your spark." },
+        { id: 4, question: "A quality I love about you:", placeholder: "A trait that defines you." },
+        { id: 5, question: "Three words that describe you:", placeholder: "Your essence." },
+        { id: 6, question: "A funny or unexpected moment we shared:", placeholder: "A joyful memory." },
+        { id: 7, question: "Something I admire about your personality:", placeholder: "Your strength or softness." },
+        { id: 8, question: "What I hope you remember from today:", placeholder: "A moment to treasure." },
+        { id: 9, question: "A wish I have for your marriage:", placeholder: "For your love story." },
+        { id: 10, question: "A moment from our friendship that means a lot to me:", placeholder: "Why it matters." },
+        { id: 11, question: "Something you absolutely deserve in life:", placeholder: "A blessing." },
+        { id: 12, question: "A moment I'm excited to experience with you in the future:", placeholder: "Looking forward." },
+        { id: 13, question: "A wish for your next chapter:", placeholder: "Hope." },
+        { id: 14, question: "My personal message to you:", placeholder: "From the heart.", checked: true },
     ],
- 
+
     // Anniversary  (unchanged — not in Senay's file)
     Anniversary: [
-        { id: 1, question: "My favourite memory of us:",         placeholder: "A special moment together..." },
-        { id: 2, question: "What I love most about you:",        placeholder: "Your smile, your laugh..." },
-        { id: 3, question: "My wish for our future:",            placeholder: "Dreams for us..." },
+        { id: 1, question: "My favourite memory of us:", placeholder: "A special moment together..." },
+        { id: 2, question: "What I love most about you:", placeholder: "Your smile, your laugh..." },
+        { id: 3, question: "My wish for our future:", placeholder: "Dreams for us..." },
     ],
- 
+
     // ── 5. FAMILY ────────────────────────────────────────────
- 
+
     // Family Book
     "Family Book": [
-        { id: 1,  question: "A favorite family memory that always stays with me:",            placeholder: "A moment I treasure." },
-        { id: 2,  question: "Something our family is especially good at:",                    placeholder: "What defines us." },
-        { id: 3,  question: "A moment that made me feel connected to our family:",            placeholder: "A memory of closeness." },
-        { id: 4,  question: "A tradition or habit I cherish:",                                placeholder: "What I hope we keep." },
-        { id: 5,  question: "A challenge we overcame together:",                              placeholder: "Our strength." },
-        { id: 6,  question: "Something I appreciate about our family dynamic:",               placeholder: "What makes us unique." },
-        { id: 7,  question: "A funny moment we experienced together:",                        placeholder: "A joyful memory." },
-        { id: 8,  question: "Three words that describe our family:",                          placeholder: "Our essence." },
-        { id: 9,  question: "Something I learned from being part of this family:",            placeholder: "A life lesson." },
-        { id: 10, question: "A moment that showed our strength:",                             placeholder: "Unity." },
-        { id: 11, question: "A place that feels like 'home' to me:",                          placeholder: "Real or symbolic." },
-        { id: 12, question: "A wish I have for our future:",                                  placeholder: "For the years ahead." },
-        { id: 13, question: "Something I look forward to doing together:",                    placeholder: "A future memory." },
-        { id: 14, question: "My message to our family:",                                      placeholder: "From the heart.", checked: true },
+        { id: 1, question: "A favorite family memory that always stays with me:", placeholder: "A moment I treasure." },
+        { id: 2, question: "Something our family is especially good at:", placeholder: "What defines us." },
+        { id: 3, question: "A moment that made me feel connected to our family:", placeholder: "A memory of closeness." },
+        { id: 4, question: "A tradition or habit I cherish:", placeholder: "What I hope we keep." },
+        { id: 5, question: "A challenge we overcame together:", placeholder: "Our strength." },
+        { id: 6, question: "Something I appreciate about our family dynamic:", placeholder: "What makes us unique." },
+        { id: 7, question: "A funny moment we experienced together:", placeholder: "A joyful memory." },
+        { id: 8, question: "Three words that describe our family:", placeholder: "Our essence." },
+        { id: 9, question: "Something I learned from being part of this family:", placeholder: "A life lesson." },
+        { id: 10, question: "A moment that showed our strength:", placeholder: "Unity." },
+        { id: 11, question: "A place that feels like 'home' to me:", placeholder: "Real or symbolic." },
+        { id: 12, question: "A wish I have for our future:", placeholder: "For the years ahead." },
+        { id: 13, question: "Something I look forward to doing together:", placeholder: "A future memory." },
+        { id: 14, question: "My message to our family:", placeholder: "From the heart.", checked: true },
     ],
- 
+
     // For Grandma / Grandpa
     "For Grandma / Grandpa": [
-        { id: 1,  question: "My favorite memory with you:",                                   placeholder: "A moment I cherish." },
-        { id: 2,  question: "Something you taught me that I'll always treasure:",             placeholder: "A lesson of a lifetime." },
-        { id: 3,  question: "A story or moment I will never forget:",                         placeholder: "Your wisdom." },
-        { id: 4,  question: "Something I admire deeply about you:",                           placeholder: "A special quality." },
-        { id: 5,  question: "A moment that showed your kindness or wisdom:",                  placeholder: "A gentle memory." },
-        { id: 6,  question: "Three words that describe you:",                                 placeholder: "Your essence." },
-        { id: 7,  question: "Something you always say that stays with me:",                   placeholder: "Your signature phrase." },
-        { id: 8,  question: "A moment when you made me feel supported:",                      placeholder: "A warm memory." },
-        { id: 9,  question: "What I appreciate most about you:",                              placeholder: "What you bring to my life." },
-        { id: 10, question: "Something I look forward to doing with you again:",              placeholder: "A future moment." },
-        { id: 11, question: "A wish I have for you:",                                         placeholder: "With love." },
-        { id: 12, question: "My personal message to you:",                                    placeholder: "From the heart.", checked: true },
+        { id: 1, question: "My favorite memory with you:", placeholder: "A moment I cherish." },
+        { id: 2, question: "Something you taught me that I'll always treasure:", placeholder: "A lesson of a lifetime." },
+        { id: 3, question: "A story or moment I will never forget:", placeholder: "Your wisdom." },
+        { id: 4, question: "Something I admire deeply about you:", placeholder: "A special quality." },
+        { id: 5, question: "A moment that showed your kindness or wisdom:", placeholder: "A gentle memory." },
+        { id: 6, question: "Three words that describe you:", placeholder: "Your essence." },
+        { id: 7, question: "Something you always say that stays with me:", placeholder: "Your signature phrase." },
+        { id: 8, question: "A moment when you made me feel supported:", placeholder: "A warm memory." },
+        { id: 9, question: "What I appreciate most about you:", placeholder: "What you bring to my life." },
+        { id: 10, question: "Something I look forward to doing with you again:", placeholder: "A future moment." },
+        { id: 11, question: "A wish I have for you:", placeholder: "With love." },
+        { id: 12, question: "My personal message to you:", placeholder: "From the heart.", checked: true },
     ],
- 
+
     // Baby Book / Welcome Baby
     "Baby Book": [
-        { id: 1,  question: "The first thing I thought when you were born:",                  placeholder: "A moment of pure emotion." },
-        { id: 2,  question: "A hope I have for your future:",                                 placeholder: "A dream for your life." },
-        { id: 3,  question: "Something I look forward to experiencing with you:",             placeholder: "A moment I can't wait for." },
-        { id: 4,  question: "A wish for the person you will grow up to be:",                  placeholder: "A loving hope." },
-        { id: 5,  question: "Three words I hope will describe you someday:",                  placeholder: "A gentle blessing." },
-        { id: 6,  question: "A moment from the day you arrived:",                             placeholder: "A detail I'll never forget." },
-        { id: 7,  question: "Something special about the family you were born into:",         placeholder: "Your roots." },
-        { id: 8,  question: "Something I hope you will always know:",                         placeholder: "A truth of love." },
-        { id: 9,  question: "A little piece of advice for your future:",                      placeholder: "Guidance for life." },
-        { id: 10, question: "A dream I have for you:",                                        placeholder: "A wish for your journey." },
-        { id: 11, question: "Something I hope you discover in life:",                         placeholder: "A meaningful experience." },
-        { id: 12, question: "A moment I can't wait to share with you:",                       placeholder: "For the years ahead." },
-        { id: 13, question: "Something wonderful I already see in you:",                      placeholder: "Your beginning." },
-        { id: 14, question: "My message to you when you're older:",                           placeholder: "From the heart.", checked: true },
+        { id: 1, question: "The first thing I thought when you were born:", placeholder: "A moment of pure emotion." },
+        { id: 2, question: "A hope I have for your future:", placeholder: "A dream for your life." },
+        { id: 3, question: "Something I look forward to experiencing with you:", placeholder: "A moment I can't wait for." },
+        { id: 4, question: "A wish for the person you will grow up to be:", placeholder: "A loving hope." },
+        { id: 5, question: "Three words I hope will describe you someday:", placeholder: "A gentle blessing." },
+        { id: 6, question: "A moment from the day you arrived:", placeholder: "A detail I'll never forget." },
+        { id: 7, question: "Something special about the family you were born into:", placeholder: "Your roots." },
+        { id: 8, question: "Something I hope you will always know:", placeholder: "A truth of love." },
+        { id: 9, question: "A little piece of advice for your future:", placeholder: "Guidance for life." },
+        { id: 10, question: "A dream I have for you:", placeholder: "A wish for your journey." },
+        { id: 11, question: "Something I hope you discover in life:", placeholder: "A meaningful experience." },
+        { id: 12, question: "A moment I can't wait to share with you:", placeholder: "For the years ahead." },
+        { id: 13, question: "Something wonderful I already see in you:", placeholder: "Your beginning." },
+        { id: 14, question: "My message to you when you're older:", placeholder: "From the heart.", checked: true },
     ],
- 
+
     // For Mom  (Mother's Day questions)
     "For Mom": [
-        { id: 1,  question: "My favorite memory with you:",                                   placeholder: "A moment that always warms my heart." },
-        { id: 2,  question: "Something you taught me that shaped who I am:",                  placeholder: "A lesson I carry with me every day." },
-        { id: 3,  question: "A moment that showed your strength or kindness:",                placeholder: "A memory I will never forget." },
-        { id: 4,  question: "Something I truly admire about you as a mother:",                placeholder: "A quality that inspires me." },
-        { id: 5,  question: "Three words that describe you:",                                 placeholder: "Your essence in three words." },
-        { id: 6,  question: "A moment from this past year that meant a lot to me:",           placeholder: "Something special we shared." },
-        { id: 7,  question: "Something I want to thank you for:",                             placeholder: "From the heart." },
-        { id: 8,  question: "Something I hope you always remember:",                          placeholder: "A loving truth about you." },
-        { id: 9,  question: "A wish I have for you today:",                                   placeholder: "What I want for you on Mother's Day." },
-        { id: 10, question: "Something I look forward to doing together:",                    placeholder: "A moment I can't wait to share." },
-        { id: 11, question: "A memory of you that always makes me smile:",                    placeholder: "Your magic." },
-        { id: 12, question: "My personal Mother's Day message to you:",                       placeholder: "With love.", checked: true },
+        { id: 1, question: "My favorite memory with you:", placeholder: "A moment that always warms my heart." },
+        { id: 2, question: "Something you taught me that shaped who I am:", placeholder: "A lesson I carry with me every day." },
+        { id: 3, question: "A moment that showed your strength or kindness:", placeholder: "A memory I will never forget." },
+        { id: 4, question: "Something I truly admire about you as a mother:", placeholder: "A quality that inspires me." },
+        { id: 5, question: "Three words that describe you:", placeholder: "Your essence in three words." },
+        { id: 6, question: "A moment from this past year that meant a lot to me:", placeholder: "Something special we shared." },
+        { id: 7, question: "Something I want to thank you for:", placeholder: "From the heart." },
+        { id: 8, question: "Something I hope you always remember:", placeholder: "A loving truth about you." },
+        { id: 9, question: "A wish I have for you today:", placeholder: "What I want for you on Mother's Day." },
+        { id: 10, question: "Something I look forward to doing together:", placeholder: "A moment I can't wait to share." },
+        { id: 11, question: "A memory of you that always makes me smile:", placeholder: "Your magic." },
+        { id: 12, question: "My personal Mother's Day message to you:", placeholder: "With love.", checked: true },
     ],
- 
+
     // For Dad  (Father's Day questions)
     "For Dad": [
-        { id: 1,  question: "My favorite memory with you:",                                   placeholder: "A moment that stays with me forever." },
-        { id: 2,  question: "Something you taught me that truly stayed with me:",             placeholder: "A lesson that shaped my life." },
-        { id: 3,  question: "A moment that showed your character:",                           placeholder: "Strength, humor or kindness — your choice." },
-        { id: 4,  question: "Something I admire about you:",                                  placeholder: "A quality I will never forget." },
-        { id: 5,  question: "Three words that describe you:",                                 placeholder: "Your essence in three words." },
-        { id: 6,  question: "A moment from this past year that meant a lot to me:",           placeholder: "Something special you may not know." },
-        { id: 7,  question: "Something I want to thank you for:",                             placeholder: "From the heart." },
-        { id: 8,  question: "A memory of you that always makes me proud:",                    placeholder: "A proud moment." },
-        { id: 9,  question: "Something I hope for you in the coming years:",                  placeholder: "A wish for your future." },
-        { id: 10, question: "Something I hope we experience together:",                       placeholder: "A moment I am looking forward to." },
-        { id: 11, question: "A small thing you do that I appreciate more than you think:",    placeholder: "A detail that matters." },
-        { id: 12, question: "My personal Father's Day message to you:",                       placeholder: "Warm and heartfelt.", checked: true },
+        { id: 1, question: "My favorite memory with you:", placeholder: "A moment that stays with me forever." },
+        { id: 2, question: "Something you taught me that truly stayed with me:", placeholder: "A lesson that shaped my life." },
+        { id: 3, question: "A moment that showed your character:", placeholder: "Strength, humor or kindness — your choice." },
+        { id: 4, question: "Something I admire about you:", placeholder: "A quality I will never forget." },
+        { id: 5, question: "Three words that describe you:", placeholder: "Your essence in three words." },
+        { id: 6, question: "A moment from this past year that meant a lot to me:", placeholder: "Something special you may not know." },
+        { id: 7, question: "Something I want to thank you for:", placeholder: "From the heart." },
+        { id: 8, question: "A memory of you that always makes me proud:", placeholder: "A proud moment." },
+        { id: 9, question: "Something I hope for you in the coming years:", placeholder: "A wish for your future." },
+        { id: 10, question: "Something I hope we experience together:", placeholder: "A moment I am looking forward to." },
+        { id: 11, question: "A small thing you do that I appreciate more than you think:", placeholder: "A detail that matters." },
+        { id: 12, question: "My personal Father's Day message to you:", placeholder: "Warm and heartfelt.", checked: true },
     ],
- 
+
     // ── 6. SEASONAL ──────────────────────────────────────────
- 
+
     // Christmas
     Christmas: [
-        { id: 1,  question: "My favorite Christmas memory with our family:",                  placeholder: "A moment that always brings warmth when I think of it." },
-        { id: 2,  question: "A Christmas moment that still makes me laugh:",                  placeholder: "Something funny or unexpected that happened." },
-        { id: 3,  question: "A holiday tradition in our family that I truly cherish:",        placeholder: "Something that makes Christmas feel like home." },
-        { id: 4,  question: "A tradition I would love for us to start:",                      placeholder: "A new family idea for future Christmases." },
-        { id: 5,  question: "The funniest or most chaotic Christmas moment we ever had:",     placeholder: "A story that perfectly captures our family energy." },
-        { id: 6,  question: "Something from this past year that I feel grateful for:",        placeholder: "A moment of appreciation." },
-        { id: 7,  question: "A dish, smell or song that instantly reminds me of our family holidays:", placeholder: "A sensory Christmas memory." },
-        { id: 8,  question: "Someone in the family who always brings the Christmas spirit — and why:", placeholder: "Every family has that one person…" },
-        { id: 9,  question: "The family member who gives the funniest Christmas gifts:",      placeholder: "Pure comedy." },
-        { id: 10, question: "The family member who gives the most thoughtful gifts:",         placeholder: "Warm and sweet." },
+        { id: 1, question: "My favorite Christmas memory with our family:", placeholder: "A moment that always brings warmth when I think of it." },
+        { id: 2, question: "A Christmas moment that still makes me laugh:", placeholder: "Something funny or unexpected that happened." },
+        { id: 3, question: "A holiday tradition in our family that I truly cherish:", placeholder: "Something that makes Christmas feel like home." },
+        { id: 4, question: "A tradition I would love for us to start:", placeholder: "A new family idea for future Christmases." },
+        { id: 5, question: "The funniest or most chaotic Christmas moment we ever had:", placeholder: "A story that perfectly captures our family energy." },
+        { id: 6, question: "Something from this past year that I feel grateful for:", placeholder: "A moment of appreciation." },
+        { id: 7, question: "A dish, smell or song that instantly reminds me of our family holidays:", placeholder: "A sensory Christmas memory." },
+        { id: 8, question: "Someone in the family who always brings the Christmas spirit — and why:", placeholder: "Every family has that one person…" },
+        { id: 9, question: "The family member who gives the funniest Christmas gifts:", placeholder: "Pure comedy." },
+        { id: 10, question: "The family member who gives the most thoughtful gifts:", placeholder: "Warm and sweet." },
         { id: 11, question: "Something I appreciate about our family — especially during Christmas:", placeholder: "A quality or habit that means a lot." },
-        { id: 12, question: "A moment from this year that brought us closer:",                placeholder: "A recent family memory of connection." },
-        { id: 13, question: "My wish for our family in the coming year:",                     placeholder: "Hope for the future." },
+        { id: 12, question: "A moment from this year that brought us closer:", placeholder: "A recent family memory of connection." },
+        { id: 13, question: "My wish for our family in the coming year:", placeholder: "Hope for the future." },
         { id: 14, question: "Something I hope we always remember when Christmas comes again:", placeholder: "A heartfelt reminder." },
         { id: 15, question: "If our family had a Christmas movie title, it would be… because…", placeholder: "A playful and creative question." },
-        { id: 16, question: "My Christmas message for our family this year:",                 placeholder: "Warm, loving and personal.", checked: true },
+        { id: 16, question: "My Christmas message for our family this year:", placeholder: "Warm, loving and personal.", checked: true },
     ],
- 
+
     // Ramadan  (NEW)
     Ramadan: [
-        { id: 1,  question: "A favorite Ramadan memory from our family life:",                placeholder: "A moment that always makes you smile." },
-        { id: 2,  question: "A tradition in our family during Ramadan that you truly cherish:", placeholder: "Something that makes this month feel special." },
-        { id: 3,  question: "A moment from a past Ramadan that brought our family closer:",   placeholder: "A shared experience of connection." },
-        { id: 4,  question: "Three words that describe our family during Ramadan:",           placeholder: "Our month-long spirit in three words." },
-        { id: 5,  question: "Your most meaningful prayer or verse this Ramadan — and why:",   placeholder: "A spiritual moment or reflection." },
-        { id: 6,  question: "The hardest moment of fasting for you — and how you handled it:", placeholder: "A moment of strength and patience." },
-        { id: 7,  question: "Something you missed the most while fasting — or what you craved the most:", placeholder: "A light, honest and relatable question." },
-        { id: 8,  question: "A moment during Ramadan when you felt grateful:",                placeholder: "A small or big moment of peace." },
-        { id: 9,  question: "Something Ramadan taught you about yourself or our family this year:", placeholder: "A lesson or realization." },
-        { id: 10, question: "A special moment during iftar or suhoor with our family:",       placeholder: "A warm or joyful memory." },
+        { id: 1, question: "A favorite Ramadan memory from our family life:", placeholder: "A moment that always makes you smile." },
+        { id: 2, question: "A tradition in our family during Ramadan that you truly cherish:", placeholder: "Something that makes this month feel special." },
+        { id: 3, question: "A moment from a past Ramadan that brought our family closer:", placeholder: "A shared experience of connection." },
+        { id: 4, question: "Three words that describe our family during Ramadan:", placeholder: "Our month-long spirit in three words." },
+        { id: 5, question: "Your most meaningful prayer or verse this Ramadan — and why:", placeholder: "A spiritual moment or reflection." },
+        { id: 6, question: "The hardest moment of fasting for you — and how you handled it:", placeholder: "A moment of strength and patience." },
+        { id: 7, question: "Something you missed the most while fasting — or what you craved the most:", placeholder: "A light, honest and relatable question." },
+        { id: 8, question: "A moment during Ramadan when you felt grateful:", placeholder: "A small or big moment of peace." },
+        { id: 9, question: "Something Ramadan taught you about yourself or our family this year:", placeholder: "A lesson or realization." },
+        { id: 10, question: "A special moment during iftar or suhoor with our family:", placeholder: "A warm or joyful memory." },
         { id: 11, question: "Something you appreciate about how our family spends Ramadan together:", placeholder: "A habit or atmosphere that means a lot to you." },
-        { id: 12, question: "A Ramadan tradition you hope our family keeps forever:",         placeholder: "Something timeless." },
-        { id: 13, question: "A hope or prayer you have for our family for next year:",        placeholder: "A wish for the future." },
-        { id: 14, question: "Something you look forward to next Ramadan:",                    placeholder: "A future moment you already feel excited about." },
-        { id: 15, question: "Your personal Ramadan message to our family:",                   placeholder: "A warm and heartfelt closing note.", checked: true },
+        { id: 12, question: "A Ramadan tradition you hope our family keeps forever:", placeholder: "Something timeless." },
+        { id: 13, question: "A hope or prayer you have for our family for next year:", placeholder: "A wish for the future." },
+        { id: 14, question: "Something you look forward to next Ramadan:", placeholder: "A future moment you already feel excited about." },
+        { id: 15, question: "Your personal Ramadan message to our family:", placeholder: "A warm and heartfelt closing note.", checked: true },
     ],
- 
+
     // Mother's Day  (alias key — same as "For Mom")
     "Mother's Day": [
-        { id: 1,  question: "My favorite memory with you:",                                   placeholder: "A moment that always warms my heart." },
-        { id: 2,  question: "Something you taught me that shaped who I am:",                  placeholder: "A lesson I carry with me every day." },
-        { id: 3,  question: "A moment that showed your strength or kindness:",                placeholder: "A memory I will never forget." },
-        { id: 4,  question: "Something I truly admire about you as a mother:",                placeholder: "A quality that inspires me." },
-        { id: 5,  question: "Three words that describe you:",                                 placeholder: "Your essence in three words." },
-        { id: 6,  question: "A moment from this past year that meant a lot to me:",           placeholder: "Something special we shared." },
-        { id: 7,  question: "Something I want to thank you for:",                             placeholder: "From the heart." },
-        { id: 8,  question: "Something I hope you always remember:",                          placeholder: "A loving truth about you." },
-        { id: 9,  question: "A wish I have for you today:",                                   placeholder: "What I want for you on Mother's Day." },
-        { id: 10, question: "Something I look forward to doing together:",                    placeholder: "A moment I can't wait to share." },
-        { id: 11, question: "A memory of you that always makes me smile:",                    placeholder: "Your magic." },
-        { id: 12, question: "My personal Mother's Day message to you:",                       placeholder: "With love.", checked: true },
+        { id: 1, question: "My favorite memory with you:", placeholder: "A moment that always warms my heart." },
+        { id: 2, question: "Something you taught me that shaped who I am:", placeholder: "A lesson I carry with me every day." },
+        { id: 3, question: "A moment that showed your strength or kindness:", placeholder: "A memory I will never forget." },
+        { id: 4, question: "Something I truly admire about you as a mother:", placeholder: "A quality that inspires me." },
+        { id: 5, question: "Three words that describe you:", placeholder: "Your essence in three words." },
+        { id: 6, question: "A moment from this past year that meant a lot to me:", placeholder: "Something special we shared." },
+        { id: 7, question: "Something I want to thank you for:", placeholder: "From the heart." },
+        { id: 8, question: "Something I hope you always remember:", placeholder: "A loving truth about you." },
+        { id: 9, question: "A wish I have for you today:", placeholder: "What I want for you on Mother's Day." },
+        { id: 10, question: "Something I look forward to doing together:", placeholder: "A moment I can't wait to share." },
+        { id: 11, question: "A memory of you that always makes me smile:", placeholder: "Your magic." },
+        { id: 12, question: "My personal Mother's Day message to you:", placeholder: "With love.", checked: true },
     ],
- 
+
     // Father's Day  (alias key — same as "For Dad")
     "Father's Day": [
-        { id: 1,  question: "My favorite memory with you:",                                   placeholder: "A moment that stays with me forever." },
-        { id: 2,  question: "Something you taught me that truly stayed with me:",             placeholder: "A lesson that shaped my life." },
-        { id: 3,  question: "A moment that showed your character:",                           placeholder: "Strength, humor or kindness — your choice." },
-        { id: 4,  question: "Something I admire about you:",                                  placeholder: "A quality I will never forget." },
-        { id: 5,  question: "Three words that describe you:",                                 placeholder: "Your essence in three words." },
-        { id: 6,  question: "A moment from this past year that meant a lot to me:",           placeholder: "Something special you may not know." },
-        { id: 7,  question: "Something I want to thank you for:",                             placeholder: "From the heart." },
-        { id: 8,  question: "A memory of you that always makes me proud:",                    placeholder: "A proud moment." },
-        { id: 9,  question: "Something I hope for you in the coming years:",                  placeholder: "A wish for your future." },
-        { id: 10, question: "Something I hope we experience together:",                       placeholder: "A moment I am looking forward to." },
-        { id: 11, question: "A small thing you do that I appreciate more than you think:",    placeholder: "A detail that matters." },
-        { id: 12, question: "My personal Father's Day message to you:",                       placeholder: "Warm and heartfelt.", checked: true },
+        { id: 1, question: "My favorite memory with you:", placeholder: "A moment that stays with me forever." },
+        { id: 2, question: "Something you taught me that truly stayed with me:", placeholder: "A lesson that shaped my life." },
+        { id: 3, question: "A moment that showed your character:", placeholder: "Strength, humor or kindness — your choice." },
+        { id: 4, question: "Something I admire about you:", placeholder: "A quality I will never forget." },
+        { id: 5, question: "Three words that describe you:", placeholder: "Your essence in three words." },
+        { id: 6, question: "A moment from this past year that meant a lot to me:", placeholder: "Something special you may not know." },
+        { id: 7, question: "Something I want to thank you for:", placeholder: "From the heart." },
+        { id: 8, question: "A memory of you that always makes me proud:", placeholder: "A proud moment." },
+        { id: 9, question: "Something I hope for you in the coming years:", placeholder: "A wish for your future." },
+        { id: 10, question: "Something I hope we experience together:", placeholder: "A moment I am looking forward to." },
+        { id: 11, question: "A small thing you do that I appreciate more than you think:", placeholder: "A detail that matters." },
+        { id: 12, question: "My personal Father's Day message to you:", placeholder: "Warm and heartfelt.", checked: true },
     ],
- 
+
     // New Year  (unchanged — not in Senay's file)
     "New Year": [
-        { id: 1, question: "My highlight of this year:",          placeholder: "A milestone or memory..." },
-        { id: 2, question: "My resolution for next year:",        placeholder: "What I want to change..." },
-        { id: 3, question: "My wish for everyone:",               placeholder: "Health, joy, success..." },
+        { id: 1, question: "My highlight of this year:", placeholder: "A milestone or memory..." },
+        { id: 2, question: "My resolution for next year:", placeholder: "What I want to change..." },
+        { id: 3, question: "My wish for everyone:", placeholder: "Health, joy, success..." },
     ],
- 
+
     // Easter  (unchanged — not in Senay's file)
     Easter: [
-        { id: 1, question: "My favourite Easter tradition:",      placeholder: "Egg hunts, family meals..." },
-        { id: 2, question: "Best Easter memory:",                  placeholder: "A special moment..." },
-        { id: 3, question: "What Easter means to me:",             placeholder: "In your own words..." },
+        { id: 1, question: "My favourite Easter tradition:", placeholder: "Egg hunts, family meals..." },
+        { id: 2, question: "Best Easter memory:", placeholder: "A special moment..." },
+        { id: 3, question: "What Easter means to me:", placeholder: "In your own words..." },
     ],
- 
+
     // Halloween  (unchanged — not in Senay's file)
     Halloween: [
-        { id: 1, question: "Best costume I ever wore:",            placeholder: "Describe it..." },
-        { id: 2, question: "Scariest Halloween memory:",           placeholder: "A spooky moment..." },
-        { id: 3, question: "My favourite Halloween treat:",        placeholder: "Candy corn? Chocolate?" },
+        { id: 1, question: "Best costume I ever wore:", placeholder: "Describe it..." },
+        { id: 2, question: "Scariest Halloween memory:", placeholder: "A spooky moment..." },
+        { id: 3, question: "My favourite Halloween treat:", placeholder: "Candy corn? Chocolate?" },
     ],
 };
 
@@ -1112,45 +1112,45 @@ function Step1({
             </div>
 
             {isOccasionModalOpen && selectedOccasion && (
-            <div ref={modalOverlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
-                <div ref={modalCardRef} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[#f0edf1] bg-white shadow-2xl">
-                    <div className="flex items-start justify-between gap-4 border-b border-[#f5f2f3] px-5 py-4 sm:px-6">
-                        <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Sub Occasion</p>
-                            <h2 className="mt-1 text-[20px] font-bold text-[#1a1a2e]">{selectedOccasionLabel}</h2>
+                <div ref={modalOverlayRef} className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 backdrop-blur-sm">
+                    <div ref={modalCardRef} className="w-full max-w-2xl overflow-hidden rounded-3xl border border-[#f0edf1] bg-white shadow-2xl">
+                        <div className="flex items-start justify-between gap-4 border-b border-[#f5f2f3] px-5 py-4 sm:px-6">
+                            <div>
+                                <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-[#9CA3AF]">Sub Occasion</p>
+                                <h2 className="mt-1 text-[20px] font-bold text-[#1a1a2e]">{selectedOccasionLabel}</h2>
+                            </div>
+                            <button type="button" onClick={() => setIsOccasionModalOpen(false)}
+                                className="flex h-9 w-9 items-center justify-center cursor-pointer rounded-full border border-[#e5e7eb] text-[#9CA3AF] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                                </svg>
+                            </button>
                         </div>
-                        <button type="button" onClick={() => setIsOccasionModalOpen(false)}
-                            className="flex h-9 w-9 items-center justify-center cursor-pointer rounded-full border border-[#e5e7eb] text-[#9CA3AF] transition-colors hover:border-[#B91C1C] hover:text-[#B91C1C]">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div className="p-5 sm:p-6">
-                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            {selectedItems.map((tab) => {
-                                const isSelected = form.selectedSubTab === tab.name;
-                                return (
-                                    <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
-                                        className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
-                                        <div className="flex items-center justify-between gap-3">
-                                            <span className="text-[14px] font-semibold">{tab.name}</span>
-                                            {isSelected && (
-                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                                                    <polyline points="20 6 9 17 4 12" />
-                                                </svg>
-                                            )}
-                                        </div>
-                                        <p className={`mt-1 text-[12px] ${isSelected ? "text-[#B91C1C]/80" : "text-[#9CA3AF]"}`}>
-                                            Select this item to continue.
-                                        </p>
-                                    </button>
-                                );
-                            })}
+                        <div className="p-5 sm:p-6">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                                {selectedItems.map((tab) => {
+                                    const isSelected = form.selectedSubTab === tab.name;
+                                    return (
+                                        <button key={tab.id} type="button" onClick={() => handleSubTabSelect(tab.name)}
+                                            className={`rounded-2xl border px-4 py-3 text-left transition-all cursor-pointer ${isSelected ? "border-[#B91C1C] bg-[#fff5f6] text-[#B91C1C]" : "border-[#e5e7eb] bg-white text-[#374151] hover:border-[#B91C1C]/50 hover:bg-[#fffafb]"}`}>
+                                            <div className="flex items-center justify-between gap-3">
+                                                <span className="text-[14px] font-semibold">{tab.name}</span>
+                                                {isSelected && (
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                                        <polyline points="20 6 9 17 4 12" />
+                                                    </svg>
+                                                )}
+                                            </div>
+                                            <p className={`mt-1 text-[12px] ${isSelected ? "text-[#B91C1C]/80" : "text-[#9CA3AF]"}`}>
+                                                Select this item to continue.
+                                            </p>
+                                        </button>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
             )}
 
             <BottomNav
