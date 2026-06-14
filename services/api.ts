@@ -570,8 +570,8 @@ export async function fetchCoverPageStyles(): Promise<CoverPageStylesResponse> {
 
 
 // New
-export async function fetchBooks(): Promise<BooksResponse> {
-    const token = getAuthToken();
+export async function fetchBooks(authToken?: string | null): Promise<BooksResponse> {
+    const token = authToken ?? getAuthToken();
 
     const response = await fetch(`/api/user/books`, {
         method: "GET",
@@ -639,8 +639,8 @@ function buildBookFormData(payload: CreateBookPayload | UpdateBookPayload): Form
 }
 
 // ── FIXED: createBookUser ────────────────────────────────────────────────────
-export async function createBookUser(payload: CreateBookPayload): Promise<CreateBookResponse> {
-    const token = getAuthToken();
+export async function createBookUser(payload: CreateBookPayload, authToken?: string | null): Promise<CreateBookResponse> {
+    const token = authToken ?? getAuthToken();
     if (!token) {
         throw new Error("Authentication token is missing. Please log in again.");
     }
@@ -676,13 +676,14 @@ export async function createBookUser(payload: CreateBookPayload): Promise<Create
 
 export async function updateBookUser(
     bookId: string | number,
-    payload: UpdateBookPayload
+    payload: UpdateBookPayload,
+    authToken?: string | null
 ): Promise<UpdateBookResponse> {
     if (!bookId && bookId !== 0) {
         throw new Error("Book ID is required.");
     }
 
-    const token = getAuthToken();
+    const token = authToken ?? getAuthToken();
     const formData = buildBookFormData(payload);
     const response = await fetch(`/api/user/books/${bookId}`, {
         method: "POST",
@@ -702,11 +703,11 @@ export async function updateBookUser(
 }
 
 // invite by email
-export async function inviteByEmail(bookId: string | number, email: string, name?: string): Promise<SendBookInviteResponse> {
+export async function inviteByEmail(bookId: string | number, email: string, name?: string, authToken?: string | null): Promise<SendBookInviteResponse> {
     if (!bookId && bookId !== 0) throw new Error("Book ID is required.");
     if (!email?.trim()) throw new Error("Email is required.");
 
-    const token = getAuthToken();
+    const token = authToken ?? getAuthToken();
     const response = await fetch(`/api/user/books/${bookId}/invite`, {
         method: "POST",
         headers: {
@@ -725,12 +726,12 @@ export async function inviteByEmail(bookId: string | number, email: string, name
 }
 
 // Book Details API (used in book details page, and also to get book info before final PDF generation)
-export async function fetchBookDetails(bookId: string | number): Promise<BookDetailResponse> {
+export async function fetchBookDetails(bookId: string | number, authToken?: string | null): Promise<BookDetailResponse> {
     if (!bookId && bookId !== 0) {
         throw new Error("Book ID is required.");
     }
 
-    const token = getAuthToken();
+    const token = authToken ?? getAuthToken();
     const response = await fetch(`/api/user/books/${bookId}`, {
         method: "GET",
         headers: {

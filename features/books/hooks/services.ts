@@ -57,18 +57,32 @@ function dedupeContributionsByName(contributions: Contribution[]) {
 }
 
 export function useBooksQuery() {
+	const { data: session } = useSession();
+	const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	const localToken = typeof window !== "undefined"
+		? (localStorage.getItem("authToken") || localStorage.getItem("token") || "")
+		: "";
+	const token = sessionToken || localToken;
+
 	return useQuery<BooksResponse, Error>({
-		queryKey: ["books"],
-		queryFn: fetchBooks,
+		queryKey: ["books", token],
+		queryFn: () => fetchBooks(token || null),
 		retry: false,
 	});
 }
 
 
 export function useBookDetailsQuery(bookId: string | number | undefined) {
+	const { data: session } = useSession();
+	const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	const localToken = typeof window !== "undefined"
+		? (localStorage.getItem("authToken") || localStorage.getItem("token") || "")
+		: "";
+	const token = sessionToken || localToken;
+
 	return useQuery<BookDetailResponse, Error>({
-		queryKey: ["book", bookId],
-		queryFn: () => fetchBookDetails(bookId as string | number),
+		queryKey: ["book", bookId, token],
+		queryFn: () => fetchBookDetails(bookId as string | number, token || null),
 		enabled: Boolean(bookId),
 		retry: false,
 	});
@@ -76,9 +90,15 @@ export function useBookDetailsQuery(bookId: string | number | undefined) {
 
 export function useCreateBookMutation() {
 	const queryClient = useQueryClient();
+	const { data: session } = useSession();
+	const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	const localToken = typeof window !== "undefined"
+		? (localStorage.getItem("authToken") || localStorage.getItem("token") || "")
+		: "";
+	const token = sessionToken || localToken;
 
 	return useMutation<CreateBookResponse, Error, CreateBookPayload>({
-		mutationFn: createBookUser,
+		mutationFn: (payload) => createBookUser(payload, token || null),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ["books"] });
 		},
@@ -87,9 +107,15 @@ export function useCreateBookMutation() {
 
 export function useUpdateBookMutation(bookId: string | number | undefined) {
 	const queryClient = useQueryClient();
+	const { data: session } = useSession();
+	const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	const localToken = typeof window !== "undefined"
+		? (localStorage.getItem("authToken") || localStorage.getItem("token") || "")
+		: "";
+	const token = sessionToken || localToken;
 
 	return useMutation<UpdateBookResponse, Error, UpdateBookPayload>({
-		mutationFn: (payload) => updateBookUser(bookId as string | number, payload),
+		mutationFn: (payload) => updateBookUser(bookId as string | number, payload, token || null),
 		onSuccess: async () => {
 			await queryClient.invalidateQueries({ queryKey: ["books"] });
 			await queryClient.invalidateQueries({ queryKey: ["book", bookId] });
@@ -100,9 +126,15 @@ export function useUpdateBookMutation(bookId: string | number | undefined) {
 
 export function useSendBookInviteMutation(bookId: string | number | undefined) {
 	const queryClient = useQueryClient();
+	const { data: session } = useSession();
+	const sessionToken = (session as { accessToken?: string } | null | undefined)?.accessToken ?? null;
+	const localToken = typeof window !== "undefined"
+		? (localStorage.getItem("authToken") || localStorage.getItem("token") || "")
+		: "";
+	const token = sessionToken || localToken;
 
 	return useMutation<SendBookInviteResponse, Error, string, SendBookInviteMutationContext>({
-		mutationFn: (email: string) => inviteByEmail(bookId as string | number, email),
+		mutationFn: (email: string) => inviteByEmail(bookId as string | number, email, undefined, token || null),
 		onMutate: async (email: string) => {
 			if (!bookId) {
 				return { previousContributions: undefined };
