@@ -119,161 +119,6 @@ function mapStyleCard(style: {
     };
 }
 
-// const fallbackOccasions = [
-//     {
-//         id: 1, name: "Birthday", image: "", status: 1,
-//         sub_occasions: [
-//             { id: 101, occasion_id: 1, name: "Birthday", image: "", status: 1 },
-//             { id: 102, occasion_id: 1, name: "Anniversary", image: "", status: 1 },
-//         ],
-//     },
-//     {
-//         id: 2, name: "School", image: "", status: 1,
-//         sub_occasions: [
-//             { id: 201, occasion_id: 2, name: "Class Book", image: "", status: 1 },
-//             { id: 202, occasion_id: 2, name: "Kindergarten", image: "", status: 1 },
-//             { id: 203, occasion_id: 2, name: "Farewell Teacher", image: "", status: 1 },
-//             { id: 204, occasion_id: 2, name: "End-of-Year Book", image: "", status: 1 },
-//         ],
-//     },
-//     {
-//         id: 3, name: "Farewell", image: "", status: 1,
-//         sub_occasions: [
-//             { id: 301, occasion_id: 3, name: "Retirement", image: "", status: 1 },
-//             { id: 302, occasion_id: 3, name: "Team Memory Book", image: "", status: 1 },
-//         ],
-//     },
-//     {
-//         id: 4, name: "Love", image: "", status: 1,
-//         sub_occasions: [
-//             { id: 401, occasion_id: 4, name: "Wedding", image: "", status: 1 },
-//             { id: 402, occasion_id: 4, name: "Bachelorette Party (JGA)", image: "", status: 1 },
-//         ],
-//     },
-//     {
-//         id: 5, name: "Family", image: "", status: 1,
-//         sub_occasions: [
-//             { id: 501, occasion_id: 5, name: "Family Book", image: "", status: 1 },
-//             { id: 502, occasion_id: 5, name: "For Mom", image: "", status: 1 },
-//             { id: 503, occasion_id: 5, name: "For Dad", image: "", status: 1 },
-//             { id: 504, occasion_id: 5, name: "Baby Book", image: "", status: 1 },
-//             { id: 505, occasion_id: 5, name: "For Grandma / Grandpa", image: "", status: 1 },
-//         ],
-//     },
-//     {
-//         id: 6, name: "Seasonal", image: "", status: 1,
-//         sub_occasions: [
-//             { id: 601, occasion_id: 6, name: "Christmas", image: "", status: 1 },
-//             { id: 602, occasion_id: 6, name: "New Year", image: "", status: 1 },
-//             { id: 603, occasion_id: 6, name: "Easter", image: "", status: 1 },
-//             { id: 604, occasion_id: 6, name: "Halloween", image: "", status: 1 },
-//         ],
-//     },
-// ];
-
-// const questionnairesBySubOccasion: Record<
-//     string,
-//     { id: number; question: string; placeholder: string; checked?: boolean }[]
-// > = {
-//     Birthday: [
-//         { id: 1, question: "My life motto:", placeholder: "Words you live by..." },
-//         { id: 2, question: "This is what I wanted to be when I was a child:", placeholder: "An astronaut, a doctor..." },
-//         { id: 3, question: "I get grumpy about:", placeholder: "What grinds your gears?" },
-//         { id: 4, question: "The best invention ever:", placeholder: "Coffee? The internet?" },
-//         { id: 5, question: "My ultimate dream:", placeholder: "Your biggest dream..." },
-//         { id: 6, question: "My fondest childhood memory:", placeholder: "Share a cherished memory...", checked: true },
-//     ],
-//     Anniversary: [
-//         { id: 1, question: "My favourite memory of us:", placeholder: "A special moment together..." },
-//         { id: 2, question: "What I love most about you:", placeholder: "Your smile, your laugh..." },
-//         { id: 3, question: "My wish for our future:", placeholder: "Dreams for us..." },
-//     ],
-//     "Class Book": [
-//         { id: 1, question: "My favourite subject:", placeholder: "Math, Art, PE..." },
-//         { id: 2, question: "Best school memory:", placeholder: "A moment you'll never forget..." },
-//         { id: 3, question: "What I'll miss most:", placeholder: "Friends, teachers, lunch..." },
-//     ],
-//     Kindergarten: [
-//         { id: 1, question: "My favourite game:", placeholder: "Hide and seek, painting..." },
-//         { id: 2, question: "My best friend:", placeholder: "Who do you love playing with?" },
-//         { id: 3, question: "What I want to be when I grow up:", placeholder: "A superhero? A chef?" },
-//     ],
-//     "Farewell Teacher": [
-//         { id: 1, question: "What I admired most about this teacher:", placeholder: "Their patience, creativity..." },
-//         { id: 2, question: "A lesson I'll never forget:", placeholder: "Something they taught me..." },
-//         { id: 3, question: "Thank you for:", placeholder: "Words of gratitude..." },
-//     ],
-//     "End-of-Year Book": [
-//         { id: 1, question: "My highlight of this school year:", placeholder: "A trip, a project..." },
-//         { id: 2, question: "What I learned:", placeholder: "Skills or lessons..." },
-//         { id: 3, question: "My goals for next year:", placeholder: "What I want to achieve..." },
-//     ],
-//     Retirement: [
-//         { id: 1, question: "What I enjoyed most working here:", placeholder: "The people, the projects..." },
-//         { id: 2, question: "My biggest achievement:", placeholder: "Something you're proud of..." },
-//         { id: 3, question: "Advice for those staying:", placeholder: "Words of wisdom..." },
-//     ],
-//     "Team Memory Book": [
-//         { id: 1, question: "Best team moment:", placeholder: "A win, a laugh, a milestone..." },
-//         { id: 2, question: "What made our team special:", placeholder: "The culture, the people..." },
-//         { id: 3, question: "What I'll miss most:", placeholder: "The daily standups, lunch trips..." },
-//     ],
-//     Wedding: [
-//         { id: 1, question: "My wish for the couple:", placeholder: "Love, laughter, adventure..." },
-//         { id: 2, question: "A favourite memory with the couple:", placeholder: "A special moment together..." },
-//         { id: 3, question: "Advice for a happy marriage:", placeholder: "Your best tip..." },
-//     ],
-//     "Bachelorette Party (JGA)": [
-//         { id: 1, question: "My funniest memory with the bride:", placeholder: "A hilarious moment..." },
-//         { id: 2, question: "What I love about her:", placeholder: "Her laugh, her kindness..." },
-//         { id: 3, question: "My wish for her future:", placeholder: "Everything she deserves..." },
-//     ],
-//     "Family Book": [
-//         { id: 1, question: "A family tradition I treasure:", placeholder: "Sunday dinners, holiday trips..." },
-//         { id: 2, question: "What family means to me:", placeholder: "In your own words..." },
-//         { id: 3, question: "My favourite family memory:", placeholder: "A moment we all remember..." },
-//     ],
-//     "For Mom": [
-//         { id: 1, question: "My favourite thing Mom always says:", placeholder: "Her classic phrase..." },
-//         { id: 2, question: "A lesson Mom taught me:", placeholder: "Something she showed me..." },
-//         { id: 3, question: "My fondest memory with Mom:", placeholder: "A special moment..." },
-//     ],
-//     "For Dad": [
-//         { id: 1, question: "My favourite thing Dad always does:", placeholder: "His habits, his humour..." },
-//         { id: 2, question: "Something Dad taught me:", placeholder: "A skill, a value..." },
-//         { id: 3, question: "My fondest memory with Dad:", placeholder: "A special moment..." },
-//     ],
-//     "Baby Book": [
-//         { id: 1, question: "My wish for this little one:", placeholder: "Health, joy, adventure..." },
-//         { id: 2, question: "What I love about babies:", placeholder: "Their laughter, their wonder..." },
-//         { id: 3, question: "Advice for new parents:", placeholder: "Your best tip..." },
-//     ],
-//     "For Grandma / Grandpa": [
-//         { id: 1, question: "My favourite memory with Grandma/Grandpa:", placeholder: "A special moment..." },
-//         { id: 2, question: "The best thing they taught me:", placeholder: "A lesson or skill..." },
-//         { id: 3, question: "What I love most about them:", placeholder: "Their warmth, their stories..." },
-//     ],
-//     Christmas: [
-//         { id: 1, question: "My favourite Christmas tradition:", placeholder: "Decorating the tree, carol singing..." },
-//         { id: 2, question: "Best Christmas memory:", placeholder: "A magical moment..." },
-//         { id: 3, question: "My Christmas wish:", placeholder: "What I wish for this year..." },
-//     ],
-//     "New Year": [
-//         { id: 1, question: "My highlight of this year:", placeholder: "A milestone or memory..." },
-//         { id: 2, question: "My resolution for next year:", placeholder: "What I want to change..." },
-//         { id: 3, question: "My wish for everyone:", placeholder: "Health, joy, success..." },
-//     ],
-//     Easter: [
-//         { id: 1, question: "My favourite Easter tradition:", placeholder: "Egg hunts, family meals..." },
-//         { id: 2, question: "Best Easter memory:", placeholder: "A special moment..." },
-//         { id: 3, question: "What Easter means to me:", placeholder: "In your own words..." },
-//     ],
-//     Halloween: [
-//         { id: 1, question: "Best costume I ever wore:", placeholder: "Describe it..." },
-//         { id: 2, question: "Scariest Halloween memory:", placeholder: "A spooky moment..." },
-//         { id: 3, question: "My favourite Halloween treat:", placeholder: "Candy corn? Chocolate?" },
-//     ],
-// };
 const fallbackOccasions = [
     {
         id: 1, name: "Birthday", image: "", status: 1,
@@ -1526,135 +1371,6 @@ function Step5({ onNext, onBack, coverId, bookDraft, isAuthenticated, themeId: _
     );
 }
 
-// ── Step 5: Review Setup ────────
-// function Step5({
-//     onNext,
-//     onBack,
-//     coverId,
-//     bookDraft,
-//     isAuthenticated,
-//     themeId,
-//     selectedThemeName,
-// }: {
-//     onNext: () => void;
-//     onBack: () => void;
-//     coverId: number;
-//     bookDraft: BookDraft | null;
-//     isAuthenticated: boolean;
-//     themeId: number;
-//     selectedThemeName: string;
-// }) {
-//     const headingRef = useRef<HTMLDivElement>(null);
-//     const previewRef = useRef<HTMLDivElement>(null);
-//     const { data: coverPageStylesResponse } = useCoverPageStylesQuery();
-//     const coversFromApi = coverPageStylesResponse?.data?.map(mapStyleCard) ?? [];
-
-//     const fallbackCovers: StyleCard[] = [
-//         { id: 2001, name: "Solid Color", description: "A bold, single-color cover that puts your title front and center.", image: "/icon/11.jpg", occasionName: "General", subOccasionName: "" },
-//         { id: 2002, name: "Soft Pattern", description: "Delicate repeating patterns add warmth and personality.", image: "/icon/12.jpg", occasionName: "General", subOccasionName: "" },
-//         { id: 2003, name: "Full Photo", description: "Let a single stunning photograph fill the entire cover.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
-//         { id: 2004, name: "Split / Duo-Tone", description: "Two contrasting tones divided across the cover for editorial look.", image: "/icon/14.jpg", occasionName: "General", subOccasionName: "" },
-//         { id: 2005, name: "Framed Photo", description: "Your photo set inside an elegant frame — classic and polished.", image: "/icon/15.jpg", occasionName: "General", subOccasionName: "" },
-//     ];
-
-//     const covers = coversFromApi.length > 0 ? coversFromApi : fallbackCovers;
-//     const selectedCover = covers.find((c) => c.id === coverId) ?? covers[0];
-
-//     useEffect(() => {
-//         gsap.set([headingRef.current, previewRef.current], { opacity: 0, y: 22 });
-//         const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-//         tl.to(headingRef.current, { opacity: 1, y: 0, duration: 0.5 })
-//             .to(previewRef.current, { opacity: 1, y: 0, duration: 0.5 }, "-=0.25");
-//     }, []);
-
-//     return (
-//         <>
-//             <div className="flex-1 px-4 sm:px-6 py-6 max-w-3xl mx-auto w-full">
-//                 <div ref={headingRef} className="mb-6">
-//                     <h1 className="text-[22px] font-bold text-[#1a1a2e]">Review Setup</h1>
-//                     <p className="text-[13px] text-[#9CA3AF] mt-0.5">Review your selected setup before creating the book.</p>
-//                 </div>
-//                 <div ref={previewRef} className="rounded-2xl border border-[#f0edf1] bg-white p-5">
-//                     <div className="grid grid-cols-1 sm:grid-cols-[220px_1fr] gap-5 items-start">
-//                         <div className="relative w-full max-w-55 mx-auto sm:mx-0 aspect-3/4 rounded-xl overflow-hidden border border-[#e5e7eb] bg-[#f7f7f7]">
-//                             {selectedCover
-//                                 ? <Image src={selectedCover.image} alt={selectedCover.name} fill className="" />
-//                                 : <div className="flex h-full w-full items-center justify-center text-[13px] text-[#9CA3AF]">No cover selected</div>
-//                             }
-//                         </div>
-//                         <div>
-//                             <h2 className="text-[16px] font-semibold text-[#1a1a2e]">Book Preview</h2>
-//                             <p className="text-[13px] text-[#6b7280] mt-1">This is the current cover and setup that will be used for your new book.</p>
-//                             <ul className="mt-4 space-y-2 text-[13px] text-[#4b5563]">
-//                                 {/* ✅ Bug #5 Fix: Theme এখন দেখাবে */}
-//                                 {selectedThemeName && (
-//                                     <li className="flex items-center gap-2">
-//                                         <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
-//                                         Theme: {selectedThemeName}
-//                                     </li>
-//                                 )}
-//                                 {selectedCover && (
-//                                     <li className="flex items-center gap-2">
-//                                         <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
-//                                         Cover: {selectedCover.name}
-//                                     </li>
-//                                 )}
-//                                 <li className="flex items-center gap-2">
-//                                     <span className="w-2 h-2 rounded-full bg-[#B91C1C] shrink-0" />
-//                                     Questionnaire Type: {bookDraft?.subTab ?? "Not selected"}
-//                                 </li>
-//                                 <li className="flex items-center gap-2">
-//                                     <span className="w-2 h-2 rounded-full bg-[#16a34a] shrink-0" />
-//                                     Status: Ready to create
-//                                 </li>
-//                             </ul>
-//                         </div>
-//                     </div>
-
-//                     {/* Draft section — অপরিবর্তিত */}
-//                     <div className="mt-5 rounded-2xl border border-[#f0edf1] bg-[#fafafa] p-4">
-//                         <div className="flex items-center justify-between gap-3">
-//                             <div>
-//                                 <h3 className="text-[14px] font-semibold text-[#1a1a2e]">Current draft</h3>
-//                                 <p className="text-[12px] text-[#9CA3AF]">This draft will be submitted to POST /user/books.</p>
-//                             </div>
-//                             <span className="rounded-full bg-white px-3 py-1 text-[12px] font-semibold text-[#BF003A] border border-[#f3d4db]">Ready</span>
-//                         </div>
-//                         <div className="mt-3 space-y-2">
-//                             {bookDraft ? (
-//                                 <div className="rounded-xl border border-[#ece7ea] bg-white px-3 py-2.5">
-//                                     <div className="flex items-start justify-between gap-3">
-//                                         <div className="min-w-0">
-//                                             <p className="truncate text-[13px] font-semibold text-[#1a1a2e]">{bookDraft.bookTitle || "Untitled book"}</p>
-//                                             <p className="mt-0.5 text-[12px] text-[#6b7280]">{bookDraft.recipientName ? `Recipient: ${bookDraft.recipientName}` : "Recipient not set"}</p>
-//                                         </div>
-//                                         <div className="shrink-0 text-right">
-//                                             <p className="text-[11px] font-semibold text-[#BF003A]">{bookDraft.occasion || "No occasion selected"}</p>
-//                                             <p className="text-[11px] text-[#9CA3AF]">{bookDraft.bookSubtitle || "No subtitle provided"}</p>
-//                                         </div>
-//                                     </div>
-//                                 </div>
-//                             ) : (
-//                                 <div className="rounded-xl border border-dashed border-[#e5e7eb] bg-white px-3 py-5 text-center text-[13px] text-[#9CA3AF]">
-//                                     No draft found yet. Go back and fill in the book details.
-//                                 </div>
-//                             )}
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//             <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 pb-2">
-//                 <p className="text-[12px] text-[#9CA3AF]">
-//                     {isAuthenticated
-//                         ? "You are already signed in. Continue to the invite step."
-//                         : "Next you'll create your account before inviting friends."}
-//                 </p>
-//             </div>
-//             <BottomNav onBack={onBack} onNext={onNext} nextLabel={isAuthenticated ? "Invite Friends" : "Create Account"} />
-//         </>
-//     );
-// }
-
 // ── Step 6: Create Account Gate ───────────────────────────
 function Step6({ onBack, onContinue, loginHref, onLoginNavigate, accountDraft, onAccountDraftChange, isAuthenticated }: {
     onBack: () => void;
@@ -1842,13 +1558,6 @@ function Step7({
             .to(emailSectionRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.25")
             .to(friendsSectionRef.current, { opacity: 1, y: 0, duration: 0.45 }, "-=0.25");
     }, []);
-
-    // useEffect(() => {
-    //     if (!isAuthenticated) return;
-    //     if (!inviteLink && !isGeneratingInviteLink) {
-    //         void onEnsureInviteLink();
-    //     }
-    // }, [isAuthenticated, inviteLink, isGeneratingInviteLink, onEnsureInviteLink]);
 
     useEffect(() => {
         if (!isAuthenticated) return;
@@ -2200,28 +1909,12 @@ export default function BookCreator() {
                 questions: selectedQuestions,
                 pages_per_contributor: 2,
             });
-
-            // const inviteLink = getCleanInviteLink(result.data?.invite_link || (result as { invite_link?: string }).invite_link || "");
-            // const inviteLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
             const rawLink = result.data?.invite_link || (result as { invite_link?: string }).invite_link || "";
             const inviteLink = getCleanInviteLink(rawLink)
 
             if (!inviteLink) {
                 throw new Error("Invite link missing from create book response.");
             }
-
-            // if (result.data?.id !== undefined && result.data?.id !== null) {
-            //     await updateBookUser(result.data.id, {
-            //         book_title: bookDraft.bookTitle,
-            //         book_subtitle: bookDraft.bookSubtitle || null,
-            //         recipient_name: bookDraft.recipientName,
-            //         occasion_id: bookDraft.occasionId || null,
-            //         sub_occasion_id: bookDraft.subOccasionId || null,
-            //         cover_page_style_id: resolvedCoverId,
-            //         book_page_style_id: resolvedThemeId,
-            //         questions: selectedQuestions,
-            //     });
-            // }
 
             setCreatedInviteLink(inviteLink);
             return { inviteLink, bookId: result.data?.id };
@@ -2323,7 +2016,6 @@ export default function BookCreator() {
             {step === 2 && <Step3 onNext={(id) => { setSelectedThemeId(id); setStep(3); }} onBack={() => setStep(1)} selectedThemeId={selectedThemeId} onSelectedThemeIdChange={setSelectedThemeId} />}
             {step === 3 && <Step4 onNext={(coverId) => { setSelectedCoverId(coverId); setStep(4); }} onBack={() => setStep(2)} selectedCoverId={selectedCoverId} onSelectedCoverIdChange={setSelectedCoverId} />}
             {step === 4 && <Step2 onNext={() => setStep(5)} onBack={() => setStep(3)} subTab={bookDetailsForm.selectedSubTab} questions={questionsBySubOccasion} onQuestionsChange={setQuestionsBySubOccasion} />}
-            {/* {step === 5 && <Step5 onNext={() => setStep(6)} onBack={() => setStep(4)} coverId={selectedCoverId} bookDraft={bookDraft} isAuthenticated={isAuthenticated} themeId={0} selectedThemeName={""} />} */}
             {step === 5 && (() => {
                 const themesFromApi = bookPageStylesResponse?.data?.map(mapStyleCard) ?? [];
                 const fallbackTemplates: StyleCard[] = [
