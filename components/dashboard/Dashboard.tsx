@@ -8,7 +8,7 @@ import { Activity, Book } from "@/types";
 import ActivityFeed from "./ActivityFeed";
 import BookCard from "./Bookcard";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import gsap from "gsap";
 import { useBooksQuery } from "@/features/books/hooks/services";
 import type { BookItem } from "@/types/api";
@@ -44,7 +44,8 @@ const DashboardPageMain: FC = () => {
   const titleRef = useRef<HTMLDivElement>(null);
   const booksRef = useRef<HTMLDivElement>(null);
   const activityRef = useRef<HTMLDivElement>(null);
-  const { data: booksResponse, isLoading, isError } = useBooksQuery();
+  const { data: booksResponse, isLoading, isError, refetch } = useBooksQuery();
+  const [showErrorModal, setShowErrorModal] = useState(false);
 
 
 
@@ -71,6 +72,15 @@ const DashboardPageMain: FC = () => {
       }, "-=0.2")
       .to(activityRef.current, { opacity: 1, x: 0, duration: 0.5 }, "-=0.35");
   }, []);
+
+  // Auto‑show error modal for 10 s
+  useEffect(() => {
+    if (isError) {
+      setShowErrorModal(true);
+      const timer = setTimeout(() => setShowErrorModal(false), 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [isError]);
 
   // Book card hover
   const onCardEnter = (e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -102,16 +112,16 @@ const DashboardPageMain: FC = () => {
           ? (book as any).pages_count
           : 0;
 
-    const submitted = typeof (book as any).submitted === "number" 
-      ? (book as any).submitted 
+    const submitted = typeof (book as any).submitted === "number"
+      ? (book as any).submitted
       : typeof (book as any).pages_count === "number"
         ? (book as any).pages_count
         : undefined;
 
-    const totalPages = typeof book.page_count === "number" 
-      ? book.page_count 
-      : typeof book.pages === "number" 
-        ? book.pages 
+    const totalPages = typeof book.page_count === "number"
+      ? book.page_count
+      : typeof book.pages === "number"
+        ? book.pages
         : typeof (book as any).min_page_count === "number"
           ? (book as any).min_page_count
           : undefined;
@@ -211,7 +221,15 @@ const DashboardPageMain: FC = () => {
 
             {isError && !isLoading && (
               <div className="bg-white border border-dashed border-red-200 rounded-2xl p-10 text-center">
-                <p className="text-sm text-red-500 font-light">Failed to load books.</p>
+                <p className="text-sm text-red-500 font-light">
+                  We&apos;re having trouble loading your books right now. Please try again shortly.
+                </p>
+                <button
+                  onClick={() => refetch()}
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs text-rose-700 hover:underline underline-offset-2 font-medium"
+                >
+                  Try Again
+                </button>
               </div>
             )}
 
@@ -247,6 +265,35 @@ const DashboardPageMain: FC = () => {
 
         </div>
       </main>
+    {showErrorModal && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center relative">
+            <button
+              onClick={() => setShowErrorModal(false)}
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition-colors"
+              aria-label="Close"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+            <div className="flex justify-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B91C1C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 9v4" />
+                  <path d="M12 17h.01" />
+                  <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                </svg>
+              </div>
+            </div>
+            <h2 className="text-[18px] font-bold text-gray-900 mb-2">We&apos;re having a temporary issue</h2>
+            <p className="text-[13px] text-gray-500 leading-relaxed">
+              We couldn&apos;t load your books due to a server issue on our side. Your data is safe — please check back shortly.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

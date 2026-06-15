@@ -518,10 +518,16 @@ export default function ProgressBar({ bookId }: { bookId: string }) {
 
   const handleSaveSettingsPanel = async () => {
     try {
+      // Convert the selected date (YYYY-MM-DD) to a UTC date string to avoid timezone shifts.
+      const date = new Date(settingsDeadline);
+      const utcDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+        .toISOString()
+        .split('T')[0];
       await updateMutation.mutateAsync({
         book_title: settingsBookTitle.trim(),
         book_subtitle: settingsBookSubtitle.trim() || null,
-        expire_date: settingsDeadline,
+        // Store the UTC-adjusted date string
+        expire_date: utcDate,
       });
       toast.success("Settings saved");
       setShowSettingsPanel(false);
@@ -895,67 +901,6 @@ function SortableParticipantRow({ p, bookId }: { p: any; bookId: string }) {
     </div>
   );
 }
-
-// function InviteContributors({ bookId }: { bookId: string }) {
-//   const [email, setEmail] = useState("");
-//   const [isMounted, setIsMounted] = useState(false);
-//   const inviteMutation = useSendBookInviteMutation(bookId);
-
-//   useEffect(() => {
-//     setIsMounted(true);
-//   }, []);
-
-//   const handleSend = async () => {
-//     if (!email.trim()) {
-//       toast.error("Please enter an email address");
-//       return;
-//     }
-//     try {
-//       const response = await inviteMutation.mutateAsync(email);
-//       toast.success(response.message || "Invitation sent successfully");
-//       setEmail("");
-//     } catch (error) {
-//       const message = error instanceof Error ? error.message : "Failed to send invitation";
-//       toast.error(message);
-//     }
-//   };
-
-//   return (
-//     <div className="space-y-2">
-//       {isMounted ? (
-//         <div className="flex items-center border rounded-lg overflow-hidden">
-//           <input
-//             type="email"
-//             value={email}
-//             onChange={(e) => setEmail(e.target.value)}
-//             className="flex-1 p-2 text-xs outline-none"
-//             placeholder="email@example.com"
-//           />
-//           <button
-//             onClick={() => void handleSend()}
-//             disabled={inviteMutation.isPending}
-//             className="p-2 text-white bg-linear-to-r from-[#BF003A] to-[#59001C]"
-//           >
-//             <Plus size={14} />
-//           </button>
-//         </div>
-//       ) : (
-//         <div className="flex h-9 items-center rounded-lg border border-dashed border-[#e5e7eb] px-3 text-xs text-[#9CA3AF]">
-//           Loading invite input...
-//         </div>
-//       )}
-
-//       <button
-//         onClick={() => void handleSend()}
-//         disabled={inviteMutation.isPending || !email.trim()}
-//         className="w-full cursor-pointer bg-linear-to-r from-[#BF003A] to-[#59001C] text-white py-2 rounded-lg text-sm disabled:opacity-60"
-//       >
-//         {inviteMutation.isPending ? "Sending..." : "Send Invites"}
-//       </button>
-//     </div>
-//   );
-// }
-
 
 function InviteContributors({ bookId }: { bookId: string }) {
   const [name, setName] = useState("");

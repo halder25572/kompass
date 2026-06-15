@@ -157,6 +157,15 @@ function getAuthToken() {
     );
 }
 
+// Returns the current IANA timezone string, used for X-Timezone header
+function getTimezoneHeader() {
+    if (typeof Intl !== "undefined" && Intl.DateTimeFormat) {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        return { "X-Timezone": tz || "UTC" };
+    }
+    return { "X-Timezone": "UTC" };
+}
+
 // ── Safe JSON parser (handles empty body & non-JSON responses) ───────────────
 async function safeParseJson<T>(response: Response): Promise<T | null> {
     const text = await response.text();
@@ -181,6 +190,7 @@ export async function registerUser(payload: RegisterPayload): Promise<RegisterRe
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -204,6 +214,7 @@ export async function loginUser(payload: LoginPayload): Promise<LoginResponse> {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -228,6 +239,7 @@ export async function googleLoginUser(
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -253,6 +265,7 @@ export async function forgotPasswordUser(
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -278,6 +291,7 @@ export async function verifyOtpUser(
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -303,6 +317,7 @@ export async function resendOtpUser(
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -328,6 +343,7 @@ export async function resetPasswordUser(
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -359,6 +375,7 @@ export async function changePasswordUser(
         headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
+            ...getTimezoneHeader(),
         },
         body: JSON.stringify(payload),
     });
@@ -387,6 +404,7 @@ export async function showUser(): Promise<ShowUserResponse> {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`,
+            ...getTimezoneHeader(),
         },
     });
 
@@ -428,6 +446,7 @@ export async function updateProfileUser(
         method: "POST",
         headers: {
             Authorization: `Bearer ${token}`,
+            ...getTimezoneHeader(),
         },
         body: formData,
     });
@@ -455,6 +474,7 @@ export async function updateLanguageUser(
                 "Content-Type": "application/json",
                 "Accept": "application/json",
                 Authorization: `Bearer ${token}`,
+                ...getTimezoneHeader(),
             },
             body: JSON.stringify(payload),
         },
@@ -463,6 +483,7 @@ export async function updateLanguageUser(
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Accept": "application/json",
                 Authorization: `Bearer ${token}`,
+                ...getTimezoneHeader(),
             },
             body: new URLSearchParams({ language: payload.language }).toString(),
         },
@@ -506,6 +527,8 @@ export async function fetchOccasions(): Promise<OccasionsResponse> {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
+            ...getTimezoneHeader(),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     });
@@ -529,6 +552,7 @@ export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader(),
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
     });
@@ -689,6 +713,7 @@ export async function updateBookUser(
         method: "POST",
         headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            ...getTimezoneHeader(),
         },
         body: formData,
     });
@@ -763,6 +788,7 @@ export async function fetchBookContributions(
         headers: {
             "Content-Type": "application/json",
             ...(token ? { Authorization: token.startsWith("Bearer ") ? token : `Bearer ${token}` } : {}),
+            ...getTimezoneHeader(),
         },
     });
 
@@ -814,7 +840,8 @@ export async function joinInviteByCode(code: string, name: string, email: string
         headers: {
             "Content-Type": "application/json",
         },
-        body: JSON.stringify({ name, participant_name: name, contributor_name: name, email }),
+        // No headers needed for joinInviteByCode (GET) but add timezone for consistency
+        ...getTimezoneHeader(),
     });
 
     const rawBody = await response.text();

@@ -4,5 +4,6 @@ import { placeOrder, PlaceOrderPayload, PlaceOrderResponse } from '@/services/ap
 export function usePlaceOrder() {
     return useMutation<PlaceOrderResponse, Error, PlaceOrderPayload>({
         mutationFn: (payload) => placeOrder(payload),
+        retry: false,
     });
 }

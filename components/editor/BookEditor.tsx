@@ -235,11 +235,11 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
     try {
       const { pages, occasion, subOccasion } = useBookStore.getState();
       const theme = (subOccasion && OCCASION_THEMES[subOccasion]) || (occasion && OCCASION_THEMES[occasion]) || null;
-      
+
       const blob = await exportBookToPdfBlob(pages, A4_WIDTH, A4_HEIGHT, theme);
-      
+
       const res = await uploadFinalPdf(bookId, blob);
-      
+
       if (res.success) {
         toast.success("Book finalized and saved successfully!", { id: toastId });
         router.push("/dashboard");
@@ -574,8 +574,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                   onClick={() => setBookFormat(key)}
                   title={config.sublabel}
                   className={`flex items-center cursor-pointer gap-1.5 px-3 py-1.5 rounded-[10px] text-[11px] font-semibold transition-all ${bookFormat === key
-                      ? "bg-white text-[#b5192c] shadow-sm"
-                      : "text-black hover:bg-white/10"
+                    ? "bg-white text-[#b5192c] shadow-sm"
+                    : "text-black hover:bg-white/10"
                     }`}
                 >
                   {/* Mini aspect-ratio icon */}
@@ -733,8 +733,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                     <div key={el.id}
                       onClick={() => useBookStore.getState().setSelectedElement(el.id)}
                       className={`flex items-center gap-2 px-2 py-2 rounded-lg mb-1 cursor-pointer transition-all ${el.id === selectedElementId
-                          ? "bg-[#fff0f0] border border-[#f5c0c0]"
-                          : "hover:bg-[#f5f4f2] border border-transparent"
+                        ? "bg-[#fff0f0] border border-[#f5c0c0]"
+                        : "hover:bg-[#f5f4f2] border border-transparent"
                         }`}>
                       <span className="text-base w-5 text-center">
                         {el.type === "image" ? "🖼" : el.type === "text" ? "T" : "◻"}
@@ -772,8 +772,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                           type="button"
                           onClick={() => handleSelectContributor(contribution)}
                           className={`mb-1 flex w-full items-center justify-between gap-2 rounded-lg border px-2 py-2 text-left transition-all cursor-pointer ${isActive
-                              ? "border-[#b5192c] bg-[#fff0f0]"
-                              : "border-transparent hover:bg-[#f5f4f2]"
+                            ? "border-[#b5192c] bg-[#fff0f0]"
+                            : "border-transparent hover:bg-[#f5f4f2]"
                             }`}
                         >
                           <span className="min-w-0 flex-1 truncate text-[11px] font-medium text-[#333]">{label}</span>
@@ -797,8 +797,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                       type="button"
                       onClick={() => setContentTab(tab)}
                       className={`flex-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold capitalize transition-all cursor-pointer ${contentTab === tab
-                          ? "bg-[#fff0f0] text-[#b5192c]"
-                          : "text-[#888] hover:bg-[#f5f4f2]"
+                        ? "bg-[#fff0f0] text-[#b5192c]"
+                        : "text-[#888] hover:bg-[#f5f4f2]"
                         }`}
                     >
                       {tab}
@@ -823,8 +823,8 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
                           }
                         }}
                         className={`flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-4 py-6 text-center transition-all ${isPhotoDragOver
-                            ? "border-[#b5192c] bg-[#fff0f0]"
-                            : "border-black/10 bg-[#fafafa] hover:border-[#b5192c]/40"
+                          ? "border-[#b5192c] bg-[#fff0f0]"
+                          : "border-black/10 bg-[#fafafa] hover:border-[#b5192c]/40"
                           }`}
                         onClick={() => contentFileRef.current?.click()}
                       >
@@ -1167,10 +1167,10 @@ function SidebarBtn({ icon, label, onClick, danger = false, active = false }: {
   return (
     <button type="button" onClick={onClick}
       className={`flex flex-col items-center justify-center gap-1 w-full rounded-xl py-2 px-1 border text-[9px] font-medium cursor-pointer transition-all active:scale-95 ${active
-          ? "bg-[#fff0f0] border-[#f5c0c0] text-[#c0392b]"
-          : danger
-            ? "bg-white border-black/6 text-[#c0392b] hover:bg-[#fff3f2]"
-            : "bg-white border-black/6 text-[#888] hover:bg-[#f5f4f2]"
+        ? "bg-[#fff0f0] border-[#f5c0c0] text-[#c0392b]"
+        : danger
+          ? "bg-white border-black/6 text-[#c0392b] hover:bg-[#fff3f2]"
+          : "bg-white border-black/6 text-[#888] hover:bg-[#f5f4f2]"
         }`}>
       {icon}<span>{label}</span>
     </button>
