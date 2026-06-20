@@ -8,11 +8,11 @@ import ReadytoCreate from "@/components/sections/ReadytoCreate";
 export default function Home() {
   return (
     <section>
-      <HeroSection/>
-      <TemplatesSection/>
-      <HowItWorksSummary/>
-      <ReadytoCreate/>
-      <ContactSection/>
+      <HeroSection />
+      <TemplatesSection />
+      <HowItWorksSummary />
+      <ReadytoCreate />
+      <ContactSection />
     </section>
   );
 }

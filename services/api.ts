@@ -560,7 +560,7 @@ export async function fetchBookPageStyles(): Promise<BookPageStylesResponse> {
     const result = (await response.json()) as BookPageStylesResponse;
 
     if (!response.ok || !result.success) {
-        return { success: false, message: result?.message ?? "", data: [], meta: {}, code: response.status };
+        throw new Error(result?.message || "Failed to load book page styles");
     }
 
     return result;
@@ -747,7 +747,22 @@ export async function inviteByEmail(bookId: string | number, email: string, name
 
     const result = await safeParseJson<SendBookInviteResponse>(response);
 
-    return result ?? { success: response.ok, message: "", data: null, meta: {}, code: response.status };
+    if (!response.ok) {
+        throw new Error(
+            result ? getApiErrorMessage(result, result.message || `Failed to send invite (HTTP ${response.status})`)
+                   : `Failed to send invite (HTTP ${response.status})`
+        );
+    }
+
+    if (!result) {
+        throw new Error("Server returned an empty response when sending invite");
+    }
+
+    if (!result.success) {
+        throw new Error(getApiErrorMessage(result, result.message || "Failed to send invite"));
+    }
+
+    return result;
 }
 
 // Book Details API (used in book details page, and also to get book info before final PDF generation)
@@ -839,28 +854,29 @@ export async function joinInviteByCode(code: string, name: string, email: string
         method: "POST",
         headers: {
             "Content-Type": "application/json",
+            ...getTimezoneHeader()
         },
-        // No headers needed for joinInviteByCode (GET) but add timezone for consistency
-        ...getTimezoneHeader(),
+        body: JSON.stringify({ name, email }),
     });
 
     const rawBody = await response.text();
 
     if (!rawBody.trim()) {
-        return { success: response.ok, message: "", data: null, meta: {}, code: response.status };
+        throw new Error("Check-in failed");
     }
 
+    let result: CheckInResponse;
     try {
-        return JSON.parse(rawBody) as CheckInResponse;
+        result = JSON.parse(rawBody) as CheckInResponse;
     } catch {
-        return {
-            success: response.ok,
-            message: rawBody.trim(),
-            data: null,
-            meta: {},
-            code: response.status,
-        };
+        throw new Error(rawBody.trim() || "Check-in failed");
     }
+
+    if (!response.ok || result.success === false) {
+        throw new Error(result.message || "Check-in failed");
+    }
+
+    return result;
 }
 
 // Fetch invite details by code (used in contribution page to show invite info before joining)

@@ -7,9 +7,10 @@ import type { SubmitContributionPayload, SubmitContributionResponse } from "@/ty
 
 interface Props {
   inviterId: string | number;
+  code: string;
 }
 
-export default function SubmitContributionForm({ inviterId }: Props) {
+export default function SubmitContributionForm({ inviterId, code }: Props) {
   const { mutate, isPending } = useSubmitContributionMutation();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -26,7 +27,7 @@ export default function SubmitContributionForm({ inviterId }: Props) {
     };
 
     mutate(
-      { inviterId, payload },
+      { inviterId, code, payload },
       {
         onSuccess: (response: SubmitContributionResponse) => {
           const contributor = response?.data;

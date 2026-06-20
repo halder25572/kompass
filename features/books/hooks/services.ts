@@ -14,10 +14,13 @@ import {
 	UpdateBookPayload,
 	UpdateBookResponse,
 	inviteByEmail,
+	fetchBookPageStyles,
+	fetchCoverPageStyles,
 } from "@/services/api";
 import type { Contribution, ContributionsListResponse, ContributionDetailResponse } from "@/types/api";
 import { useSession } from "next-auth/react";
 import { getContributionIdentityKey, getContributionDisplayName } from "@/lib/contributor";
+
 
 const EMPTY_CONTRIBUTIONS: Contribution[] = [];
 
@@ -65,7 +68,7 @@ export function useBooksQuery() {
 	const token = sessionToken || localToken;
 
 	return useQuery<BooksResponse, Error>({
-		queryKey: ["books", token],
+		queryKey: ["books"],
 		queryFn: () => fetchBooks(token || null),
 		retry: false,
 	});
@@ -81,7 +84,7 @@ export function useBookDetailsQuery(bookId: string | number | undefined) {
 	const token = sessionToken || localToken;
 
 	return useQuery<BookDetailResponse, Error>({
-		queryKey: ["book", bookId, token],
+		queryKey: ["book", bookId],
 		queryFn: () => fetchBookDetails(bookId as string | number, token || null),
 		enabled: Boolean(bookId),
 		retry: false,
@@ -334,7 +337,7 @@ export function useBookContributionsQuery(bookId: string | number | undefined) {
 		: "";
 	const token = sessionToken || localToken;
 	const query = useQuery<ContributionsListResponse, Error, BookContributionsSummary>({
-		queryKey: ["contributions", bookId, token],
+		queryKey: ["contributions", bookId],
 		queryFn: () => fetchBookContributions(bookId as string | number, token || null),
 		enabled: Boolean(bookId),
 		retry: false,
@@ -356,5 +359,21 @@ export function useContributionQuery(contributionId: string | number | undefined
 		queryFn: () => fetchContribution(contributionId as string | number),
 		enabled: Boolean(contributionId),
 		retry: false,
+	});
+}
+
+export function useBookPageStylesQuery() {
+	return useQuery({
+		queryKey: ["bookPageStyles"],
+		queryFn: fetchBookPageStyles,
+		staleTime: 1000 * 60 * 30,
+	});
+}
+
+export function useCoverPageStylesQuery() {
+	return useQuery({
+		queryKey: ["coverPageStyles"],
+		queryFn: fetchCoverPageStyles,
+		staleTime: 1000 * 60 * 30,
 	});
 }

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 "use client";
 
-import { memo, useRef, useEffect, useState, lazy, Suspense } from "react";
+import { memo, useRef, useEffect, useState } from "react";
 
 import { usePlaceOrder } from "@/features/checkout/hooks/usePlaceOrder";
 import { useStripeSession } from "@/features/checkout/hooks/useStripeSession";
@@ -31,9 +32,8 @@ const PAYMENT_METHODS = [
     },
 ] as const;
 
-const StripeForm = lazy(() => import("./StripeForm").then((m) => ({ default: m.StripeForm })));
 
-export const PaymentModal = memo(function PaymentModal({ onClose, amount, checkoutData }: PaymentModalProps) {
+export const PaymentModal = memo(function PaymentModal({ onClose, checkoutData }: PaymentModalProps) {
     const overlayRef = useRef<HTMLDivElement>(null);
     const modalRef = useRef<HTMLDivElement>(null);
     const [selectedMethod, setSelectedMethod] = useState<string | null>(null);

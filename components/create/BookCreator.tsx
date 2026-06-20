@@ -36,7 +36,7 @@ function renderOccasionIcon(name: string) {
                     <path d="M22 10v6M2 10l10-5 10 5-10 5z" /><path d="M6 12v5c3 3 9 3 12 0v-5" />
                 </svg>
             );
-        case "Farewell":
+        case "Work":
             return (
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 8h1a4 4 0 0 1 0 8h-1" /><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" /><line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" />
@@ -72,7 +72,7 @@ function renderOccasionIcon(name: string) {
 const placeholdersByOccasion: Record<string, { title: string; subtitle: string; recipient: string }> = {
     Birthday: { title: "e.g., Mom's 60th Birthday Book", subtitle: "e.g., 60 years of love and memories", recipient: "e.g., Sarah Johnson" },
     School: { title: "e.g., Class of 2025 Memory Book", subtitle: "e.g., A year full of growth and friendship", recipient: "e.g., Maria" },
-    Farewell: { title: "e.g., Farewell to an Amazing Colleague", subtitle: "e.g., Thank you for everything", recipient: "e.g., Thomas" },
+    Work: { title: "e.g., Farewell to an Amazing Colleague", subtitle: "e.g., Thank you for everything", recipient: "e.g., Thomas" },
     Love: { title: "e.g., Our Wedding Memory Book", subtitle: "e.g., A love story worth remembering", recipient: "e.g., Anna & Michael" },
     Family: { title: "e.g., Our Family Through the Years", subtitle: "e.g., Stories and memories we treasure", recipient: "e.g., The Johnson Family" },
     Seasonal: { title: "e.g., Christmas Memories 2024", subtitle: "e.g., A festive season to remember", recipient: "e.g., Our Family" },
@@ -130,20 +130,17 @@ const fallbackOccasions = [
     {
         id: 2, name: "School", image: "", status: 1,
         sub_occasions: [
-            { id: 201, occasion_id: 2, name: "Class Book", image: "", status: 1 },
-            { id: 202, occasion_id: 2, name: "Kindergarten", image: "", status: 1 },
-            { id: 203, occasion_id: 2, name: "Farewell Teacher", image: "", status: 1 },
-            { id: 204, occasion_id: 2, name: "End-of-Year Book", image: "", status: 1 },
             { id: 205, occasion_id: 2, name: "School Yearbook", image: "", status: 1 },
+            { id: 203, occasion_id: 2, name: "Farewell Teacher", image: "", status: 1 },
             { id: 206, occasion_id: 2, name: "Graduation Yearbook", image: "", status: 1 },
         ],
     },
     {
-        id: 3, name: "Farewell", image: "", status: 1,
+        id: 3, name: "Work", image: "", status: 1,
         sub_occasions: [
+            { id: 303, occasion_id: 3, name: "Farewell Colleague", image: "", status: 1 },
             { id: 301, occasion_id: 3, name: "Retirement", image: "", status: 1 },
             { id: 302, occasion_id: 3, name: "Team Memory Book", image: "", status: 1 },
-            { id: 303, occasion_id: 3, name: "Farewell Colleague", image: "", status: 1 },
         ],
     },
     {
@@ -157,19 +154,14 @@ const fallbackOccasions = [
         id: 5, name: "Family", image: "", status: 1,
         sub_occasions: [
             { id: 501, occasion_id: 5, name: "Family Book", image: "", status: 1 },
-            { id: 502, occasion_id: 5, name: "For Mom", image: "", status: 1 },
-            { id: 503, occasion_id: 5, name: "For Dad", image: "", status: 1 },
-            { id: 504, occasion_id: 5, name: "Baby Book", image: "", status: 1 },
             { id: 505, occasion_id: 5, name: "For Grandma / Grandpa", image: "", status: 1 },
+            { id: 504, occasion_id: 5, name: "Baby Book / Welcome Baby", image: "", status: 1 },
         ],
     },
     {
-        id: 6, name: "Seasonal", image: "", status: 1,
+        id: 6, name: "Seasonal", image: "", status: 0,
         sub_occasions: [
             { id: 601, occasion_id: 6, name: "Christmas", image: "", status: 1 },
-            { id: 602, occasion_id: 6, name: "New Year", image: "", status: 1 },
-            { id: 603, occasion_id: 6, name: "Easter", image: "", status: 1 },
-            { id: 604, occasion_id: 6, name: "Halloween", image: "", status: 1 },
             { id: 605, occasion_id: 6, name: "Mother's Day", image: "", status: 1 },
             { id: 606, occasion_id: 6, name: "Father's Day", image: "", status: 1 },
             { id: 607, occasion_id: 6, name: "Ramadan", image: "", status: 1 },
@@ -1708,6 +1700,13 @@ function Step7({
                         </div>
                     </div>
                     <p className="text-[11px] text-[#9CA3AF] mb-4 mt-1">Add contributors and their email addresses below, or leave them blank and share the link instead.</p>
+                    <p className="text-[12px] text-[#6b7280] mb-3 mt-1 flex items-center gap-1.5">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <circle cx="9" cy="5" r="1" /><circle cx="9" cy="12" r="1" /><circle cx="9" cy="19" r="1" />
+                            <circle cx="15" cy="5" r="1" /><circle cx="15" cy="12" r="1" /><circle cx="15" cy="19" r="1" />
+                        </svg>
+                        You can easily change the order of participants by dragging them.
+                    </p>
 
                     <div className="flex flex-col gap-1">
                         {inviteDraft.friends.map((friend, idx) => <FriendRow key={friend.id} friend={friend} index={idx} canRemove={inviteDraft.friends.length > 1} onUpdate={updateFriend} onRemove={removeFriend} />)}
@@ -1870,6 +1869,9 @@ export default function BookCreator() {
 
     const ensureInviteLink = useCallback(async () => {
         if (isGeneratingInviteLink) return;
+        if (!isAuthenticated) {
+            throw new Error("Unauthenticated. Please log in to continue.");
+        }
         if (!bookDraft) {
             throw new Error("Book details are missing");
         }
@@ -1927,6 +1929,7 @@ export default function BookCreator() {
         bookDraft,
         createdInviteLink,
         createBookMutation,
+        isAuthenticated,
         isGeneratingInviteLink,
         selectedCoverId,
         selectedThemeId,
@@ -2107,8 +2110,8 @@ function FriendRow({ friend, index, canRemove, onUpdate, onRemove }: {
     return (
         <div className={`flex flex-col sm:flex-row gap-2 items-end rounded-xl p-2 border border-transparent hover:border-[#f0edf1] hover:bg-[#fafafa]`}>
             <div className="flex-1 w-full">
-                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Full Name</label>}
-                <input value={friend.name} onChange={e => onUpdate(friend.id, "name", e.target.value)} placeholder="Friend's full name"
+                {index === 0 && <label className="text-[12px] font-semibold text-[#374151] block mb-1">Full Name <span className="font-normal text-[#9CA3AF]">(optional)</span></label>}
+                <input value={friend.name} onChange={e => onUpdate(friend.id, "name", e.target.value)} placeholder="Friend's name (optional)"
                     className="w-full border border-[#e5e7eb] bg-white rounded-xl px-4 py-2.5 text-[13px] text-[#374151] placeholder:text-[#d1d5db] outline-none focus:ring-2 focus:ring-[#B91C1C]/20 focus:border-[#B91C1C] transition-all" />
             </div>
             <div className="flex-1 w-full">
