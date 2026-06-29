@@ -92,5 +92,5 @@ export default function ContributorPage() {
     return <div className="min-h-screen flex items-center justify-center text-sm text-red-600">Unable to load check-in details.</div>;
   }
 
-  return <QuestionnaireStep inviterId={inviterId} name={userName} email={userEmail} bookId={bookId} questions={inviteQuestions} bookTitle={inviteDetails?.data?.book_title} recipientName={recipientName} occasion={inviteDetails?.data?.occasion ?? undefined} isAlreadySubmitted={isAlreadySubmitted} />;
+  return <QuestionnaireStep inviterId={inviterId} name={userName} email={userEmail} bookId={bookId} questions={inviteQuestions} bookTitle={inviteDetails?.data?.book_title} recipientName={recipientName} occasion={inviteDetails?.data?.occasion ?? undefined} isAlreadySubmitted={isAlreadySubmitted} code={code!} />;
 }

@@ -11,8 +11,8 @@ import Konva from "konva";
 import { Theme, Categories } from "emoji-picker-react";
 import type { EmojiClickData } from "emoji-picker-react";
 import { useBookStore, type BookPage, OCCASION_THEMES } from "@/store/useBookStore";
-import { fetchBookDetails, fetchBookPageStyles, fetchCoverPageStyles, uploadFinalPdf } from "@/services/api";
-import { useBookContributionsQuery } from "@/features/books/hooks/services";
+import { fetchBookDetails, uploadFinalPdf } from "@/services/api";
+import { useBookContributionsQuery, useBookPageStylesQuery, useCoverPageStylesQuery } from "@/features/books/hooks/services";
 import { getContributionDisplayName } from "@/lib/contributor";
 import type { Contribution } from "@/types/api";
 import CanvasPage from "./CanvasPage";
@@ -21,10 +21,10 @@ import { loadBookEditorState, persistBookEditorState } from "./utils/persistEdit
 import { exportBookToPdfBlob } from "./utils/exportPdf";
 import { toast } from "sonner";
 
-// ── Next.js SSR-safe dynamic import (picker uses window) ─────────────────
+// ── Next.js SSR-safe dynamic import (picker uses window) ─────
 const EmojiPicker = dynamic(() => import("emoji-picker-react"), { ssr: false });
 
-// ── Format definitions (printsmarter.de specs) ───────────────────────────
+// ── Format definitions (printsmarter.de specs) ──────
 // All values in pixels @ 96dpi; print sizes in mm noted as comments
 
 export type BookFormat = "a4-landscape" | "square";
@@ -213,11 +213,14 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
   const [contentPhotos, setContentPhotos] = useState<EditorPhoto[]>([]);
   const [isPhotoDragOver, setIsPhotoDragOver] = useState(false);
   const [activeContributor, setActiveContributor] = useState<ActiveContributor | null>(null);
-  const [coverStylesList, setCoverStylesList] = useState<any[]>([]);
-  const [bookStylesList, setBookStylesList] = useState<any[]>([]);
   const elementSequence = useRef(0);
 
   const { contributions, isLoading: isContributionsLoading } = useBookContributionsQuery(bookId || undefined);
+  const { data: bookStylesResponse } = useBookPageStylesQuery();
+  const { data: coverStylesResponse } = useCoverPageStylesQuery();
+
+  const bookStylesList = bookStylesResponse?.data ?? [];
+  const coverStylesList = coverStylesResponse?.data ?? [];
 
   // ── Format state (per-book, user picks once) ──────────────────────────
   const [bookFormat, setBookFormat] = useState<BookFormat>("a4-landscape");
@@ -317,30 +320,6 @@ export default function BookEditor({ bookId: propBookId }: BookEditorProps) {
     }
 
     let isActive = true;
-
-    const loadThemeLists = async () => {
-      try {
-        const [bookStylesResponse, coverStylesResponse] = await Promise.all([
-          fetchBookPageStyles().catch((error) => {
-            console.warn("Failed to load book page styles", error);
-            return null;
-          }),
-          fetchCoverPageStyles().catch((error) => {
-            console.warn("Failed to load cover page styles", error);
-            return null;
-          }),
-        ]);
-
-        if (!isActive) return;
-
-        setCoverStylesList(coverStylesResponse?.data ?? []);
-        setBookStylesList(bookStylesResponse?.data ?? []);
-      } catch (error) {
-        console.error("loadThemeLists error:", error);
-      }
-    };
-
-    void loadThemeLists();
 
     const loadBookStyles = async () => {
       try {

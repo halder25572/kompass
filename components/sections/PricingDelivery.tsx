@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import gsap from "gsap";
 import Image from "next/image";
 import { useLanguage } from "@/hooks/useLanguage";
+import Link from "next/link";
 
 const pricingTiers = [
     { range: "0 – 4 friends", price: "€5.50", unit: "per friend" },
@@ -363,18 +364,20 @@ export default function PricingDelivery() {
 
                 {/* CTA */}
                 <div ref={ctaRef} className="flex justify-center mt-12">
-                    <button
-                        ref={btnRef}
-                        className="flex items-center gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[14px] font-semibold px-8 py-3.5 rounded-full cursor-pointer"
-                        style={{ boxShadow: "0 4px 14px rgba(191,0,58,0.15)" }}
-                        onMouseEnter={handleBtnEnter}
-                        onMouseLeave={handleBtnLeave}
-                    >
-                        {text.startBook}
-                        <svg className="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                            <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                    </button>
+                    <Link href="/create">
+                        <button
+                            ref={btnRef}
+                            className="flex items-center gap-2 bg-[linear-gradient(102deg,#BF003A_0%,#59001C_100%)] text-white text-[14px] font-semibold px-8 py-3.5 rounded-full cursor-pointer"
+                            style={{ boxShadow: "0 4px 14px rgba(191,0,58,0.15)" }}
+                            onMouseEnter={handleBtnEnter}
+                            onMouseLeave={handleBtnLeave}
+                        >
+                            {text.startBook}
+                            <svg className="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </button>
+                    </Link>
                 </div>
             </div>
 

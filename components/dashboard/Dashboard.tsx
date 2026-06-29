@@ -226,7 +226,7 @@ const DashboardPageMain: FC = () => {
                 </p>
                 <button
                   onClick={() => refetch()}
-                  className="mt-3 inline-flex items-center gap-1.5 text-xs text-rose-700 hover:underline underline-offset-2 font-medium"
+                  className="mt-3 inline-flex cursor-pointer items-center gap-1.5 text-xs text-rose-700 hover:underline underline-offset-2 font-medium"
                 >
                   Try Again
                 </button>
@@ -265,7 +265,7 @@ const DashboardPageMain: FC = () => {
 
         </div>
       </main>
-    {showErrorModal && (
+      {showErrorModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 px-4">
           <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center relative">
             <button

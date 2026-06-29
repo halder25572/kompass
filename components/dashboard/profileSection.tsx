@@ -208,6 +208,7 @@ export default function ProfileSection() {
                                 <input
                                     type="email"
                                     placeholder="john@example.com"
+                                    readOnly
                                     value={email}
                                     onChange={(event) => setEmail(event.target.value)}
                                     className="w-full mt-1 px-4 py-2 rounded-md bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-red-500"
