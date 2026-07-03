@@ -1055,7 +1055,7 @@ function Step2({ onNext, onBack, subTab, questions, onQuestionsChange }: {
                                         </button>
                                     </div>
                                 </div>
-                                <p className="text-[11px] text-[#9CA3AF]">Question only. Answers are not enabled in this step.</p>
+                                <p className="text-[11px] text-[#9CA3AF]">{q.placeholder}</p>
                             </div>
                         ))}
                     </div>
